@@ -13,7 +13,7 @@ ad_page_contract {
 } {
     { start_date "" }
     { end_date "" }
-    { level_of_detail 2 }
+    { level_of_detail 1 }
     project_id:integer,optional
     customer_id:integer,optional
     provider_id:integer,optional
@@ -111,8 +111,8 @@ set this_url [export_vars -base "/intranet-reporting/finance-monthly-summary" {s
 
 set criteria [list]
 
-if {[info exists company_id]} {
-    lappend criteria "p.company_id = :company_id"
+if {[info exists customer_id]} {
+    lappend criteria "c.customer_id = :customer_id"
 }
 
 # Select project & subprojects
@@ -150,6 +150,11 @@ select
 	c.effective_date,
 	c.customer_id,
 	c.provider_id,
+	round((c.paid_amount * 
+		im_exchange_rate(c.effective_date::date, c.currency, :default_currency)) :: numeric
+	    , 2) as paid_amount_converted,
+	c.paid_amount,
+	c.paid_currency,
 	round((c.amount * 
 		im_exchange_rate(c.effective_date::date, c.currency, :default_currency)) :: numeric
 	    , 2) as amount_converted,
@@ -168,6 +173,7 @@ set sql "
 select
 	c.*,
 	to_char(c.effective_date, :date_format) as effective_date_formatted,
+	to_char(c.effective_date, 'YYMM')::integer * customer_id as effective_month,
 	cust.company_path as customer_nr,
 	cust.company_name as customer_name,
 	prov.company_path as provider_nr,
@@ -179,7 +185,8 @@ select
 	CASE WHEN c.cost_type_id = 3700 THEN to_char(c.amount, :cur_format) || ' ' || c.currency END as invoice_amount_pretty,
 	CASE WHEN c.cost_type_id = 3702 THEN to_char(c.amount, :cur_format) || ' ' || c.currency END as quote_amount_pretty,
 	CASE WHEN c.cost_type_id = 3704 THEN to_char(c.amount, :cur_format) || ' ' || c.currency END as bill_amount_pretty,
-	CASE WHEN c.cost_type_id = 3706 THEN to_char(c.amount, :cur_format) || ' ' || c.currency END as po_amount_pretty
+	CASE WHEN c.cost_type_id = 3706 THEN to_char(c.amount, :cur_format) || ' ' || c.currency END as po_amount_pretty,
+	to_char(c.paid_amount, :cur_format) || ' ' || c.paid_currency as paid_amount_pretty
 from
 	($inner_sql) c
 	left outer join im_companies cust on (c.customer_id = cust.company_id)
@@ -195,31 +202,101 @@ order by
 set report_def [list \
     group_by customer_nr \
     header {
-	"\#colspan=9 <a href=$this_url&customer_id=$customer_id&level_of_detail=4 target=_blank><img src=/intranet/images/plus_9.gif border=0></a> 
+	"\#colspan=10 <a href=$this_url&customer_id=$customer_id&level_of_detail=4 target=_blank><img src=/intranet/images/plus_9.gif width=9 height=9 border=0></a> 
 	<b><a href=$company_url$customer_id>$customer_name</a></b>"
     } \
-    content [list \
-	    header {
-		$customer_nr
-		$provider_nr
-		$effective_date_formatted
-		$cost_name
-		"<nobr>$invoice_amount_pretty</nobr>"
-		"<nobr>$quote_amount_pretty</nobr>"
-		"<nobr>$bill_amount_pretty</nobr>"
-		"<nobr>$po_amount_pretty</nobr>"
-	    } \
-	    content {} \
+        content [list \
+            group_by effective_month \
+            header { } \
+	    content [list \
+		    header {
+			$customer_nr
+			$provider_nr
+			$effective_date_formatted
+			$cost_name
+			"<nobr>$paid_amount_pretty</nobr>"
+			"<nobr>$invoice_amount_pretty</nobr>"
+			"<nobr>$quote_amount_pretty</nobr>"
+			"<nobr>$bill_amount_pretty</nobr>"
+			"<nobr>$po_amount_pretty</nobr>"
+		    } \
+		    content {} \
+	    ] \
+            footer {
+		"" 
+		"" 
+                "\#colspan=1 <nobr><a href=$this_url&effective_date=$effective_date_formatted&level_of_detail=3 target=_blank><img src=/intranet/images/plus_9.gif width=9 height=9 border=0></a>
+                <i>$effective_date_formatted</i></nobr>"
+		"" 
+		"<i>$paid_month_total $default_currency</i>" 
+		"<i>$invoice_month_total $default_currency</i>" 
+		"<i>$quote_month_total $default_currency</i>" 
+		"<i>$bill_month_total $default_currency</i>" 
+		"<i>$po_month_total $default_currency</i>"
+            } \
     ] \
-    footer {"" "" "" "" "<b>$invoice_subtotal $default_currency</b>" "<b>$quote_subtotal $default_currency</b>" "<b>$bill_subtotal $default_currency</b>" "<b>$po_subtotal $default_currency</b>"} \
+    footer {
+	"" 
+	"" 
+	"" 
+	"<b>Subtotal:</b>" 
+	"<b>$paid_subtotal $default_currency</b>" 
+	"<b>$invoice_subtotal $default_currency</b>" 
+	"<b>$quote_subtotal $default_currency</b>" 
+	"<b>$bill_subtotal $default_currency</b>" 
+	"<b>$po_subtotal $default_currency</b>"
+    } \
 ]
 
 # Global header/footer
-set header0 {"Customer" "Provider" "Date" "Name" "Invoice" "Quote" "Bill" "PO"}
-set footer0 {"" "" "" "<br><b>Total:</b>" "<br><b>$invoice_total $default_currency</b>" "<br><b>$quote_total $default_currency</b>" "<br><b>$bill_total $default_currency</b>" "<br><b>$po_total $default_currency</b>"}
+set header0 {"Customer" "Provider" "Date" "Name" "Paid" "Invoice" "Quote" "Bill" "PO"}
+set footer0 {"" "" "" "<br><b>Total:</b>" "<br><b>$paid_total $default_currency</b>" "<br><b>$invoice_total $default_currency</b>" "<br><b>$quote_total $default_currency</b>" "<br><b>$bill_total $default_currency</b>" "<br><b>$po_total $default_currency</b>"}
 
 # invoice_amount can be empty (null), so let's add "+0",
 # which gets translated in a "0" if invoice_amount _is_ ""
+set paid_month_total_counter [list \
+        pretty_name "Paid Amount" \
+        var paid_month_total \
+        reset \$effective_month \
+        expr "\$paid_amount+0" \
+]
+
+set invoice_month_total_counter [list \
+        pretty_name "Invoice Amount" \
+        var invoice_month_total \
+        reset \$effective_month \
+        expr "\$invoice_amount+0" \
+]
+
+set quote_month_total_counter [list \
+        pretty_name "Quote Amount" \
+        var quote_month_total \
+        reset \$effective_month \
+        expr "\$quote_amount+0" \
+]
+
+set bill_month_total_counter [list \
+        pretty_name "Bill Amount" \
+        var bill_month_total \
+        reset \$effective_month \
+        expr "\$bill_amount+0" \
+]
+
+set po_month_total_counter [list \
+        pretty_name "Po Amount" \
+        var po_month_total \
+        reset \$effective_month \
+        expr "\$po_amount+0" \
+]
+
+
+set paid_subtotal_counter [list \
+        pretty_name "Paid Amount" \
+        var paid_subtotal \
+        reset \$customer_id \
+        expr "\$paid_amount+0" \
+]
+
 set invoice_subtotal_counter [list \
         pretty_name "Invoice Amount" \
         var invoice_subtotal \
@@ -246,6 +323,16 @@ set po_subtotal_counter [list \
         var po_subtotal \
         reset \$customer_id \
         expr "\$po_amount+0" \
+]
+
+
+
+
+set paid_grand_total_counter [list \
+        pretty_name "Paid Amount" \
+        var paid_total \
+        reset 0 \
+        expr "\$paid_amount+0" \
 ]
 
 set invoice_grand_total_counter [list \
@@ -280,10 +367,17 @@ set po_grand_total_counter [list \
 
 
 set counters [list \
+	$paid_subtotal_counter \
 	$invoice_subtotal_counter \
 	$quote_subtotal_counter \
 	$bill_subtotal_counter \
 	$po_subtotal_counter \
+	$paid_month_total_counter \
+	$invoice_month_total_counter \
+	$quote_month_total_counter \
+	$bill_month_total_counter \
+	$po_month_total_counter \
+	$paid_grand_total_counter \
 	$invoice_grand_total_counter \
 	$quote_grand_total_counter \
 	$bill_grand_total_counter \
