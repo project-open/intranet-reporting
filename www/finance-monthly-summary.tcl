@@ -248,6 +248,12 @@ set report_def [list \
     } \
 ]
 
+set paid_total 0
+set invoice_total 0
+set quote_total 0
+set bill_total 0
+set po_total 0
+
 # Global header/footer
 set header0 {"Customer" "Provider" "Date" "Name" "Paid" "Invoice" "Quote" "Bill" "PO"}
 set footer0 {"" "" "" "<br><b>Total:</b>" "<br><b>$paid_total $default_currency</b>" "<br><b>$invoice_total $default_currency</b>" "<br><b>$quote_total $default_currency</b>" "<br><b>$bill_total $default_currency</b>" "<br><b>$po_total $default_currency</b>"}
