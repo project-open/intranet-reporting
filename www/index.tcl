@@ -40,7 +40,7 @@ set read_p [db_string report_perms "
 " -default 'f']
 
 if {![string equal "t" $read_p]} {
-    ad_return_complaint 1 "<li>[lang::message::lookup "" intranet-reporting.You_dont_have_permissions "You don't have the necessary permissions to view this page"]">
+    ad_return_complaint 1 "<li>[lang::message::lookup "" intranet-reporting.You_dont_have_permissions "You don't have the necessary permissions to view this page"]"
     return
 }
 

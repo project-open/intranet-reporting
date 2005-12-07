@@ -26,6 +26,11 @@
 -- check from the report for its menu.
 
 
+-- Delete all menus - Useful particularly in the beginning
+-- when we have to add new headers
+select im_menu__del_module('intranet-reporting');
+
+
 ---------------------------------------------------------
 -- Report Menus
 --
