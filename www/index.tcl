@@ -98,6 +98,7 @@ db_multirow -extend {report_url indent_spaces} reports get_reports "
 	        im_menus m
 	where
 	        tree_sortkey like '$top_menu_sortkey%'
+		and 't' = im_object_permission_p(m.menu_id, :current_user_id, 'read')
 	order by tree_sortkey
 " {
 	set report_url [export_vars -base "new" {menu_id return_url}]
