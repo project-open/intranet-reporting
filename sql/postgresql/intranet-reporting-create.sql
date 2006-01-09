@@ -91,9 +91,6 @@ BEGIN
     PERFORM acs_permission__grant_permission(v_reporting_menu, v_proman, ''read'');
     PERFORM acs_permission__grant_permission(v_reporting_menu, v_accounting, ''read'');
     PERFORM acs_permission__grant_permission(v_reporting_menu, v_employees, ''read'');
-    PERFORM acs_permission__grant_permission(v_reporting_menu, v_customers, ''read'');
-    PERFORM acs_permission__grant_permission(v_reporting_menu, v_freelancers, ''read'');
-
 
     v_menu := im_menu__new (
         null,                   -- p_menu_id
