@@ -16,7 +16,6 @@ ad_page_contract {
     { level_of_detail 1 }
     project_id:integer,optional
     customer_id:integer,optional
-    provider_id:integer,optional
 }
 
 # ------------------------------------------------------------
@@ -25,7 +24,7 @@ ad_page_contract {
 # Label: Provides the security context for this report
 # because it identifies unquely the report's Menu and
 # its permissions.
-set menu_label "reporting-finance-monthly-summary"
+set menu_label "reporting-finance-quotes-pos"
 
 set current_user_id [ad_maybe_redirect_for_registration]
 
@@ -103,7 +102,7 @@ if {"" == $end_date} {
 set company_url "/intranet/companies/view?company_id="
 set project_url "/intranet/projects/view?project_id="
 set user_url "/intranet/users/view?user_id="
-set this_url [export_vars -base "/intranet-reporting/finance-monthly-summary" {start_date end_date} ]
+set this_url [export_vars -base "/intranet-reporting/finance-quotes-pos" {start_date end_date} ]
 
 
 # ------------------------------------------------------------
@@ -113,7 +112,7 @@ set this_url [export_vars -base "/intranet-reporting/finance-monthly-summary" {s
 set criteria [list]
 
 if {[info exists customer_id]} {
-    lappend criteria "c.customer_id = :customer_id"
+    lappend criteria "pcust.company_id = :customer_id"
 }
 
 # Select project & subprojects
@@ -169,29 +168,7 @@ where
 	c.cost_type_id in (3700, 3702, 3704, 3706)
 	and c.effective_date >= to_date(:start_date, 'YYYY-MM-DD')
 	and c.effective_date < to_date(:end_date, 'YYYY-MM-DD')
-	$where_clause
 "
-
-set ttt " 
-select
-        c.cost_id,
-	c.amount,
-	c.currency,
-	p.project_id,
-	p.project_nr
-from
-        im_costs c
-        LEFT OUTER JOIN acs_rels r on (c.cost_id = r.object_id_two)
-        LEFT OUTER JOIN im_projects p on (r.object_id_one = p.project_id)
-where
-	c.cost_type_id in (3700, 3702, 3704, 3706)
-order by 
-	project_id,
-	cost_id
-
-"
-
-
 
 
 set sql "
@@ -217,162 +194,115 @@ select
 	END as po_amount_pretty,
 	to_char(c.paid_amount, :cur_format) || ' ' || c.paid_currency as paid_amount_pretty,
 	p.project_name,
-	p.project_nr
+	p.project_nr,
+	pcust.company_id as project_customer_id,
+	pcust.company_name as project_customer_name
 from
 	($inner_sql) c
 	LEFT OUTER JOIN im_projects p on (c.project_id = p.project_id)
 	LEFT OUTER JOIN im_companies cust on (c.customer_id = cust.company_id)
 	LEFT OUTER JOIN im_companies prov on (c.provider_id = prov.company_id)
+	LEFT OUTER JOIN im_companies pcust on (p.company_id = pcust.company_id)
+where
+	1 = 1
+	$where_clause
 order by
-	cust.company_path,
-	prov.company_path,
-	c.effective_date
+	pcust.company_name,
+	p.project_name
 "
 
 
-
 set report_def [list \
-    group_by customer_nr \
+    group_by project_customer_id \
     header {
-	"\#colspan=10 <a href=$this_url&customer_id=$customer_id&level_of_detail=4 target=_blank><img src=/intranet/images/plus_9.gif width=9 height=9 border=0></a> 
-	<b><a href=$company_url$customer_id>$customer_name</a></b>"
+	"\#colspan=8 <a href=$this_url&customer_id=$project_customer_id&level_of_detail=4 
+	target=_blank><img src=/intranet/images/plus_9.gif width=9 height=9 border=0></a> 
+	<b><a href=$company_url$project_customer_id>$project_customer_name</a></b>"
     } \
         content [list \
-            group_by effective_month \
+            group_by project_id \
             header { } \
 	    content [list \
 		    header {
-			$customer_nr
-			$provider_nr
-			$effective_date_formatted
+			""
+			""
 			$cost_name
-			"<nobr>$paid_amount_pretty</nobr>"
 			"<nobr>$invoice_amount_pretty</nobr>"
 			"<nobr>$quote_amount_pretty</nobr>"
 			"<nobr>$bill_amount_pretty</nobr>"
 			"<nobr>$po_amount_pretty</nobr>"
+			""
 		    } \
 		    content {} \
 	    ] \
             footer {
 		"" 
+		"<a href=$this_url&project_id=$project_id&level_of_detail=4 
+		target=_blank><img src=/intranet/images/plus_9.gif width=9 height=9 border=0></a> 
+		<b><a href=$project_url$project_id>$project_name</a></b>"
 		"" 
-                "\#colspan=1 <nobr><a href=$this_url&effective_date=$effective_date_formatted&level_of_detail=3 target=_blank><img src=/intranet/images/plus_9.gif width=9 height=9 border=0></a>
-                <i>$effective_date_formatted</i></nobr>"
-		"" 
-		"<i>$paid_month_total $default_currency</i>" 
-		"<i>$invoice_month_total $default_currency</i>" 
-		"<i>$quote_month_total $default_currency</i>" 
-		"<i>$bill_month_total $default_currency</i>" 
-		"<i>$po_month_total $default_currency</i>"
+		"<i>$invoice_subtotal $default_currency</i>" 
+		"<i>$quote_subtotal $default_currency</i>" 
+		"<i>$bill_subtotal $default_currency</i>" 
+		"<i>$po_subtotal $default_currency</i>"
+		$po_per_quote_perc
             } \
     ] \
-    footer {
-	"" 
-	"" 
-	"" 
-	"<b>Subtotal:</b>" 
-	"<b>$paid_subtotal $default_currency</b>" 
-	"<b>$invoice_subtotal $default_currency</b>" 
-	"<b>$quote_subtotal $default_currency</b>" 
-	"<b>$bill_subtotal $default_currency</b>" 
-	"<b>$po_subtotal $default_currency</b>"
-    } \
+    footer {  } \
 ]
 
-set paid_total 0
 set invoice_total 0
 set quote_total 0
 set bill_total 0
 set po_total 0
 
 # Global header/footer
-set header0 {"Customer" "Provider" "Date" "Name" "Paid" "Invoice" "Quote" "Bill" "PO"}
-set footer0 {"" "" "" "<br><b>Total:</b>" "<br><b>$paid_total $default_currency</b>" "<br><b>$invoice_total $default_currency</b>" "<br><b>$quote_total $default_currency</b>" "<br><b>$bill_total $default_currency</b>" "<br><b>$po_total $default_currency</b>"}
+set header0 {"Cust" "Project" "Name" "Invoice" "Quote" "Bill" "PO" "PO/Quote"}
+set footer0 {
+	"" 
+	"" 
+	"<br><b>Total:</b>" 
+	"<br><b>$invoice_total $default_currency</b>" 
+	"<br><b>$quote_total $default_currency</b>" 
+	"<br><b>$bill_total $default_currency</b>" 
+	"<br><b>$po_total $default_currency</b>"
+	"<br><b>$po_per_quote_perc %</b>"
+}
 
-# invoice_amount can be empty (null), so let's add "+0",
-# which gets translated in a "0" if invoice_amount _is_ ""
-set paid_month_total_counter [list \
-        pretty_name "Paid Amount" \
-        var paid_month_total \
-        reset \$effective_month \
-        expr "\$paid_amount+0" \
-]
-
-set invoice_month_total_counter [list \
-        pretty_name "Invoice Amount" \
-        var invoice_month_total \
-        reset \$effective_month \
-        expr "\$invoice_amount+0" \
-]
-
-set quote_month_total_counter [list \
-        pretty_name "Quote Amount" \
-        var quote_month_total \
-        reset \$effective_month \
-        expr "\$quote_amount+0" \
-]
-
-set bill_month_total_counter [list \
-        pretty_name "Bill Amount" \
-        var bill_month_total \
-        reset \$effective_month \
-        expr "\$bill_amount+0" \
-]
-
-set po_month_total_counter [list \
-        pretty_name "Po Amount" \
-        var po_month_total \
-        reset \$effective_month \
-        expr "\$po_amount+0" \
-]
-
-
-set paid_subtotal_counter [list \
-        pretty_name "Paid Amount" \
-        var paid_subtotal \
-        reset \$customer_id \
-        expr "\$paid_amount+0" \
-]
-
+#
+# Subtotal Counters (per project)
+#
 set invoice_subtotal_counter [list \
         pretty_name "Invoice Amount" \
         var invoice_subtotal \
-        reset \$customer_id \
+        reset \$project_id \
         expr "\$invoice_amount+0" \
 ]
 
 set quote_subtotal_counter [list \
         pretty_name "Quote Amount" \
         var quote_subtotal \
-        reset \$customer_id \
+        reset \$project_id \
         expr "\$quote_amount+0" \
 ]
 
 set bill_subtotal_counter [list \
         pretty_name "Bill Amount" \
         var bill_subtotal \
-        reset \$customer_id \
+        reset \$project_id \
         expr "\$bill_amount+0" \
 ]
 
 set po_subtotal_counter [list \
         pretty_name "Po Amount" \
         var po_subtotal \
-        reset \$customer_id \
+        reset \$project_id \
         expr "\$po_amount+0" \
 ]
 
-
-
-
-set paid_grand_total_counter [list \
-        pretty_name "Paid Amount" \
-        var paid_total \
-        reset 0 \
-        expr "\$paid_amount+0" \
-]
-
+#
+# Grand Total Counters
+#
 set invoice_grand_total_counter [list \
         pretty_name "Invoice Amount" \
         var invoice_total \
@@ -405,17 +335,10 @@ set po_grand_total_counter [list \
 
 
 set counters [list \
-	$paid_subtotal_counter \
 	$invoice_subtotal_counter \
 	$quote_subtotal_counter \
 	$bill_subtotal_counter \
 	$po_subtotal_counter \
-	$paid_month_total_counter \
-	$invoice_month_total_counter \
-	$quote_month_total_counter \
-	$bill_month_total_counter \
-	$po_month_total_counter \
-	$paid_grand_total_counter \
 	$invoice_grand_total_counter \
 	$quote_grand_total_counter \
 	$bill_grand_total_counter \
@@ -431,7 +354,7 @@ set start_years {2000 2000 2001 2001 2002 2002 2003 2003 2004 2004 2005 2005 200
 set start_months {01 Jan 02 Feb 03 Mar 04 Apr 05 May 06 Jun 07 Jul 08 Aug 09 Sep 10 Oct 11 Nov 12 Dec}
 set start_weeks {01 1 02 2 03 3 04 4 05 5 06 6 07 7 08 8 09 9 10 10 11 11 12 12 13 13 14 14 15 15 16 16 17 17 18 18 19 19 20 20 21 21 22 22 23 23 24 24 25 25 26 26 27 27 28 28 29 29 30 30 31 31 32 32 33 33 34 34 35 35 36 36 37 37 38 38 39 39 40 40 41 41 42 42 43 43 44 44 45 45 46 46 47 47 48 48 49 49 50 50 51 51 52 52}
 set start_days {01 1 02 2 03 3 04 4 05 5 06 6 07 7 08 8 09 9 10 10 11 11 12 12 13 13 14 14 15 15 16 16 17 17 18 18 19 19 20 20 21 21 22 22 23 23 24 24 25 25 26 26 27 27 28 28 29 29 30 30 31 31}
-set levels {1 "Customer Only" 2 "Customer+Date" 3 "All Details"} 
+set levels {1 "Customer Only" 2 "Customer+Project" 3 "All Details"} 
 
 # ------------------------------------------------------------
 # Start formatting the page
@@ -480,6 +403,11 @@ set last_value_list [list]
 set class "rowodd"
 db_foreach sql $sql {
 
+	if {"" == $project_id} {
+	    set project_id 0
+	    set project_name "No Project"
+	}
+
 	im_report_display_footer \
 	    -group_def $report_def \
 	    -footer_array_list $footer_array_list \
@@ -490,6 +418,13 @@ db_foreach sql $sql {
 	
 	im_report_update_counters -counters $counters
 	
+	# Calculated Variables 
+	set po_per_quote_perc "undef"
+	if {[expr $quote_subtotal+0] != 0} {
+	  set po_per_quote_perc [expr int(10000.0 * $po_subtotal / $quote_subtotal) / 100.0]
+	  set po_per_quote_perc "$po_per_quote_perc %"
+	}
+
 	set last_value_list [im_report_render_header \
 	    -group_def $report_def \
 	    -last_value_array_list $last_value_list \
@@ -506,6 +441,12 @@ db_foreach sql $sql {
 	    -cell_class $class
         ]
 }
+
+set po_per_quote_perc "undef"
+if {[expr $quote_subtotal+0] != 0} {
+    set po_per_quote_perc [expr int(10000.0 * $po_total / $quote_total) / 100.0]
+}
+
 
 im_report_display_footer \
     -group_def $report_def \
