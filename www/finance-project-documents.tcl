@@ -65,9 +65,10 @@ set help_text "
 
 The purpose of this report is to determine the profitability of
 the projects in the time period between StartDate and End Date
-by showing the gross margin 
+by showing the relationship between quotes and purchase orders
+(an approximation of the gross margin).
 
-This report lists all projects that have started in the period 
+The report lists all projects that have started in the period 
 between Start Date and End Date and lists their financial documents. 
 This selection is meant to provide a reasonable approximation 
 for 'revenues in this period' if there are many small projects, 
