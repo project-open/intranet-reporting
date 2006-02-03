@@ -385,6 +385,11 @@ set levels {1 "Customer Only" 2 "Customer+Project" 3 "All Details"}
 ad_return_top_of_page "
 [im_header]
 [im_navbar]
+
+<table cellspacing=0 cellpadding=0 border=0>
+<tr>
+<td>
+
 <form>
 <table border=0 cellspacing=1 cellpadding=1>
 <tr>
@@ -411,6 +416,20 @@ ad_return_top_of_page "
 </tr>
 </table>
 </form>
+
+
+<table cellspacing=2 width=90%>
+<tr>
+<td>
+$help_text
+</td>
+</tr>
+</table>
+
+</td>
+</tr>
+</table>
+
 
 <table border=0 cellspacing=1 cellpadding=1>\n"
 
