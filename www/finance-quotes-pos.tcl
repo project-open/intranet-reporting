@@ -53,9 +53,31 @@ if {"" != $end_date && ![regexp {[0-9][0-9][0-9][0-9]\-[0-9][0-9]\-[0-9][0-9]} $
     Expected format: 'YYYY-MM-DD'"
 }
 
-set page_title "Finance Quotes &amp; POs"
+
+# ------------------------------------------------------------
+# Page Settings
+
+set page_title "Financial Documents and Their Projects"
 set context_bar [im_context_bar $page_title]
 set context ""
+
+set help_text "
+<strong>Financial Documents and Their Projects:</strong><br>
+
+The purpose of this report is to show how much money has been
+earned / spend in the periodbetween Start Date and End Date, 
+excluding effects due to unpaid invoices and payment delays.
+<br>
+
+The report lists all financial documents with an 'effective date'
+in the period, grouped by their projects. 
+'Effective date' is 'due date' - 'payment days' of the document,
+representing the date when the inflow/outflow of the money is 
+registered for accounting purposes.<br>
+
+
+"
+
 
 
 # ------------------------------------------------------------
@@ -401,6 +423,9 @@ im_report_render_row \
 set footer_array_list [list]
 set last_value_list [list]
 set class "rowodd"
+
+ns_log Notice "intranet-reporting/finance-quotes-pos: sql=\n$sql"
+
 db_foreach sql $sql {
 
 	if {"" == $project_id} {
