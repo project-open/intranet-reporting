@@ -417,6 +417,8 @@ ad_return_top_of_page "
 </table>
 </form>
 
+</td>
+<td>
 
 <table cellspacing=2 width=90%>
 <tr>
