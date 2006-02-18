@@ -387,7 +387,7 @@ ad_return_top_of_page "
 [im_navbar]
 
 <table cellspacing=0 cellpadding=0 border=0>
-<tr>
+<tr valign=top>
 <td>
 
 <form>

@@ -1,4 +1,4 @@
-# /packages/intranet-reporting/www/finance-quotes-pos.tcl
+# /packages/intranet-reporting/www/finance-payments.tcl
 #
 # Copyright (C) 2003-2004 Project/Open
 #
@@ -24,8 +24,7 @@ ad_page_contract {
 # Label: Provides the security context for this report
 # because it identifies unquely the report's Menu and
 # its permissions.
-set menu_label "reporting-finance-quotes-pos"
-
+set menu_label "reporting-finance-payments"
 set current_user_id [ad_maybe_redirect_for_registration]
 
 set read_p [db_string report_perms "
@@ -33,12 +32,15 @@ set read_p [db_string report_perms "
 	from	im_menus m
 	where	m.label = :menu_label
 " -default 'f']
-
 if {![string equal "t" $read_p]} {
     ad_return_complaint 1 "<li>
 [lang::message::lookup "" intranet-reporting.You_dont_have_permissions "You don't have the necessary permissions to view this page"]"
     return
 }
+
+
+# ------------------------------------------------------------
+# Parameter Checking
 
 # Check that Start & End-Date have correct format
 if {"" != $start_date && ![regexp {[0-9][0-9][0-9][0-9]\-[0-9][0-9]\-[0-9][0-9]} $start_date]} {
@@ -57,27 +59,20 @@ if {"" != $end_date && ![regexp {[0-9][0-9][0-9][0-9]\-[0-9][0-9]\-[0-9][0-9]} $
 # ------------------------------------------------------------
 # Page Settings
 
-set page_title "Financial Documents and Their Projects"
+set page_title "Payments"
 set context_bar [im_context_bar $page_title]
 set context ""
 
 set help_text "
-<strong>Financial Documents and Their Projects:</strong><br>
+<strong>$page_title:</strong><br>
 
-The purpose of this report is to show how much money has been
-earned / spend in the periodbetween Start Date and End Date, 
-excluding effects due to unpaid invoices and payment delays.
+The purpose of this report is to show the actual payments that have
+entered and left the company in the give time period.
 <br>
 
-The report lists all financial documents with an 'effective date'
-in the period, grouped by their projects. 
-'Effective date' is 'due date' - 'payment days' of the document,
-representing the date when the inflow/outflow of the money is 
-registered for accounting purposes.<br>
-
-
+The report list all payments in the given period and identifies the
+related financial documents and projects.
 "
-
 
 
 # ------------------------------------------------------------
@@ -123,6 +118,7 @@ if {"" == $end_date} {
 
 set company_url "/intranet/companies/view?company_id="
 set project_url "/intranet/projects/view?project_id="
+set invoice_url "/intranet-invoices/view?invoice_id="
 set user_url "/intranet/users/view?user_id="
 set this_url [export_vars -base "/intranet-reporting/finance-quotes-pos" {start_date end_date} ]
 
@@ -151,7 +147,7 @@ if {[info exists project_id]} {
     )"
 }
 
-set where_clause [join $criteria " and\n            "]
+set where_clause [join $criteria " and\n	    "]
 if { ![empty_string_p $where_clause] } {
     set where_clause " and $where_clause"
 }
@@ -164,6 +160,10 @@ if { ![empty_string_p $where_clause] } {
 
 set inner_sql "
 select
+	p.received_date as paid_date,
+	p.note as paid_note,
+	p.amount as paid_amount,
+	p.currency as paid_currency,
 	c.cost_id,
 	c.cost_type_id,
 	c.cost_status_id,
@@ -172,19 +172,18 @@ select
 	c.effective_date,
 	c.customer_id,
 	c.provider_id,
-	round((c.paid_amount * 
+	c.amount as cost_amount,
+	c.currency as cost_currency,
+	round((c.amount *
 	  im_exchange_rate(c.effective_date::date, c.currency, 'EUR')) :: numeric
+	  , 2) as cost_amount_converted,
+	round((p.amount *
+	  im_exchange_rate(p.received_date::date, p.currency, 'EUR')) :: numeric
 	  , 2) as paid_amount_converted,
-	c.paid_amount,
-	c.paid_currency,
-	round((c.amount * 
-	  im_exchange_rate(c.effective_date::date, c.currency, 'EUR')) :: numeric
-	  , 2) as amount_converted,
-	c.amount,
-	c.currency,
 	r.object_id_one as project_id
 from
-	im_costs c
+	im_payments p
+	LEFT OUTER JOIN im_costs c on (p.cost_id = c.cost_id)
 	LEFT OUTER JOIN acs_rels r on (c.cost_id = r.object_id_two)
 where
 	c.cost_type_id in (3700, 3702, 3704, 3706)
@@ -202,18 +201,19 @@ select
 	cust.company_name as customer_name,
 	prov.company_path as provider_nr,
 	prov.company_name as provider_name,
-	CASE WHEN c.cost_type_id = 3700 THEN c.amount_converted END as invoice_amount,
-	CASE WHEN c.cost_type_id = 3702 THEN c.amount_converted END as quote_amount,
-	CASE WHEN c.cost_type_id = 3704 THEN c.amount_converted END as bill_amount,
-	CASE WHEN c.cost_type_id = 3706 THEN c.amount_converted END as po_amount,
-	CASE WHEN c.cost_type_id = 3700 THEN to_char(c.amount, :cur_format) || ' ' || c.currency 
-	END as invoice_amount_pretty,
-	CASE WHEN c.cost_type_id = 3702 THEN to_char(c.amount, :cur_format) || ' ' || c.currency 
-	END as quote_amount_pretty,
-	CASE WHEN c.cost_type_id = 3704 THEN to_char(c.amount, :cur_format) || ' ' || c.currency 
-	END as bill_amount_pretty,
-	CASE WHEN c.cost_type_id = 3706 THEN to_char(c.amount, :cur_format) || ' ' || c.currency 
-	END as po_amount_pretty,
+	CASE WHEN c.cost_type_id = 3700 THEN c.paid_amount_converted END as paid_invoice_amount,
+	CASE WHEN c.cost_type_id = 3702 THEN c.paid_amount_converted END as paid_quote_amount,
+	CASE WHEN c.cost_type_id = 3704 THEN c.paid_amount_converted END as paid_bill_amount,
+	CASE WHEN c.cost_type_id = 3706 THEN c.paid_amount_converted END as paid_po_amount,
+
+	CASE WHEN c.cost_type_id = 3700 THEN to_char(c.paid_amount, :cur_format) || ' ' || c.paid_currency 
+	END as paid_invoice_amount_pretty,
+	CASE WHEN c.cost_type_id = 3702 THEN to_char(c.paid_amount, :cur_format) || ' ' || c.paid_currency 
+	END as paid_quote_amount_pretty,
+	CASE WHEN c.cost_type_id = 3704 THEN to_char(c.paid_amount, :cur_format) || ' ' || c.paid_currency 
+	END as paid_bill_amount_pretty,
+	CASE WHEN c.cost_type_id = 3706 THEN to_char(c.paid_amount, :cur_format) || ' ' || c.paid_currency 
+	END as paid_po_amount_pretty,
 	to_char(c.paid_amount, :cur_format) || ' ' || c.paid_currency as paid_amount_pretty,
 	p.project_name,
 	p.project_nr,
@@ -237,38 +237,42 @@ order by
 set report_def [list \
     group_by project_customer_id \
     header {
-	"\#colspan=8 <a href=$this_url&customer_id=$project_customer_id&level_of_detail=4 
+	"\#colspan=10 <a href=$this_url&customer_id=$project_customer_id&level_of_detail=4 
 	target=_blank><img src=/intranet/images/plus_9.gif width=9 height=9 border=0></a> 
 	<b><a href=$company_url$project_customer_id>$project_customer_name</a></b>"
     } \
-        content [list \
-            group_by project_id \
-            header { } \
+	content [list \
+	    group_by project_id \
+	    header { } \
 	    content [list \
 		    header {
 			""
 			""
-			$cost_name
-			"<nobr>$invoice_amount_pretty</nobr>"
-			"<nobr>$quote_amount_pretty</nobr>"
-			"<nobr>$bill_amount_pretty</nobr>"
-			"<nobr>$po_amount_pretty</nobr>"
-			""
+			"<nobr>$cost_amount $cost_currency</nobr>"
+			"<nobr>$effective_date_formatted</nobr>"
+			"<a href=$invoice_url$cost_id>$cost_name</a>"
+			"<nobr>$paid_invoice_amount_pretty</nobr>"
+			"<nobr>$paid_quote_amount_pretty</nobr>"
+			"<nobr>$paid_bill_amount_pretty</nobr>"
+			"<nobr>$paid_po_amount_pretty</nobr>"
+			$paid_note
 		    } \
 		    content {} \
 	    ] \
-            footer {
+	    footer {
 		"" 
 		"<a href=$this_url&project_id=$project_id&level_of_detail=4 
 		target=_blank><img src=/intranet/images/plus_9.gif width=9 height=9 border=0></a> 
 		<b><a href=$project_url$project_id>$project_name</a></b>"
 		"" 
+		"" 
+		""
 		"<i>$invoice_subtotal $default_currency</i>" 
 		"<i>$quote_subtotal $default_currency</i>" 
 		"<i>$bill_subtotal $default_currency</i>" 
 		"<i>$po_subtotal $default_currency</i>"
-		$po_per_quote_perc
-            } \
+		""
+	    } \
     ] \
     footer {  } \
 ]
@@ -279,8 +283,10 @@ set bill_total 0
 set po_total 0
 
 # Global header/footer
-set header0 {"Cust" "Project" "Name" "Invoice" "Quote" "Bill" "PO" "PO/Quote"}
+set header0 {"Cust" "Project" "Document<br>Amount<br>(w/o VAT)" "Effective<br>Date" "Document<br>Name" "Payment Invoice" "Payment Quote" "Payment Bill" "Payment PO" "Note"}
 set footer0 {
+	"" 
+	"" 
 	"" 
 	"" 
 	"<br><b>Total:</b>" 
@@ -288,69 +294,69 @@ set footer0 {
 	"<br><b>$quote_total $default_currency</b>" 
 	"<br><b>$bill_total $default_currency</b>" 
 	"<br><b>$po_total $default_currency</b>"
-	"<br><b>$po_per_quote_perc %</b>"
+	""
 }
 
 #
 # Subtotal Counters (per project)
 #
 set invoice_subtotal_counter [list \
-        pretty_name "Invoice Amount" \
-        var invoice_subtotal \
-        reset \$project_id \
-        expr "\$invoice_amount+0" \
+	pretty_name "Invoice Amount" \
+	var invoice_subtotal \
+	reset \$project_id \
+	expr "\$paid_invoice_amount+0" \
 ]
 
 set quote_subtotal_counter [list \
-        pretty_name "Quote Amount" \
-        var quote_subtotal \
-        reset \$project_id \
-        expr "\$quote_amount+0" \
+	pretty_name "Quote Amount" \
+	var quote_subtotal \
+	reset \$project_id \
+	expr "\$paid_quote_amount+0" \
 ]
 
 set bill_subtotal_counter [list \
-        pretty_name "Bill Amount" \
-        var bill_subtotal \
-        reset \$project_id \
-        expr "\$bill_amount+0" \
+	pretty_name "Bill Amount" \
+	var bill_subtotal \
+	reset \$project_id \
+	expr "\$paid_bill_amount+0" \
 ]
 
 set po_subtotal_counter [list \
-        pretty_name "Po Amount" \
-        var po_subtotal \
-        reset \$project_id \
-        expr "\$po_amount+0" \
+	pretty_name "Po Amount" \
+	var po_subtotal \
+	reset \$project_id \
+	expr "\$paid_po_amount+0" \
 ]
 
 #
 # Grand Total Counters
 #
 set invoice_grand_total_counter [list \
-        pretty_name "Invoice Amount" \
-        var invoice_total \
-        reset 0 \
-        expr "\$invoice_amount+0" \
+	pretty_name "Invoice Amount" \
+	var invoice_total \
+	reset 0 \
+	expr "\$paid_invoice_amount+0" \
 ]
 
 set quote_grand_total_counter [list \
-        pretty_name "Quote Amount" \
-        var quote_total \
-        reset 0 \
-        expr "\$quote_amount+0" \
+	pretty_name "Quote Amount" \
+	var quote_total \
+	reset 0 \
+	expr "\$paid_quote_amount+0" \
 ]
 
 set bill_grand_total_counter [list \
-        pretty_name "Bill Amount" \
-        var bill_total \
-        reset 0 \
-        expr "\$bill_amount+0" \
+	pretty_name "Bill Amount" \
+	var bill_total \
+	reset 0 \
+	expr "\$paid_bill_amount+0" \
 ]
 
 set po_grand_total_counter [list \
-        pretty_name "Po Amount" \
-        var po_total \
-        reset 0 \
-        expr "\$po_amount+0" \
+	pretty_name "Po Amount" \
+	var po_total \
+	reset 0 \
+	expr "\$paid_po_amount+0" \
 ]
 
 
@@ -387,7 +393,7 @@ ad_return_top_of_page "
 [im_navbar]
 
 <table cellspacing=0 cellpadding=0 border=0>
-<tr>
+<tr valign=top>
 <td>
 
 <form>
@@ -464,35 +470,22 @@ db_foreach sql $sql {
 	
 	im_report_update_counters -counters $counters
 	
-	# Calculated Variables 
-	set po_per_quote_perc "undef"
-	if {[expr $quote_subtotal+0] != 0} {
-	  set po_per_quote_perc [expr int(10000.0 * $po_subtotal / $quote_subtotal) / 100.0]
-	  set po_per_quote_perc "$po_per_quote_perc %"
-	}
-
 	set last_value_list [im_report_render_header \
 	    -group_def $report_def \
 	    -last_value_array_list $last_value_list \
 	    -level_of_detail $level_of_detail \
 	    -row_class $class \
 	    -cell_class $class
-        ]
+	]
 
-        set footer_array_list [im_report_render_footer \
+	set footer_array_list [im_report_render_footer \
 	    -group_def $report_def \
 	    -last_value_array_list $last_value_list \
 	    -level_of_detail $level_of_detail \
 	    -row_class $class \
 	    -cell_class $class
-        ]
+	]
 }
-
-set po_per_quote_perc "undef"
-if {[expr $quote_subtotal+0] != 0} {
-    set po_per_quote_perc [expr int(10000.0 * $po_total / $quote_total) / 100.0]
-}
-
 
 im_report_display_footer \
     -group_def $report_def \
