@@ -123,6 +123,8 @@ if {"" == $end_date} {
 
 set company_url "/intranet/companies/view?company_id="
 set project_url "/intranet/projects/view?project_id="
+set invoice_url "/intranet-invoices/view?invoice_id="
+
 set user_url "/intranet/users/view?user_id="
 set this_url [export_vars -base "/intranet-reporting/finance-quotes-pos" {start_date end_date} ]
 
@@ -247,7 +249,7 @@ order by
 set report_def [list \
     group_by project_customer_id \
     header {
-	"\#colspan=8 <a href=$this_url&customer_id=$project_customer_id&level_of_detail=4 
+	"\#colspan=9 <a href=$this_url&customer_id=$project_customer_id&level_of_detail=4 
 	target=_blank><img src=/intranet/images/plus_9.gif width=9 height=9 border=0></a> 
 	<b><a href=$company_url$project_customer_id>$project_customer_name</a></b>"
     } \
@@ -258,11 +260,12 @@ set report_def [list \
 		    header {
 			""
 			""
-			$cost_name
+			"<a href=$invoice_url$cost_id>$cost_name</a>"
 			"<nobr>$invoice_amount_pretty</nobr>"
 			"<nobr>$quote_amount_pretty</nobr>"
 			"<nobr>$bill_amount_pretty</nobr>"
 			"<nobr>$po_amount_pretty</nobr>"
+			""
 			""
 		    } \
 		    content {} \
@@ -273,11 +276,12 @@ set report_def [list \
 		target=_blank><img src=/intranet/images/plus_9.gif width=9 height=9 border=0></a> 
 		<b><a href=$project_url$project_id>$project_name</a></b>"
 		"" 
-		"<i>$invoice_subtotal $default_currency</i>" 
-		"<i>$quote_subtotal $default_currency</i>" 
-		"<i>$bill_subtotal $default_currency</i>" 
-		"<i>$po_subtotal $default_currency</i>"
-		$po_per_quote_perc
+		"<nobr><i>$invoice_subtotal $default_currency</i></nobr>" 
+		"<nobr><i>$quote_subtotal $default_currency</i></nobr>" 
+		"<nobr><i>$bill_subtotal $default_currency</i></nobr>" 
+		"<nobr><i>$po_subtotal $default_currency</i></nobr>"
+		"<nobr><i>$po_per_quote_perc</i></nobr>"
+		"<nobr><i>$gross_profit</i></nobr>"
             } \
     ] \
     footer {  } \
@@ -289,7 +293,7 @@ set bill_total 0
 set po_total 0
 
 # Global header/footer
-set header0 {"Cust" "Project" "Name" "Invoice" "Quote" "Bill" "PO" "PO/Quote"}
+set header0 {"Cust" "Project" "Name" "Invoice" "Quote" "Bill" "PO" "PO/Quote" "Gross Profit"}
 set footer0 {
 	"" 
 	"" 
@@ -299,6 +303,7 @@ set footer0 {
 	"<br><b>$bill_total $default_currency</b>" 
 	"<br><b>$po_total $default_currency</b>"
 	"<br><b>$po_per_quote_perc %</b>"
+	"<br><b>$gross_profit</b>"
 }
 
 #
@@ -479,6 +484,8 @@ db_foreach sql $sql {
 	  set po_per_quote_perc "$po_per_quote_perc %"
 	}
 
+	set gross_profit [expr $invoice_subtotal - $bill_subtotal]
+
 	set last_value_list [im_report_render_header \
 	    -group_def $report_def \
 	    -last_value_array_list $last_value_list \
@@ -496,10 +503,14 @@ db_foreach sql $sql {
         ]
 }
 
+# Calculated Variables for footer0
 set po_per_quote_perc "undef"
 if {[expr $quote_subtotal+0] != 0} {
     set po_per_quote_perc [expr int(10000.0 * $po_total / $quote_total) / 100.0]
 }
+
+set gross_profit [expr $invoice_total - $bill_total]
+
 
 
 im_report_display_footer \
