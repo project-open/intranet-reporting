@@ -276,7 +276,7 @@ set report_def [list \
 		"" 
 		"<a href=$this_url&project_id=$project_id&level_of_detail=4 
 		target=_blank><img src=/intranet/images/plus_9.gif width=9 height=9 border=0></a> 
-		<b><a href=$project_url$project_id>$project_name</a></b> $project_end_date"
+		<b><a href=$project_url$project_id>$project_name</a></b>"
 		"" 
 		"<nobr><i>$invoice_subtotal $default_currency</i></nobr>" 
 		"<nobr><i>$quote_subtotal $default_currency</i></nobr>" 
