@@ -1,4 +1,4 @@
-# /packages/intranet-reporting/www/finance-quotes-pos.tcl
+# /packages/intranet-reporting/www/finance-trans-pm-productivity.tcl
 #
 # Copyright (C) 2003-2004 Project/Open
 #
@@ -13,9 +13,9 @@ ad_page_contract {
 } {
     { start_date "" }
     { end_date "" }
-    { level_of_detail 2 }
+    { level_of_detail 1 }
     project_id:integer,optional
-    customer_id:integer,optional
+    project_manager_id:integer,optional
 }
 
 # ------------------------------------------------------------
@@ -24,7 +24,7 @@ ad_page_contract {
 # Label: Provides the security context for this report
 # because it identifies unquely the report's Menu and
 # its permissions.
-set menu_label "reporting-finance-quotes-pos"
+set menu_label "reporting-finance-trans-pm-productivity"
 
 set current_user_id [ad_maybe_redirect_for_registration]
 
@@ -57,33 +57,21 @@ if {"" != $end_date && ![regexp {[0-9][0-9][0-9][0-9]\-[0-9][0-9]\-[0-9][0-9]} $
 # ------------------------------------------------------------
 # Page Settings
 
-set page_title "Financial Documents and Their Projects"
+set page_title "Project Manager's Financial Performance"
 set context_bar [im_context_bar $page_title]
 set context ""
 
 set help_text "
-<strong>Financial Documents and Their Projects:</strong><br>
+<strong>Project Managers and their Productivity:</strong><br>
 
-The purpose of this report is to show how much money has been
-earned / spend
-by listing all financial documents with the effective date 
-between Start Date and End Date.
+The purpose of this report is to check performance of project
+managers in terms of the revenues of the projects that they
+have managed in the given timeframe.
 <br>
-Start Date is inclusive (document with effective date = Start Date
-or later), while End Date is exclusive (documents earlier then 
-End Date, exclucing End Date).
-<br>
-
 
 The report lists all financial documents with an effective date
-in the period, grouped by their projects. 
-Effective date is due date - payment days of the document,
-representing the date when the inflow/outflow of the money is 
-registered for accounting purposes.<br>
-
-
+in the period, grouped by their projects and project managers. 
 "
-
 
 
 # ------------------------------------------------------------
@@ -131,7 +119,7 @@ set company_url "/intranet/companies/view?company_id="
 set project_url "/intranet/projects/view?project_id="
 set invoice_url "/intranet-invoices/view?invoice_id="
 set user_url "/intranet/users/view?user_id="
-set this_url [export_vars -base "/intranet-reporting/finance-quotes-pos" {start_date end_date} ]
+set this_url [export_vars -base "/intranet-reporting/finance-trans-pm-productivity.tcl" {start_date end_date} ]
 
 
 # ------------------------------------------------------------
@@ -140,8 +128,12 @@ set this_url [export_vars -base "/intranet-reporting/finance-quotes-pos" {start_
 
 set criteria [list]
 
-if {[info exists customer_id]} {
-    lappend criteria "pcust.company_id = :customer_id"
+if {[info exists project_manager_id]} {
+    lappend criteria "p.project_lead_id = :project_manager_id"
+}
+
+if {[info exists project_id]} {
+    lappend criteria "p.project_id = :project_id"
 }
 
 # Select project & subprojects
@@ -225,6 +217,8 @@ select
 	to_char(c.paid_amount, :cur_format) || ' ' || c.paid_currency as paid_amount_pretty,
 	p.project_name,
 	p.project_nr,
+	p.project_lead_id as project_manager_id,
+	im_name_from_user_id(p.project_lead_id) as project_manager_name,
 	pcust.company_id as project_customer_id,
 	pcust.company_name as project_customer_name
 from
@@ -237,17 +231,17 @@ where
 	1 = 1
 	$where_clause
 order by
-	pcust.company_name,
+	project_manager_name,
 	p.project_name
 "
 
 
 set report_def [list \
-    group_by project_customer_id \
+    group_by project_manager_id \
     header {
-	"\#colspan=10 <a href=$this_url&customer_id=$project_customer_id&level_of_detail=4 
+	"\#colspan=7 <a href=$this_url&project_manager_id=$project_manager_id&level_of_detail=2
 	target=_blank><img src=/intranet/images/plus_9.gif width=9 height=9 border=0></a> 
-	<b><a href=$company_url$project_customer_id>$project_customer_name</a></b>"
+	<b><a href=$user_url$project_manager_id>$project_manager_name</a></b>"
     } \
         content [list \
             group_by project_id \
@@ -256,14 +250,11 @@ set report_def [list \
 		    header {
 			""
 			""
-			"<nobr>$effective_date_formatted</nobr>"
-			"<nobr>$paid_amount $paid_currency</nobr>"
 			"<nobr><a href=$invoice_url$cost_id>$cost_name</a></nobr>"
 			"<nobr>$invoice_amount_pretty</nobr>"
 			"<nobr>$quote_amount_pretty</nobr>"
 			"<nobr>$bill_amount_pretty</nobr>"
 			"<nobr>$po_amount_pretty</nobr>"
-			""
 		    } \
 		    content {} \
 	    ] \
@@ -273,16 +264,21 @@ set report_def [list \
 		target=_blank><img src=/intranet/images/plus_9.gif width=9 height=9 border=0></a> 
 		<b><a href=$project_url$project_id>$project_name</a></b>"
 		"" 
-		""
-		""
 		"<i>$invoice_subtotal $default_currency</i>" 
 		"<i>$quote_subtotal $default_currency</i>" 
 		"<i>$bill_subtotal $default_currency</i>" 
 		"<i>$po_subtotal $default_currency</i>"
-		$po_per_quote_perc
             } \
     ] \
-    footer {  } \
+    footer {  
+		"" 
+		""
+		"" 
+		"<nobr><b>$invoice_pm_subtotal $default_currency</b></nobr>" 
+		"<nobr><b>$quote_pm_subtotal $default_currency</b></nobr>"
+		"<nobr><b>$bill_pm_subtotal $default_currency</b></nobr>"
+		"<nobr><b>$po_pm_subtotal $default_currency</b></nobr>"
+    } \
 ]
 
 set invoice_total 0
@@ -291,10 +287,8 @@ set bill_total 0
 set po_total 0
 
 # Global header/footer
-set header0 {"Cust" "Project" "Effective Date" "Paid" "Name" "Invoice" "Quote" "Bill" "PO" "PO/Quote"}
+set header0 {"PM" "Project" "Name" "Invoice" "Quote" "Bill" "PO"}
 set footer0 {
-	"" 
-	"" 
 	"" 
 	"" 
 	"<br><b>Total:</b>" 
@@ -302,7 +296,6 @@ set footer0 {
 	"<br><b>$quote_total $default_currency</b>" 
 	"<br><b>$bill_total $default_currency</b>" 
 	"<br><b>$po_total $default_currency</b>"
-	"<br><b>$po_per_quote_perc %</b>"
 }
 
 #
@@ -335,6 +328,43 @@ set po_subtotal_counter [list \
         reset \$project_id \
         expr "\$po_amount+0" \
 ]
+
+
+
+#
+# PM Counters (per project)
+#
+set invoice_pm_counter [list \
+        pretty_name "Invoice Amount" \
+        var invoice_pm_subtotal \
+        reset \$project_manager_id \
+        expr "\$invoice_amount+0" \
+]
+
+set quote_pm_counter [list \
+        pretty_name "Quote Amount" \
+        var quote_pm_subtotal \
+        reset \$project_manager_id \
+        expr "\$quote_amount+0" \
+]
+
+set bill_pm_counter [list \
+        pretty_name "Bill Amount" \
+        var bill_pm_subtotal \
+        reset \$project_manager_id \
+        expr "\$bill_amount+0" \
+]
+
+set po_pm_counter [list \
+        pretty_name "Po Amount" \
+        var po_pm_subtotal \
+        reset \$project_manager_id \
+        expr "\$po_amount+0" \
+]
+
+
+
+
 
 #
 # Grand Total Counters
@@ -375,6 +405,10 @@ set counters [list \
 	$quote_subtotal_counter \
 	$bill_subtotal_counter \
 	$po_subtotal_counter \
+	$invoice_pm_counter \
+	$quote_pm_counter \
+	$bill_pm_counter \
+	$po_pm_counter \
 	$invoice_grand_total_counter \
 	$quote_grand_total_counter \
 	$bill_grand_total_counter \
@@ -390,7 +424,7 @@ set start_years {2000 2000 2001 2001 2002 2002 2003 2003 2004 2004 2005 2005 200
 set start_months {01 Jan 02 Feb 03 Mar 04 Apr 05 May 06 Jun 07 Jul 08 Aug 09 Sep 10 Oct 11 Nov 12 Dec}
 set start_weeks {01 1 02 2 03 3 04 4 05 5 06 6 07 7 08 8 09 9 10 10 11 11 12 12 13 13 14 14 15 15 16 16 17 17 18 18 19 19 20 20 21 21 22 22 23 23 24 24 25 25 26 26 27 27 28 28 29 29 30 30 31 31 32 32 33 33 34 34 35 35 36 36 37 37 38 38 39 39 40 40 41 41 42 42 43 43 44 44 45 45 46 46 47 47 48 48 49 49 50 50 51 51 52 52}
 set start_days {01 1 02 2 03 3 04 4 05 5 06 6 07 7 08 8 09 9 10 10 11 11 12 12 13 13 14 14 15 15 16 16 17 17 18 18 19 19 20 20 21 21 22 22 23 23 24 24 25 25 26 26 27 27 28 28 29 29 30 30 31 31}
-set levels {1 "Customer Only" 2 "Customer+Project" 3 "All Details"} 
+set levels {1 "PM Only" 2 "PM+Project" 3 "All Details"} 
 
 # ------------------------------------------------------------
 # Start formatting the page
@@ -463,9 +497,14 @@ ns_log Notice "intranet-reporting/finance-quotes-pos: sql=\n$sql"
 
 db_foreach sql $sql {
 
-	if {"" == $project_id} {
-	    set project_id 0
-	    set project_name "No Project"
+        if {"" == $project_id} {
+            set project_id 0
+            set project_name "No Project"
+        }
+
+	if {"" == $project_manager_id} {
+	    set project_manager_id 0
+	    set project_manager_name "No Project Manager"
 	}
 
 	im_report_display_footer \
@@ -478,13 +517,6 @@ db_foreach sql $sql {
 	
 	im_report_update_counters -counters $counters
 	
-	# Calculated Variables 
-	set po_per_quote_perc "undef"
-	if {[expr $quote_subtotal+0] != 0} {
-	  set po_per_quote_perc [expr int(10000.0 * $po_subtotal / $quote_subtotal) / 100.0]
-	  set po_per_quote_perc "$po_per_quote_perc %"
-	}
-
 	set last_value_list [im_report_render_header \
 	    -group_def $report_def \
 	    -last_value_array_list $last_value_list \
@@ -501,12 +533,6 @@ db_foreach sql $sql {
 	    -cell_class $class
         ]
 }
-
-set po_per_quote_perc "undef"
-if {[expr $quote_subtotal+0] != 0} {
-    set po_per_quote_perc [expr int(10000.0 * $po_total / $quote_total) / 100.0]
-}
-
 
 im_report_display_footer \
     -group_def $report_def \
