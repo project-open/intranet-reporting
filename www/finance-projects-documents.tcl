@@ -64,7 +64,7 @@ set help_text "
 <strong>Projects and Their Financial Documents:</strong><br>
 
 The purpose of this report is to determine the profitability of
-the projects in the time period between StartDate and End Date
+the projects that end (end_date) in the time period between StartDate and End Date
 by showing the relationship between quotes and purchase orders
 (an approximation of the gross margin).
 
@@ -192,8 +192,9 @@ set inner_sql "
 		 from
 			(select	project_id
 			 from	im_projects p
-			 where	p.start_date < to_date('2006-02-01', 'YYYY-MM-DD')
-			    and p.end_date >= to_date('2006-01-01', 'YYYY-MM-DD')
+			 where	p.end_date >= to_date(:start_date, 'YYYY-MM-DD')
+				and p.end_date < to_date(:end_date, 'YYYY-MM-DD')
+				and p.end_date::date < to_date(:end_date, 'YYYY-MM-DD')
 			) p	 
 			LEFT OUTER JOIN acs_rels r on (p.project_id = r.object_id_one)
 			LEFT OUTER JOIN im_costs c on (c.cost_id = r.object_id_two OR c.project_id = p.project_id)
@@ -228,6 +229,7 @@ select
 	to_char(c.paid_amount, :cur_format) || ' ' || c.paid_currency as paid_amount_pretty,
 	p.project_name,
 	p.project_nr,
+	p.end_date::date as project_end_date,
 	pcust.company_id as project_customer_id,
 	pcust.company_name as project_customer_name
 from
@@ -274,7 +276,7 @@ set report_def [list \
 		"" 
 		"<a href=$this_url&project_id=$project_id&level_of_detail=4 
 		target=_blank><img src=/intranet/images/plus_9.gif width=9 height=9 border=0></a> 
-		<b><a href=$project_url$project_id>$project_name</a></b>"
+		<b><a href=$project_url$project_id>$project_name</a></b> $project_end_date"
 		"" 
 		"<nobr><i>$invoice_subtotal $default_currency</i></nobr>" 
 		"<nobr><i>$quote_subtotal $default_currency</i></nobr>" 
