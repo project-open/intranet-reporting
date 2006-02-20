@@ -65,13 +65,19 @@ set help_text "
 <strong>Financial Documents and Their Projects:</strong><br>
 
 The purpose of this report is to show how much money has been
-earned / spend in the periodbetween Start Date and End Date, 
-excluding effects due to unpaid invoices and payment delays.
+earned / spend
+by listing all financial documents with the effective date 
+between Start Date and End Date.
+<br>
+Start Date is inclusive (document with effective date = Start Date
+or later), while End Date is exclusive (documents earlier then 
+End Date, exclucing End Date).
 <br>
 
-The report lists all financial documents with an 'effective date'
+
+The report lists all financial documents with an effective date
 in the period, grouped by their projects. 
-'Effective date' is 'due date' - 'payment days' of the document,
+Effective date is due date - payment days of the document,
 representing the date when the inflow/outflow of the money is 
 registered for accounting purposes.<br>
 
@@ -123,6 +129,7 @@ if {"" == $end_date} {
 
 set company_url "/intranet/companies/view?company_id="
 set project_url "/intranet/projects/view?project_id="
+set invoice_url "/intranet-invoices/view?invoice_id="
 set user_url "/intranet/users/view?user_id="
 set this_url [export_vars -base "/intranet-reporting/finance-quotes-pos" {start_date end_date} ]
 
@@ -190,6 +197,7 @@ where
 	c.cost_type_id in (3700, 3702, 3704, 3706)
 	and c.effective_date >= to_date(:start_date, 'YYYY-MM-DD')
 	and c.effective_date < to_date(:end_date, 'YYYY-MM-DD')
+	and c.effective_date::date < to_date(:end_date, 'YYYY-MM-DD')
 "
 
 
@@ -237,7 +245,7 @@ order by
 set report_def [list \
     group_by project_customer_id \
     header {
-	"\#colspan=8 <a href=$this_url&customer_id=$project_customer_id&level_of_detail=4 
+	"\#colspan=10 <a href=$this_url&customer_id=$project_customer_id&level_of_detail=4 
 	target=_blank><img src=/intranet/images/plus_9.gif width=9 height=9 border=0></a> 
 	<b><a href=$company_url$project_customer_id>$project_customer_name</a></b>"
     } \
@@ -248,7 +256,9 @@ set report_def [list \
 		    header {
 			""
 			""
-			$cost_name
+			"<nobr>$effective_date_formatted</nobr>"
+			"<nobr>$paid_amount $paid_currency</nobr>"
+			"<nobr><a href=$invoice_url$cost_id>$cost_name</a></nobr>"
 			"<nobr>$invoice_amount_pretty</nobr>"
 			"<nobr>$quote_amount_pretty</nobr>"
 			"<nobr>$bill_amount_pretty</nobr>"
@@ -263,6 +273,8 @@ set report_def [list \
 		target=_blank><img src=/intranet/images/plus_9.gif width=9 height=9 border=0></a> 
 		<b><a href=$project_url$project_id>$project_name</a></b>"
 		"" 
+		""
+		""
 		"<i>$invoice_subtotal $default_currency</i>" 
 		"<i>$quote_subtotal $default_currency</i>" 
 		"<i>$bill_subtotal $default_currency</i>" 
@@ -279,8 +291,10 @@ set bill_total 0
 set po_total 0
 
 # Global header/footer
-set header0 {"Cust" "Project" "Name" "Invoice" "Quote" "Bill" "PO" "PO/Quote"}
+set header0 {"Cust" "Project" "Effective Date" "Paid" "Name" "Invoice" "Quote" "Bill" "PO" "PO/Quote"}
 set footer0 {
+	"" 
+	"" 
 	"" 
 	"" 
 	"<br><b>Total:</b>" 
