@@ -456,3 +456,138 @@ ad_proc im_report_skip_if_zero {
     if {0 == $amount} { return "" }
     return $string
 }
+
+
+
+ad_proc im_report_write_http_headers {
+    -output_format
+} {
+    Writes a suitable HTTP header to the connection.
+    We need this custom routine in order to deal with
+    strange IE5/6 and MS-Excel behaviour that require
+    Latin1 (iso-8859-1) or other encodings, depending
+    on the country specific version of Excel...
+} {
+    set content_type [im_report_content_type -output_format $output_format]
+    set http_encoding [im_report_http_encoding -output_format $output_format]
+
+    # ad_return_complaint 1 $http_encoding
+    # set content_type "text/html"
+
+    append content_type "; charset=$http_encoding"
+
+    set all_the_headers "HTTP/1.0 200 OK
+MIME-Version: 1.0
+Content-Type: $content_type\r\n"
+
+    util_WriteWithExtraOutputHeaders $all_the_headers
+    ns_startcontent -type $content_type
+}
+
+
+ad_proc im_report_content_type {
+    -output_format
+} {
+    Returns the suitable MIME type for the given output_format
+} {
+    # return "text/html"
+
+    switch $output_format {
+        html { return "text/html" }
+        csv {
+            return [parameter::get_from_package_key \
+                        -package_key intranet-dw-light \
+                        -parameter CsvContentType \
+                        -default "application/csv" \
+			]
+        }
+        default { return "text/plain" }
+    }
+}
+
+
+
+ad_proc im_report_tcl_encoding {
+    -output_format
+} {
+    Returns a suitable conversion for the 'encoding convertto' command.
+    Please see 'encoding list' for a list of values and the TCL manuals
+    for an introduction to character encoding.
+    Please note that the values are similar to the HTTP encodings,
+    but not identical.
+} {
+    switch $output_format {
+        html { return "" }
+        csv {
+            return [parameter::get_from_package_key \
+                        -package_key intranet-dw-light \
+                        -parameter CsvTclCharacterEncoding \
+                        -default "iso8859-1" \
+			]
+        }
+        default { return "" }
+    }
+}
+
+
+ad_proc im_report_http_encoding {
+    -output_format
+} {
+    Returns a suitable HTTP "Content-Type" value.
+    Please note that the values are similar to the TCL encodings,
+    but not identical.
+} {
+    switch $output_format {
+        html { return "utf-8" }
+        csv {
+            return [parameter::get_from_package_key \
+                        -package_key intranet-dw-light \
+                        -parameter CsvHttpCharacterEncoding \
+                        -default "iso-8859-1" \
+			]
+        }
+        default { return "utf-8" }
+    }
+}
+
+
+
+# -------------------------------------------------------
+# Pivot Table helper procs
+# -------------------------------------------------------
+
+
+ad_proc -public im_report_take_n_from_list { list n } {
+    returns n elements from list
+} {
+    if {$n <= 0} { return [list $list] }
+
+    set result [list]
+    for {set i 0} {$i < [llength $list]} {incr i} {
+        set elem [lindex $list $i]
+        set left_rest [lrange $list 0 [expr $i-1]]
+        set right_rest [lrange $list [expr $i+1] end]
+        set rest [concat $left_rest $right_rest]
+        set rest_perms [im_report_take_n_from_list $rest [expr $n-1]]
+
+        foreach rest_perm $rest_perms {
+            lappend result $rest_perm
+        }
+    }
+    return [lsort -unique $result]
+}
+
+
+ad_proc -public im_report_take_all_ordered_permutations { list } {
+    returns all permutations of a list
+} {
+    set n [llength $list]
+
+    set result [list]
+    for {set i 0} {$i < [llength $list]} {incr i} {
+        set result [concat $result [im_report_take_n_from_list $list $i]]
+    }
+    lappend result [list]
+    return $result
+}
+
