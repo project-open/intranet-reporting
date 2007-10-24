@@ -360,6 +360,8 @@ switch $output_format {
 	ns_write "
 	[im_header $page_title]
 	[im_navbar]
+        <div id=\"slave\">
+        <div id=\"slave-content\">
 	<form>
 	<table border=0 cellspacing=1 cellpadding=1>
 	<tr valign=top><td>
@@ -488,5 +490,5 @@ im_report_render_row \
 # and write out the page footer.
 #
 switch $output_format {
-    html { ns_write "</table>\n[im_footer]\n"}
+    html { ns_write "</table>\n</div></div>[im_footer]\n"}
 }
