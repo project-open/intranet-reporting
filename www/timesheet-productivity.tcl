@@ -280,7 +280,7 @@ switch $output_format {
     html {
         ns_write "
 	[im_header]
-	[im_navbar]
+	[im_navbar reporting]
         <div id=\"slave\">
         <div id=\"slave_content\">
         <div class=\"filter-list\">
