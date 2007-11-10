@@ -195,6 +195,8 @@ values (15002, 'Deleted', 'Intranet Report Status');
 
 insert into im_categories(category_id, category, category_type) 
 values (15100, 'Simple SQL Report', 'Intranet Report Type');
+insert into im_categories(category_id, category, category_type) 
+values (15110, 'Indicator', 'Intranet Report Type');
 
 
 -----------------------------------------------------------
