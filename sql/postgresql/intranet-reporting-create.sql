@@ -68,13 +68,21 @@ create table im_reports (
 				not null
 				constraint im_report_type_fk
 				references im_categories,
+	report_sort_order	integer,
 	report_menu_id		integer
 				constraint im_report_menu_id_fk
 				references im_menus,
 	report_sql		text
 				constraint im_report_report_nn
-				not null
+				not null,
+	report_description	text
 );
+
+
+-- Dont allow the same name for the same company+level
+alter table im_reports add
+	constraint im_reports_name_un
+	unique(report_name);
 
 
 
