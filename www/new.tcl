@@ -74,8 +74,9 @@ ad_form \
     -form {
 	report_id:key
 	{report_name:text(text) {label "[lang::message::lookup {} intranet-reporting.Report_Name {Report Name}]"} {html {size 60}}}
+	{report_code:text(text) {label "[lang::message::lookup {} intranet-reporting.Report_Code {Report Code}]"} {html {size 10}}}
 	{parent_menu_id:text(select) {label "[lang::message::lookup {} intranet-reporting.Report_Group {Report Group}]"} {options $parent_menu_options} }
-	{sort_order:integer(text),optional {label "[lang::message::lookup {} intranet-reporting.Report_Sort_Order {Sort Order}]"}}
+	{report_sort_order:integer(text),optional {label "[lang::message::lookup {} intranet-reporting.Report_Sort_Order {Sort Order}]"}}
 	{report_sql:text(textarea) {label "[lang::message::lookup {} intranet-reporting.Reports_SQL {Report SQL}]"} {html {cols 60 rows 10} }}
 	{report_description:text(textarea),optional {label "[lang::message::lookup {} intranet-reporting.Reports_Description {Description}]"} {html {cols 60 rows 5} }}
     }
@@ -100,7 +101,7 @@ ad_form -extend -name $form_id \
 	set label [im_mangle_user_group_name $report_name]
 	set name $report_name
 	set url "/intranet-reporting/view?report_id=$report_id"
-	if {![info exists sort_order] || "" == $sort_order} { set sort_order 100 }
+	if {![info exists report_sort_order] || "" == $report_sort_order} { set report_sort_order 100 }
 
 	set report_menu_id [db_exec_plsql menu_new "
         	SELECT im_menu__new (
@@ -115,7 +116,7 @@ ad_form -extend -name $form_id \
         	        :label,                 -- label
         	        :name,                  -- name
         	        :url,                   -- url
-        	        :sort_order,            -- sort_order
+        	        :report_sort_order,	-- sort_order
         	        :parent_menu_id,	-- parent_menu_id
         	        null                    -- p_visible_tcl
         	)
@@ -131,7 +132,8 @@ ad_form -extend -name $form_id \
 			null,
 
 			:report_name,
-			[im_report_type_simple_sql],
+			:report_code,
+			[im_report_type_indicator],
 			[im_report_status_active],
 			:report_menu_id,
 			:report_sql::text
@@ -140,6 +142,7 @@ ad_form -extend -name $form_id \
 
 	db_dml edit_report "
 		update im_reports set 
+			report_sort_order = :report_sort_order,
 			report_status_id = [im_report_status_active],
 			report_type_id = [im_report_type_simple_sql],
 			report_description = :report_description
@@ -151,6 +154,8 @@ ad_form -extend -name $form_id \
 	db_dml edit_report "
 		update im_reports set 
 			report_name = :report_name,
+			report_code = :report_code,
+			report_sort_order = :report_sort_order,
 			report_status_id = [im_report_status_active],
 			report_type_id = [im_report_type_simple_sql],
 			report_sql = :report_sql,
