@@ -101,6 +101,39 @@ alter table im_reports add
 
 
 -----------------------------------------------------------
+-- Privileges
+
+create or replace function inline_0 ()
+returns integer as '
+declare
+	v_count		 integer;
+begin
+	select count(*) into v_count
+	from acs_privileges where privilege = ''add_reports'';
+	if v_count > 0 then return 0; end if;
+
+	PERFORM acs_privilege__create_privilege(''add_reports'',''Add Reports'',''Add Reports'');
+	PERFORM acs_privilege__add_child(''admin'', ''add_reports'');
+
+	PERFORM acs_privilege__create_privilege(''view_reports_all'',''View Reports All'',''View Reports All'');
+	PERFORM acs_privilege__add_child(''admin'', ''view_reports_all'');
+
+	PERFORM im_priv_create(''add_reports'', ''Accounting'');
+	PERFORM im_priv_create(''add_reports'', ''P/O Admins'');
+	PERFORM im_priv_create(''add_reports'', ''Senior Managers'');
+
+	PERFORM im_priv_create(''view_reports_all'', ''Accounting'');
+	PERFORM im_priv_create(''view_reports_all'', ''P/O Admins'');
+	PERFORM im_priv_create(''view_reports_all'', ''Senior Managers'');
+
+	return 0;
+end;' language 'plpgsql';
+select inline_0 ();
+drop function inline_0 ();
+
+
+
+-----------------------------------------------------------
 -- Create, Drop and Name Plpg/SQL functions
 --
 -- These functions represent crator/destructor
@@ -636,5 +669,7 @@ BEGIN
 end;' language 'plpgsql';
 select inline_0 ();
 drop function inline_0 ();
+
+
 
 
