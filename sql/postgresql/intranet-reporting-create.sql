@@ -174,8 +174,13 @@ DECLARE
 	p_report_menu_id	alias for $11;
 	p_report_sql		alias for $12;
 
-	v_report_id	integer;
+	v_report_id		integer;
+	v_count			integer;
 BEGIN
+	select count(*) into v_count from im_reports
+	where report_name = p_report_name;
+	if v_count > 0 then return 0; end if;
+
 	v_report_id := acs_object__new (
 		p_report_id,		-- object_id
 		p_object_type,		-- object_type
@@ -234,17 +239,12 @@ end;' language 'plpgsql';
 -- 15100-15199  Intranet Report Type
 -- 15200-15999	Reserved for Reporting
 
+SELECT im_category_new(15000, 'Active', 'Intranet Report Status');
+SELECT im_category_new(15002, 'Deleted', 'Intranet Report Status');
 
-insert into im_categories(category_id, category, category_type) 
-values (15000, 'Active', 'Intranet Report Status');
-insert into im_categories(category_id, category, category_type) 
-values (15002, 'Deleted', 'Intranet Report Status');
+SELECT im_category_new(15100, 'Simple SQL Report', 'Intranet Report Type');
+SELECT im_category_new(15110, 'Indicator', 'Intranet Report Type');
 
-
-insert into im_categories(category_id, category, category_type) 
-values (15100, 'Simple SQL Report', 'Intranet Report Type');
-insert into im_categories(category_id, category, category_type) 
-values (15110, 'Indicator', 'Intranet Report Type');
 
 
 -----------------------------------------------------------
