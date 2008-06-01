@@ -149,6 +149,8 @@ ad_form -extend -name $form_id \
 		where report_id = :report_id
 	"
 
+	im_menu_update_hierarchy
+
     } -edit_data {
 
 	db_dml edit_report "
@@ -167,9 +169,6 @@ ad_form -extend -name $form_id \
 	set report_menu_id [db_string report_menu "select report_menu_id from im_reports where report_id = :report_id" -default 0]
 	set old_parent_menu_id [db_string report_menu "select parent_menu_id from im_menus where menu_id = :report_menu_id" -default 0]
 
-#	ad_return_complaint 1 "old=$old_parent_menu_id, new=$parent_menu_id"
-
-
 	db_dml edit_menu "
 		update im_menus set
 			parent_menu_id = :parent_menu_id,
@@ -177,9 +176,7 @@ ad_form -extend -name $form_id \
 		where menu_id = :report_menu_id
 	"
 
-	if {$old_parent_menu_id != $parent_menu_id} {
-		im_menu_update_hierarchy
-	}
+	im_menu_update_hierarchy
 
 
     } -after_submit {
