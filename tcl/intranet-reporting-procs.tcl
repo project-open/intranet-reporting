@@ -144,7 +144,7 @@ ad_proc im_report_render_cell {
 
     switch $output_format {
 	html { ns_write "<td $td_fields>$quoted_cell</td>\n" }
-	csv { ns_write "\"$quoted_cell\";" }
+	csv { ns_write "\"$quoted_cell\"\t" }
    }
 }
 
