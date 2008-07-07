@@ -43,8 +43,6 @@ set read_p [db_string report_perms "
 	where	m.label = :menu_label
 " -default "f"]
 
-set read_p "t"
-
 
 # ------------------------------------------------------------
 # Constants
