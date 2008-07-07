@@ -10,10 +10,11 @@ ad_page_contract {
     Report listing all main projects in the system with all available
     fields + DynFields from projects and customers
 } {
+    { level_of_detail 2 }
     { start_date "" }
     { end_date "" }
-    { level_of_detail 2 }
     { output_format "html" }
+    { number_locale "" }
     { project_id:integer 0}
     { project_status_id:integer 0}
     { project_type_id:integer 0}
@@ -32,8 +33,6 @@ ad_page_contract {
 # its permissions.
 set menu_label "reporting-projects-main"
 set current_user_id [ad_maybe_redirect_for_registration]
-
-
 # Default User = Current User, to reduce performance overhead
 if {"" == $start_date && "" == $end_date && 0 == $project_id && 0 == $company_id && 0 == $member_id && 0 == $project_lead_id} { 
     set user_id $current_user_id 
@@ -49,6 +48,9 @@ set read_p "t"
 
 # ------------------------------------------------------------
 # Constants
+
+set locale [lang::user::locale]
+if {"" == $number_locale} { set number_locale $locale  }
 
 set date_format "YYYY-MM-DD"
 set number_format "999,999.99"
@@ -97,7 +99,7 @@ from dual
 "
 
 if {"" == $start_date} { 
-    set start_date "$todays_year-01-01"
+    set start_date "$todays_year-$todays_month-01"
 }
 
 # Maxlevel is 4. Normalize in order to show the right drop-down element
@@ -176,18 +178,18 @@ set project_vars {
     $final_company
     $company_project_nr
     "<a href=$user_url$company_contact_id>$company_contact_name</a>"
-    $project_budget
+    $project_budget_pretty
     $project_budget_currency
-    $project_budget_hours
+    $project_budget_hours_pretty
     $percent_completed_pretty
-    $reported_hours_cache
-    $cost_invoices_cache
-    $cost_delivery_notes_cache
-    $cost_quotes_cache
-    $cost_bills_cache
-    $cost_purchase_orders_cache
-    $cost_expense_logged_cache
-    $cost_timesheet_logged_cache
+    $reported_hours_cache_pretty
+    $cost_invoices_cache_pretty
+    $cost_delivery_notes_cache_pretty
+    $cost_quotes_cache_pretty
+    $cost_bills_cache_pretty
+    $cost_purchase_orders_cache_pretty
+    $cost_expense_logged_cache_pretty
+    $cost_timesheet_logged_cache_pretty
 }
 
 
@@ -262,7 +264,7 @@ select
 	to_char(p.end_date, :date_format) as project_end_date,
 	im_name_from_user_id(p.project_lead_id) as project_lead_name,
 	im_name_from_user_id(p.company_contact_id) as company_contact_name,
-	to_char(p.percent_completed, :number_format) as percent_completed_pretty,
+	round(p.percent_completed::numeric, 2) as percent_completed_rounded,
 	c.*,
 	im_category_from_id(c.company_status_id) as company_status,
 	im_category_from_id(c.company_type_id) as company_type,
@@ -376,7 +378,13 @@ switch $output_format {
                     [im_report_output_format_select output_format "" $output_format]
                   </td>
                 </tr>
-		<tr>
+                <tr>
+                  <td class=form-label><nobr>Number Format</nobr></td>
+                  <td class=form-widget>
+                    [im_report_number_locale_select number_locale $number_locale]
+                  </td>
+                </tr>
+                <tr>
 		  <td class=form-label></td>
 		  <td class=form-widget><input type=submit value=Submit></td>
 		</tr>
@@ -404,34 +412,48 @@ set last_value_list [list]
 set class "rowodd"
 db_foreach sql $sql {
 
-	im_report_display_footer \
-	    -output_format $output_format \
-	    -group_def $report_def \
-	    -footer_array_list $footer_array_list \
-	    -last_value_array_list $last_value_list \
-	    -level_of_detail $level_of_detail \
-	    -row_class $class \
-	    -cell_class $class
-	
-	im_report_update_counters -counters $counters
-	
-	set last_value_list [im_report_render_header \
-	    -output_format $output_format \
-	    -group_def $report_def \
-	    -last_value_array_list $last_value_list \
-	    -level_of_detail $level_of_detail \
-	    -row_class $class \
-	    -cell_class $class
-        ]
+    set percent_completed_pretty		[im_report_format_number $percent_completed_rounded $output_format $number_locale]
 
-        set footer_array_list [im_report_render_footer \
-	    -output_format $output_format \
-	    -group_def $report_def \
-	    -last_value_array_list $last_value_list \
-	    -level_of_detail $level_of_detail \
-	    -row_class $class \
-	    -cell_class $class
-        ]
+    set project_budget_pretty			[im_report_format_number $project_budget $output_format $number_locale]
+    set project_budget_hours_pretty		[im_report_format_number $project_budget_hours $output_format $number_locale]
+    set reported_hours_cache_pretty		[im_report_format_number $reported_hours_cache $output_format $number_locale]
+
+    set cost_invoices_cache_pretty		[im_report_format_number $cost_invoices_cache $output_format $number_locale]
+    set cost_delivery_notes_cache_pretty	[im_report_format_number $cost_delivery_notes_cache $output_format $number_locale]
+    set cost_quotes_cache_pretty		[im_report_format_number $cost_quotes_cache $output_format $number_locale]
+    set cost_bills_cache_pretty			[im_report_format_number $cost_bills_cache $output_format $number_locale]
+    set cost_purchase_orders_cache_pretty	[im_report_format_number $cost_purchase_orders_cache $output_format $number_locale]
+    set cost_expense_logged_cache_pretty	[im_report_format_number $cost_expense_logged_cache $output_format $number_locale]
+    set cost_timesheet_logged_cache_pretty	[im_report_format_number $cost_timesheet_logged_cache $output_format $number_locale]
+
+    im_report_display_footer \
+	-output_format $output_format \
+	-group_def $report_def \
+	-footer_array_list $footer_array_list \
+	-last_value_array_list $last_value_list \
+	-level_of_detail $level_of_detail \
+	-row_class $class \
+	-cell_class $class
+    
+    im_report_update_counters -counters $counters
+    
+    set last_value_list [im_report_render_header \
+			     -output_format $output_format \
+			     -group_def $report_def \
+			     -last_value_array_list $last_value_list \
+			     -level_of_detail $level_of_detail \
+			     -row_class $class \
+			     -cell_class $class
+			]
+    
+    set footer_array_list [im_report_render_footer \
+			       -output_format $output_format \
+			       -group_def $report_def \
+			       -last_value_array_list $last_value_list \
+			       -level_of_detail $level_of_detail \
+			       -row_class $class \
+			       -cell_class $class
+			  ]
 }
 
 im_report_display_footer \
