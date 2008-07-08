@@ -158,13 +158,13 @@ if { ![empty_string_p $where_clause] } {
 # List of project variables to show
 
 # Global header/footer
-set header0 {"Customer" "ProjectNr" "ProjectName" Start End Type Status PM FinalCust FinalCustProjectNr FinalCustContact Budget Cur BudgetHours PercCompl LoggedHours Invoices DelNotes Quotes Bills POs Expenses Hours}
+set header0 {"Customer" "ProjectNr" "ProjectName" Start End Type Status PM FinalCust FinalCustProjectNr FinalCustContact Budget Cur BudgetHours PercCompl LoggedHours Invoices DelNotes Quotes Bills POs Expenses Timesheet}
 set footer0 {}
 set counters [list]
 
 # Variables per project
 set project_vars {
-    $company_nr 
+    $company_name 
     "<a href=$base_url&project_id=$project_id&level_of_detail=4 target=_blank><img src=/intranet/images/plus_9.gif border=0></a>
     <b><a href=$project_url$project_id>$project_nr</a></b>"
     $project_name
