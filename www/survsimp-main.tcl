@@ -136,7 +136,7 @@ if { ![empty_string_p $where_clause] } {
 # List of survsimp variables to show
 
 # Global header/footer
-set header0 {Survey "Creation User" "Object" "Context" Question Answer}
+set header0 {Survey "Creation User" Response "Object" "Context" Question Answer}
 set footer0 {}
 set counters [list]
 
@@ -144,6 +144,7 @@ set counters [list]
 set survsimp_vars {
     "<nobr>$survey_name</nobr>"
     "<nobr><a href=$user_url$creation_user_id>$creation_user_name</a></nobr>"
+    "<nobr>$response_id</nobr>"
     "<nobr><a href=$related_object_url$related_object_id>$related_object_name</a></nobr>"
     "<nobr><a href=$related_context_url$related_context_id>$related_context_name</a></nobr>"
     "<nobr>$survey_question</nobr>"
@@ -158,7 +159,7 @@ set sql "
 	select
 		*,
 		sqc.label as choice,
-		ss.short_name as survey_name,
+		ss.name as survey_name,
 		srot.creation_user as creation_user_id,
 		sq.question_text as survey_question,
 		im_name_from_user_id(srot.creation_user) as creation_user_name,
@@ -196,6 +197,7 @@ set sql "
 		$where_clause
 	order by
 		ss.short_name,
+		creation_user_name,
 		sqr.response_id,
 		sq.question_id,
 		sq.question_text
