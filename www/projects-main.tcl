@@ -1,4 +1,4 @@
-# /packages/intranet-reporting/www/projects-mail.tcl
+# /packages/intranet-reporting/www/projects-main.tcl
 #
 # Copyright (C) 2003-2008 ]project-open[
 #
