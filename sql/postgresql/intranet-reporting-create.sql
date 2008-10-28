@@ -51,6 +51,16 @@ SELECT acs_object_type__create_type (
 );
 
 
+insert into acs_object_type_tables (object_type,table_name,id_column)
+values ('im_report', 'im_reports', 'report_id');
+
+update acs_object_types set
+        status_type_table = 'im_reports',
+        status_column = 'report_status_id',
+        type_column = 'report_type_id'
+where object_type = 'im_report';
+
+
 create table im_reports (
 	report_id		integer
 				constraint im_report_id_pk
