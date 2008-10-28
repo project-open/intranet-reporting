@@ -23,6 +23,7 @@ ad_page_contract {
     { task_id:integer 0}
     { company_id:integer 0}
     { user_id:integer 0}
+    { invoice_id:integer 0}
 }
 
 # ------------------------------------------------------------
@@ -48,6 +49,10 @@ set read_p [db_string report_perms "
 
 # Has the current user the right to edit all timesheet information?
 set edit_timesheet_p [im_permission $current_user_id "edit_hours_all"]
+if {"t" != $edit_timesheet_p} { 
+    set edit_timesheet_p [im_permission $current_user_id "add_hours_all"]
+}
+
 
 # ------------------------------------------------------------
 # Constants
@@ -144,6 +149,10 @@ if {0 != $user_id && "" != $user_id} {
 
 if {0 != $task_id && "" != $task_id} {
     lappend criteria "h.project_id = :task_id"
+}
+
+if {0 != $invoice_id && "" != $invoice_id} {
+    lappend criteria "h.invoice_id = :invoice_id"
 }
 
 # Select project & subprojects
@@ -362,6 +371,7 @@ switch $output_format {
 	[im_header $page_title]
 	[im_navbar]
 	<form>
+	[export_form_vars invoice_id]
 	<table border=0 cellspacing=1 cellpadding=1>
 	<tr valign=top><td>
 		<table border=0 cellspacing=1 cellpadding=1>
