@@ -138,87 +138,9 @@ for {set ctr 1} {$ctr < 32} {incr ctr} {
 # Define the report - SQL, counters, headers and footers 
 #
 
-set yyyy {
-set inner_sql "
-select
-	h.day::date as date,
-	h.user_id,
-	p.project_id,
-	p.company_id,
-	h.hours as hours,
-	h.note,
-	h.billing_rate,
-	e.availability,
-	to_char(e.salary, :num_format) as salary,
-	to_char(e.social_security, :num_format) as social_security,
-	to_char(e.insurance, :num_format) as insurance,
-	to_char(e.other_costs, :num_format) as other_costs,
-	to_char(e.hourly_cost, :num_format) as hourly_cost,
-	e.currency,
-	e.hourly_cost,
-	e.salary_payments_per_year,
-	(e.salary + e.social_security + e.insurance + e.other_costs) * e.salary_payments_per_year / 12 as total_cost
-from
-	im_hours h,
-	im_projects p,
-	users u
-	LEFT OUTER JOIN
-		im_employees e
-		on (u.user_id = e.employee_id)
-where
-	h.project_id = p.project_id
-	and p.project_status_id not in ([im_project_status_deleted])
-	and h.user_id = u.user_id
-	and h.day >= to_date(:start_date, 'YYYY-MM')
-	and h.day < to_date(:start_date, 'YYYY-MM') + 31
-	and :start_date = to_char(h.day, 'YYYY-MM')
-	$where_clause
-"
-}
-
-# ad_return_complaint 1 $query_dates(1)
-
-set ttt {
-
-set sql "
-select
-	s.*,
-	CASE c.company_id = :internal_company_id WHEN true THEN s.hours ELSE 0 END as hours_intl,
-	CASE c.company_id != :internal_company_id WHEN true THEN s.hours ELSE 0 END as hours_extl,
-	to_char(s.date, 'YYYY-MM-DD') as date,
-	u.user_id,
-	im_name_from_user_id(u.user_id) as user_name,
-	p.project_id,
-	p.project_nr,
-	p.project_name,
-	c.company_id,
-	c.company_path as company_nr,
-	c.company_name,
-	to_char(s.hours, :num_format) as hours_pretty,
-	to_char(s.total_cost, :num_format) as total_cost_pretty
-from
-	($inner_sql) s,
-	im_companies c,
-	im_projects p,
-	cc_users u
-where
-	s.user_id = u.user_id
-	and p.project_status_id not in ([im_project_status_deleted])
-	and s.company_id = c.company_id
-	and s.project_id = p.project_id
-order by
-	u.user_id,
-	s.company_id,
-	p.project_id,
-	s.date
-"
-# END COMMENTS
-}
-
-# ad_return_complaint 1 $start_date
-
 set sql "
 	select 
+		distinct on (s.sub_project_id, s.sub_user_id)
 		s.sub_user_id as user_id,
 		s.sub_user_name as user_name,
 		s.sub_project_id as project_id,
@@ -257,7 +179,7 @@ set sql "
 		im_get_hours_percentage(s.sub_user_id, s.sub_project_id, :start_date) as percentage_total_month
 	from 
 	(select 
-		distinct on (p.project_id) p.project_id as sub_project_id,
+		p.project_id as sub_project_id,
 		p.project_name as sub_project_name, 
 		u.user_id as sub_user_id,
 		im_name_from_user_id(u.user_id) as sub_user_name
@@ -337,6 +259,38 @@ set report_def [list \
             } \
 	] \
     footer {
+	    "" ""
+	    "<b>$project_subtotal_01</b>"
+	    "<b>$project_subtotal_02</b>"
+	    "<b>$project_subtotal_03</b>"
+	    "<b>$project_subtotal_04</b>"
+	    "<b>$project_subtotal_05</b>"
+	    "<b>$project_subtotal_06</b>"
+	    "<b>$project_subtotal_07</b>"
+	    "<b>$project_subtotal_08</b>"
+	    "<b>$project_subtotal_09</b>"
+	    "<b>$project_subtotal_10</b>"
+	    "<b>$project_subtotal_11</b>"
+	    "<b>$project_subtotal_12</b>"
+	    "<b>$project_subtotal_13</b>"
+	    "<b>$project_subtotal_14</b>"
+	    "<b>$project_subtotal_15</b>"
+	    "<b>$project_subtotal_16</b>"
+	    "<b>$project_subtotal_17</b>"
+	    "<b>$project_subtotal_18</b>"
+	    "<b>$project_subtotal_19</b>"
+	    "<b>$project_subtotal_20</b>"
+	    "<b>$project_subtotal_21</b>"
+	    "<b>$project_subtotal_22</b>"
+	    "<b>$project_subtotal_23</b>"
+	    "<b>$project_subtotal_24</b>"
+	    "<b>$project_subtotal_25</b>"
+	    "<b>$project_subtotal_26</b>"
+	    "<b>$project_subtotal_27</b>"
+	    "<b>$project_subtotal_28</b>"
+	    "<b>$project_subtotal_29</b>"
+	    "<b>$project_subtotal_30</b>"
+	    "<b>$project_subtotal_31</b>"
             "#colspan=99"
     } \
 ]
@@ -345,6 +299,258 @@ set report_def [list \
 # Global header/footer
 set header0 {"Project" "Employee" "01" "02" "03" "04" "05" "06" "07" "08" "09" "10" "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" "21" "22" "23" "24" "25" "26" "27" "28" "29" "30" "31" "% of <br>total hours<br>logged by user<br>this month"}
 set footer0 {"" "" "" "" "" "" "" "" ""}
+
+
+set project_subtotal_counter_01 [list \
+	pretty_name "Hours" \
+	var project_subtotal_01 \
+	reset "\$project_id" \
+	expr "\$day01+0" \
+]
+
+set project_subtotal_counter_02 [list \
+        pretty_name "Hours" \
+        var project_subtotal_02 \
+        reset "\$project_id" \
+        expr "\$day02+0" \
+]
+
+set project_subtotal_counter_03 [list \
+        pretty_name "Hours" \
+        var project_subtotal_03 \
+        reset "\$project_id" \
+        expr "\$day03+0" \
+]
+
+set project_subtotal_counter_04 [list \
+        pretty_name "Hours" \
+        var project_subtotal_04 \
+        reset "\$project_id" \
+        expr "\$day04+0" \
+]
+
+set project_subtotal_counter_05 [list \
+        pretty_name "Hours" \
+        var project_subtotal_05 \
+        reset "\$project_id" \
+        expr "\$day05+0" \
+]
+
+set project_subtotal_counter_06 [list \
+        pretty_name "Hours" \
+        var project_subtotal_06 \
+        reset "\$project_id" \
+        expr "\$day06+0" \
+]
+
+set project_subtotal_counter_07 [list \
+        pretty_name "Hours" \
+        var project_subtotal_07 \
+        reset "\$project_id" \
+        expr "\$day07+0" \
+]
+
+set project_subtotal_counter_08 [list \
+        pretty_name "Hours" \
+        var project_subtotal_08 \
+        reset "\$project_id" \
+        expr "\$day08+0" \
+]
+
+set project_subtotal_counter_09 [list \
+        pretty_name "Hours" \
+        var project_subtotal_09 \
+        reset "\$project_id" \
+        expr "\$day09+0" \
+]
+
+set project_subtotal_counter_10 [list \
+        pretty_name "Hours" \
+        var project_subtotal_10 \
+        reset "\$project_id" \
+        expr "\$day10+0" \
+]
+
+set project_subtotal_counter_11 [list \
+        pretty_name "Hours" \
+        var project_subtotal_11 \
+        reset "\$project_id" \
+        expr "\$day11+0" \
+]
+
+set project_subtotal_counter_12 [list \
+        pretty_name "Hours" \
+        var project_subtotal_12 \
+        reset "\$project_id" \
+        expr "\$day12+0" \
+]
+
+set project_subtotal_counter_13 [list \
+        pretty_name "Hours" \
+        var project_subtotal_13 \
+        reset "\$project_id" \
+        expr "\$day13+0" \
+]
+
+set project_subtotal_counter_14 [list \
+        pretty_name "Hours" \
+        var project_subtotal_14 \
+        reset "\$project_id" \
+        expr "\$day14+0" \
+]
+
+set project_subtotal_counter_15 [list \
+        pretty_name "Hours" \
+        var project_subtotal_15 \
+        reset "\$project_id" \
+        expr "\$day15+0" \
+]
+
+set project_subtotal_counter_16 [list \
+        pretty_name "Hours" \
+        var project_subtotal_16 \
+        reset "\$project_id" \
+        expr "\$day16+0" \
+]
+
+set project_subtotal_counter_17 [list \
+        pretty_name "Hours" \
+        var project_subtotal_17 \
+        reset "\$project_id" \
+        expr "\$day17+0" \
+]
+
+set project_subtotal_counter_18 [list \
+        pretty_name "Hours" \
+        var project_subtotal_18 \
+        reset "\$project_id" \
+        expr "\$day18+0" \
+]
+
+set project_subtotal_counter_19 [list \
+        pretty_name "Hours" \
+        var project_subtotal_19 \
+        reset "\$project_id" \
+        expr "\$day19+0" \
+]
+
+set project_subtotal_counter_20 [list \
+        pretty_name "Hours" \
+        var project_subtotal_20 \
+        reset "\$project_id" \
+        expr "\$day20+0" \
+]
+
+set project_subtotal_counter_21 [list \
+        pretty_name "Hours" \
+        var project_subtotal_21 \
+        reset "\$project_id" \
+        expr "\$day21+0" \
+]
+
+set project_subtotal_counter_22 [list \
+        pretty_name "Hours" \
+        var project_subtotal_22 \
+        reset "\$project_id" \
+        expr "\$day22+0" \
+]
+
+set project_subtotal_counter_23 [list \
+        pretty_name "Hours" \
+        var project_subtotal_23 \
+        reset "\$project_id" \
+        expr "\$day23+0" \
+]
+
+set project_subtotal_counter_24 [list \
+        pretty_name "Hours" \
+        var project_subtotal_24 \
+        reset "\$project_id" \
+        expr "\$day24+0" \
+]
+
+set project_subtotal_counter_25 [list \
+        pretty_name "Hours" \
+        var project_subtotal_25 \
+        reset "\$project_id" \
+        expr "\$day25+0" \
+]
+
+set project_subtotal_counter_26 [list \
+        pretty_name "Hours" \
+        var project_subtotal_26 \
+        reset "\$project_id" \
+        expr "\$day26+0" \
+]
+
+set project_subtotal_counter_27 [list \
+        pretty_name "Hours" \
+        var project_subtotal_27 \
+        reset "\$project_id" \
+        expr "\$day27+0" \
+]
+
+set project_subtotal_counter_28 [list \
+        pretty_name "Hours" \
+        var project_subtotal_28 \
+        reset "\$project_id" \
+        expr "\$day28+0" \
+]
+
+set project_subtotal_counter_29 [list \
+        pretty_name "Hours" \
+        var project_subtotal_29 \
+        reset "\$project_id" \
+        expr "\$day29+0" \
+]
+
+set project_subtotal_counter_30 [list \
+        pretty_name "Hours" \
+        var project_subtotal_30 \
+        reset "\$project_id" \
+        expr "\$day30+0" \
+]
+
+set project_subtotal_counter_31 [list \
+        pretty_name "Hours" \
+        var project_subtotal_31 \
+        reset "\$project_id" \
+        expr "\$day31+0" \
+]
+
+set counters [list \
+	 $project_subtotal_counter_01 \
+	 $project_subtotal_counter_02 \
+	 $project_subtotal_counter_03 \
+	 $project_subtotal_counter_04 \
+	 $project_subtotal_counter_05 \
+	 $project_subtotal_counter_06 \
+	 $project_subtotal_counter_07 \
+	 $project_subtotal_counter_08 \
+	 $project_subtotal_counter_09 \
+	 $project_subtotal_counter_10 \
+	 $project_subtotal_counter_11 \
+	 $project_subtotal_counter_12 \
+	 $project_subtotal_counter_13 \
+	 $project_subtotal_counter_14 \
+	 $project_subtotal_counter_15 \
+	 $project_subtotal_counter_16 \
+	 $project_subtotal_counter_17 \
+	 $project_subtotal_counter_18 \
+	 $project_subtotal_counter_19 \
+	 $project_subtotal_counter_20 \
+	 $project_subtotal_counter_21 \
+	 $project_subtotal_counter_22 \
+	 $project_subtotal_counter_23 \
+	 $project_subtotal_counter_24 \
+	 $project_subtotal_counter_25 \
+	 $project_subtotal_counter_26 \
+	 $project_subtotal_counter_27 \
+	 $project_subtotal_counter_28 \
+	 $project_subtotal_counter_29 \
+	 $project_subtotal_counter_30 \
+	 $project_subtotal_counter_31 \
+]
 
 
 # ------------------------------------------------------------
@@ -423,7 +629,7 @@ db_foreach sql $sql {
 	    -row_class $class \
 	    -cell_class $class
 	
-#	im_report_update_counters -counters $counters
+	im_report_update_counters -counters $counters
 	
 
 	set last_value_list [im_report_render_header \
