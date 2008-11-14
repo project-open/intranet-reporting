@@ -250,6 +250,7 @@ set report_def [list \
 				$day29
 				$day30
 				$day31
+				$employee_total
 				$percentage_total_month
                     	     } \
                     	     content {} \
@@ -297,7 +298,7 @@ set report_def [list \
 
 
 # Global header/footer
-set header0 {"Project" "Employee" "01" "02" "03" "04" "05" "06" "07" "08" "09" "10" "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" "21" "22" "23" "24" "25" "26" "27" "28" "29" "30" "31" "% of <br>total hours<br>logged by user<br>this month"}
+set header0 {"Project" "Employee" "01" "02" "03" "04" "05" "06" "07" "08" "09" "10" "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" "21" "22" "23" "24" "25" "26" "27" "28" "29" "30" "31" "Summary" "% of <br>total hours<br>logged by user<br>this month"}
 set footer0 {"" "" "" "" "" "" "" "" ""}
 
 
@@ -553,6 +554,10 @@ set counters [list \
 ]
 
 
+
+
+
+
 # ------------------------------------------------------------
 # Start formatting the page
 #
@@ -619,6 +624,8 @@ set footer_array_list [list]
 set last_value_list [list]
 set class "rowodd"
 db_foreach sql $sql {
+
+    set employee_total [expr [expr $day01+0] + [expr $day02+0] + [expr $day03+0] + [expr $day04+0] + [expr $day05+0] + [expr $day06+0] + [expr $day07+0] + [expr $day08+0] + [expr $day09+0] + [expr $day10+0] + [expr $day11+0] + [expr $day12+0] + [expr $day13+0] + [expr $day14+0] + [expr $day15+0] + [expr $day16+0] + [expr $day17+0] + [expr $day18+0] + [expr $day19+0] + [expr $day20+0] + [expr $day21+0] + [expr $day22+0] + [expr $day23+0] + [expr $day24+0] + [expr $day25+0] + [expr $day26+0] + [expr $day27+0] + [expr $day28+0] + [expr $day29+0] + [expr $day30+0] + [expr $day31+0] ] 
 
 	im_report_display_footer \
 	    -output_format $output_format \
