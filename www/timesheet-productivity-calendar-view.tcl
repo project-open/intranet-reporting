@@ -145,6 +145,7 @@ set sql "
 		s.sub_user_name as user_name,
 		s.sub_project_id as project_id,
 		s.sub_project_name as project_name,
+		s.sub_project_nr as project_nr,
 		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(1)') as day01,
 		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(2)') as day02,
 		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(3)') as day03,
@@ -180,7 +181,8 @@ set sql "
 	from 
 	(select 
 		p.project_id as sub_project_id,
-		p.project_name as sub_project_name, 
+		p.project_name as sub_project_name,
+ 		p.project_nr as sub_project_nr,
 		u.user_id as sub_user_id,
 		im_name_from_user_id(u.user_id) as sub_user_name
         from
@@ -207,7 +209,7 @@ set sql "
 set report_def [list \
     group_by project_id \
     header {
-	 "\#colspan=99 <b><a href=$project_url$project_id>$project_name</a></b>"
+	 "\#colspan=99 <b><a href=$project_url$project_id>$project_nr - $project_name</a></b>"
     } \
         content [list \
             group_by user_id \
@@ -217,7 +219,7 @@ set report_def [list \
             } \
 	            content [list \
         	            header {
-                	        $project_name
+				$project_name
                       		$user_name
 				$day01
 				$day02
@@ -292,13 +294,14 @@ set report_def [list \
 	    "<b>$project_subtotal_29</b>"
 	    "<b>$project_subtotal_30</b>"
 	    "<b>$project_subtotal_31</b>"
+	    "<b>$project_subtotal_32</b>"
             "#colspan=99"
     } \
 ]
 
 
 # Global header/footer
-set header0 {"Project" "Employee" "01" "02" "03" "04" "05" "06" "07" "08" "09" "10" "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" "21" "22" "23" "24" "25" "26" "27" "28" "29" "30" "31" "Summary" "% of <br>total hours<br>logged by user<br>this month"}
+set header0 {"Project Nr." "Project Name" "Employee" "01" "02" "03" "04" "05" "06" "07" "08" "09" "10" "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" "21" "22" "23" "24" "25" "26" "27" "28" "29" "30" "31" "Summary" "% of <br>total hours<br>logged by user<br>this month"}
 set footer0 {"" "" "" "" "" "" "" "" ""}
 
 
@@ -519,6 +522,13 @@ set project_subtotal_counter_31 [list \
         expr "\$day31+0" \
 ]
 
+set project_subtotal_counter_32 [list \
+        pretty_name "Hours" \
+        var project_subtotal_32 \
+        reset "\$project_id" \
+        expr "\$employee_total+0" \
+]
+
 set counters [list \
 	 $project_subtotal_counter_01 \
 	 $project_subtotal_counter_02 \
@@ -551,11 +561,8 @@ set counters [list \
 	 $project_subtotal_counter_29 \
 	 $project_subtotal_counter_30 \
 	 $project_subtotal_counter_31 \
+	 $project_subtotal_counter_32 \
 ]
-
-
-
-
 
 
 # ------------------------------------------------------------
