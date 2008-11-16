@@ -436,7 +436,7 @@ switch $output_format {
 		<tr>
 		  <td class=form-label>Project</td>
 		  <td class=form-widget>
-		    [im_project_select -include_empty_p 1 -include_empty_name "-- Please Select --" project_id $project_id]
+		    [im_project_select -include_empty_p -include_empty_name "-- Please Select --" project_id $project_id]
 		  </td>
 		</tr>
 		<tr>
