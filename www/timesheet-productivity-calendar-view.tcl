@@ -23,6 +23,41 @@ ad_page_contract {
 # Security
 # ------------------------------------------------------------
 
+set project_subtotal_01 0
+set project_subtotal_02 0
+set project_subtotal_03 0
+set project_subtotal_04 0
+set project_subtotal_05 0
+set project_subtotal_06 0
+set project_subtotal_07 0
+set project_subtotal_08 0
+set project_subtotal_09 0
+set project_subtotal_10 0
+set project_subtotal_11 0
+set project_subtotal_12 0
+set project_subtotal_13 0
+set project_subtotal_14 0
+set project_subtotal_15 0
+set project_subtotal_16 0
+set project_subtotal_17 0
+set project_subtotal_18 0
+set project_subtotal_19 0
+set project_subtotal_20 0
+set project_subtotal_21 0
+set project_subtotal_22 0
+set project_subtotal_23 0
+set project_subtotal_24 0
+set project_subtotal_25 0
+set project_subtotal_26 0
+set project_subtotal_27 0
+set project_subtotal_28 0
+set project_subtotal_29 0
+set project_subtotal_30 0
+set project_subtotal_31 0
+set project_subtotal_32 0
+
+
+
 # Label: Provides the security context for this report
 # because it identifies unquely the report's Menu and
 # its permissions.
@@ -206,21 +241,26 @@ set sql "
 	) s 
 "
 
+
 set report_def [list \
     group_by project_id \
     header {
-	 "\#colspan=99 <b><a href=$project_url$project_id>$project_nr - $project_name</a></b>"
+	 "<b><a href=$project_url$project_id>$project_nr</a></b>"
+	 "<b><a href=$project_url$project_id>$project_name</a></b>"
+	 "\#colspan=99"
     } \
         content [list \
             group_by user_id \
             header {
-                "\#colspan=1 "
-                "\#colspan=99 <b><a href=$user_url$user_id>$user_name</a></b>"
+                "\#colspan=2"
+                "<b><a href=$user_url$user_id>$user_name</a></b>"
+                "\#colspan=99"		
             } \
 	            content [list \
         	            header {
-				$project_name
-                      		$user_name
+				""	
+				""
+                      		""
 				$day01
 				$day02
 				$day03
@@ -262,53 +302,19 @@ set report_def [list \
             } \
 	] \
     footer {
-	    "" ""
-	    "<b>$project_subtotal_01</b>"
-	    "<b>$project_subtotal_02</b>"
-	    "<b>$project_subtotal_03</b>"
-	    "<b>$project_subtotal_04</b>"
-	    "<b>$project_subtotal_05</b>"
-	    "<b>$project_subtotal_06</b>"
-	    "<b>$project_subtotal_07</b>"
-	    "<b>$project_subtotal_08</b>"
-	    "<b>$project_subtotal_09</b>"
-	    "<b>$project_subtotal_10</b>"
-	    "<b>$project_subtotal_11</b>"
-	    "<b>$project_subtotal_12</b>"
-	    "<b>$project_subtotal_13</b>"
-	    "<b>$project_subtotal_14</b>"
-	    "<b>$project_subtotal_15</b>"
-	    "<b>$project_subtotal_16</b>"
-	    "<b>$project_subtotal_17</b>"
-	    "<b>$project_subtotal_18</b>"
-	    "<b>$project_subtotal_19</b>"
-	    "<b>$project_subtotal_20</b>"
-	    "<b>$project_subtotal_21</b>"
-	    "<b>$project_subtotal_22</b>"
-	    "<b>$project_subtotal_23</b>"
-	    "<b>$project_subtotal_24</b>"
-	    "<b>$project_subtotal_25</b>"
-	    "<b>$project_subtotal_26</b>"
-	    "<b>$project_subtotal_27</b>"
-	    "<b>$project_subtotal_28</b>"
-	    "<b>$project_subtotal_29</b>"
-	    "<b>$project_subtotal_30</b>"
-	    "<b>$project_subtotal_31</b>"
-	    "<b>$project_subtotal_32</b>"
-            "#colspan=99"
+	"\#colspan=99"
     } \
 ]
 
 
+
 # Global header/footer
 set header0 {"Project Nr." "Project Name" "Employee" "01" "02" "03" "04" "05" "06" "07" "08" "09" "10" "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" "21" "22" "23" "24" "25" "26" "27" "28" "29" "30" "31" "Summary" "% of <br>total hours<br>logged by user<br>this month"}
-set footer0 {"" "" "" "" "" "" "" "" ""}
-
 
 set project_subtotal_counter_01 [list \
 	pretty_name "Hours" \
 	var project_subtotal_01 \
-	reset "\$project_id" \
+	reset 0 \
 	expr "\$day01+0" \
 ]
 
@@ -322,210 +328,210 @@ set project_subtotal_counter_02 [list \
 set project_subtotal_counter_03 [list \
         pretty_name "Hours" \
         var project_subtotal_03 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day03+0" \
 ]
 
 set project_subtotal_counter_04 [list \
         pretty_name "Hours" \
         var project_subtotal_04 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day04+0" \
 ]
 
 set project_subtotal_counter_05 [list \
         pretty_name "Hours" \
         var project_subtotal_05 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day05+0" \
 ]
 
 set project_subtotal_counter_06 [list \
         pretty_name "Hours" \
         var project_subtotal_06 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day06+0" \
 ]
 
 set project_subtotal_counter_07 [list \
         pretty_name "Hours" \
         var project_subtotal_07 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day07+0" \
 ]
 
 set project_subtotal_counter_08 [list \
         pretty_name "Hours" \
         var project_subtotal_08 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day08+0" \
 ]
 
 set project_subtotal_counter_09 [list \
         pretty_name "Hours" \
         var project_subtotal_09 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day09+0" \
 ]
 
 set project_subtotal_counter_10 [list \
         pretty_name "Hours" \
         var project_subtotal_10 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day10+0" \
 ]
 
 set project_subtotal_counter_11 [list \
         pretty_name "Hours" \
         var project_subtotal_11 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day11+0" \
 ]
 
 set project_subtotal_counter_12 [list \
         pretty_name "Hours" \
         var project_subtotal_12 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day12+0" \
 ]
 
 set project_subtotal_counter_13 [list \
         pretty_name "Hours" \
         var project_subtotal_13 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day13+0" \
 ]
 
 set project_subtotal_counter_14 [list \
         pretty_name "Hours" \
         var project_subtotal_14 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day14+0" \
 ]
 
 set project_subtotal_counter_15 [list \
         pretty_name "Hours" \
         var project_subtotal_15 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day15+0" \
 ]
 
 set project_subtotal_counter_16 [list \
         pretty_name "Hours" \
         var project_subtotal_16 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day16+0" \
 ]
 
 set project_subtotal_counter_17 [list \
         pretty_name "Hours" \
         var project_subtotal_17 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day17+0" \
 ]
 
 set project_subtotal_counter_18 [list \
         pretty_name "Hours" \
         var project_subtotal_18 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day18+0" \
 ]
 
 set project_subtotal_counter_19 [list \
         pretty_name "Hours" \
         var project_subtotal_19 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day19+0" \
 ]
 
 set project_subtotal_counter_20 [list \
         pretty_name "Hours" \
         var project_subtotal_20 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day20+0" \
 ]
 
 set project_subtotal_counter_21 [list \
         pretty_name "Hours" \
         var project_subtotal_21 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day21+0" \
 ]
 
 set project_subtotal_counter_22 [list \
         pretty_name "Hours" \
         var project_subtotal_22 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day22+0" \
 ]
 
 set project_subtotal_counter_23 [list \
         pretty_name "Hours" \
         var project_subtotal_23 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day23+0" \
 ]
 
 set project_subtotal_counter_24 [list \
         pretty_name "Hours" \
         var project_subtotal_24 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day24+0" \
 ]
 
 set project_subtotal_counter_25 [list \
         pretty_name "Hours" \
         var project_subtotal_25 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day25+0" \
 ]
 
 set project_subtotal_counter_26 [list \
         pretty_name "Hours" \
         var project_subtotal_26 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day26+0" \
 ]
 
 set project_subtotal_counter_27 [list \
         pretty_name "Hours" \
         var project_subtotal_27 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day27+0" \
 ]
 
 set project_subtotal_counter_28 [list \
         pretty_name "Hours" \
         var project_subtotal_28 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day28+0" \
 ]
 
 set project_subtotal_counter_29 [list \
         pretty_name "Hours" \
         var project_subtotal_29 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day29+0" \
 ]
 
 set project_subtotal_counter_30 [list \
         pretty_name "Hours" \
         var project_subtotal_30 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day30+0" \
 ]
 
 set project_subtotal_counter_31 [list \
         pretty_name "Hours" \
         var project_subtotal_31 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$day31+0" \
 ]
 
 set project_subtotal_counter_32 [list \
         pretty_name "Hours" \
         var project_subtotal_32 \
-        reset "\$project_id" \
+        reset 0 \
         expr "\$employee_total+0" \
 ]
 
@@ -675,6 +681,8 @@ im_report_display_footer \
     -display_all_footers_p 1 \
     -row_class $class \
     -cell_class $class
+
+set footer0 [concat "<b>&nbsp;" "&nbsp;" "&nbsp;" "$project_subtotal_01" "$project_subtotal_02" "$project_subtotal_03" "$project_subtotal_04" "$project_subtotal_05" "$project_subtotal_06" "$project_subtotal_07" "$project_subtotal_08" "$project_subtotal_09" "$project_subtotal_10" "$project_subtotal_11" "$project_subtotal_12" "$project_subtotal_13" "$project_subtotal_14" "$project_subtotal_15" "$project_subtotal_16" "$project_subtotal_17" "$project_subtotal_18" "$project_subtotal_19" "$project_subtotal_20" "$project_subtotal_21" "$project_subtotal_22" "$project_subtotal_23" "$project_subtotal_24" "$project_subtotal_25" "$project_subtotal_26" "$project_subtotal_27" "$project_subtotal_28" "$project_subtotal_29" "$project_subtotal_30" "$project_subtotal_31" "$project_subtotal_32" "#colspan=99"]
 
 im_report_render_row \
     -output_format $output_format \
