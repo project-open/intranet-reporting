@@ -17,6 +17,7 @@ ad_page_contract {
     { user_id 0 }
     { project_id 0}
     { cost_center_id 525}
+    { accuracy "" }
 }
 
 # ------------------------------------------------------------
@@ -172,6 +173,7 @@ for {set ctr 1} {$ctr < 32} {incr ctr} {
 # ------------------------------------------------------------
 # Define the report - SQL, counters, headers and footers 
 #
+# ad_return_complaint 1 $accuracy
 
 set sql "
 	select 
@@ -181,37 +183,37 @@ set sql "
 		s.sub_project_id as project_id,
 		s.sub_project_name as project_name,
 		s.sub_project_nr as project_nr,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(1)') as day01,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(2)') as day02,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(3)') as day03,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(4)') as day04,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(5)') as day05,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(6)') as day06,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(7)') as day07,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(8)') as day08,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(9)') as day09,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(10)') as day10,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(11)') as day11,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(12)') as day12,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(13)') as day13,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(14)') as day14,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(15)') as day15,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(16)') as day16,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(17)') as day17,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(18)') as day18,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(19)') as day19,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(20)') as day20,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(21)') as day21,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(22)') as day22,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(23)') as day23,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(24)') as day24,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(25)') as day25,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(26)') as day26,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(27)') as day27,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(28)') as day28,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(29)') as day29,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(30)') as day30,
-		im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(31)') as day31,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(1)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(1)') END as day01,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(2)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(2)') END as day02,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(3)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(3)') END as day03,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(4)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(4)') END as day04,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(5)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(5)') END as day05,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(6)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(6)') END as day06,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(7)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(7)') END as day07,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(8)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(8)') END as day08,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(9)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(9)') END as day09,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(10)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(10)') END as day10,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(11)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(11)') END as day11,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(12)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(12)') END as day12,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(13)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(13)') END as day13,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(14)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(14)') END as day14,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(15)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(15)') END as day15,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(16)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(16)') END as day16,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(17)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(17)') END as day17,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(18)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(18)') END as day18,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(19)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(19)') END as day19,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(20)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(20)') END as day20,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(21)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(21)') END as day21,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(22)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(22)') END as day22,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(23)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(23)') END as day23,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(24)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(24)') END as day24,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(25)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(25)') END as day25,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(26)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(26)') END as day26,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(27)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(27)') END as day27,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(28)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(28)') END as day28,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(29)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(29)') END as day29,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(30)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(30)') END as day30,
+		CASE :accuracy = 'rounded' WHEN true THEN ROUND(im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(31)'),0) ELSE im_get_hours_logged (s.sub_user_id, s.sub_project_id, '$query_dates(31)') END as day31,
 		im_get_hours_percentage(s.sub_user_id, s.sub_project_id, :start_date) as percentage_total_month
 	from 
 	(select 
@@ -260,7 +262,7 @@ set report_def [list \
         	            header {
 				""	
 				""
-                      		""
+				""
 				$day01
 				$day02
 				$day03
@@ -306,7 +308,7 @@ set report_def [list \
     } \
 ]
 
-
+# [ expr if ( 1 == acuuracy ){ round($day01) } else { $day01 } ]
 
 # Global header/footer
 set header0 {"Project Nr." "Project Name" "Employee" "01" "02" "03" "04" "05" "06" "07" "08" "09" "10" "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" "21" "22" "23" "24" "25" "26" "27" "28" "29" "30" "31" "Summary" "% of <br>total hours<br>logged by user<br>this month"}
@@ -614,6 +616,12 @@ switch $output_format {
                   <td class=form-label>Format</td>
                   <td class=form-widget>
                     [im_report_output_format_select output_format "" $output_format]
+                  </td>
+                </tr>
+                <tr>
+                  <td class=form-label>Accuracy</td>
+                  <td class=form-widget>
+                    [im_report_accuracy_select accuracy "" $accuracy]
                   </td>
                 </tr>
 		<tr>
