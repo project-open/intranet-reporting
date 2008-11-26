@@ -608,7 +608,7 @@ ad_proc im_report_output_format_select {
         </nobr>
     "
 }
-
+ 
 ad_proc im_report_accuracy_select {
     name
     { locale ""}
@@ -622,8 +622,7 @@ ad_proc im_report_accuracy_select {
     set regular_checked ""
     set rounded_checked ""
 
-    # ad_return_complaint 1 $accuracy  
-    switch $accuracy {
+     switch $accuracy {
         regular { set regular_checked "checked" }
         rounded { set rounded_checked "checked" }
     }
