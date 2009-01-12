@@ -690,7 +690,7 @@ im_report_display_footer \
     -row_class $class \
     -cell_class $class
 
-set footer0 [concat "<b>&nbsp;" "&nbsp;" "&nbsp;" "$project_subtotal_01" "$project_subtotal_02" "$project_subtotal_03" "$project_subtotal_04" "$project_subtotal_05" "$project_subtotal_06" "$project_subtotal_07" "$project_subtotal_08" "$project_subtotal_09" "$project_subtotal_10" "$project_subtotal_11" "$project_subtotal_12" "$project_subtotal_13" "$project_subtotal_14" "$project_subtotal_15" "$project_subtotal_16" "$project_subtotal_17" "$project_subtotal_18" "$project_subtotal_19" "$project_subtotal_20" "$project_subtotal_21" "$project_subtotal_22" "$project_subtotal_23" "$project_subtotal_24" "$project_subtotal_25" "$project_subtotal_26" "$project_subtotal_27" "$project_subtotal_28" "$project_subtotal_29" "$project_subtotal_30" "$project_subtotal_31" "$project_subtotal_32" "#colspan=99"]
+set footer0 [concat "<b>&nbsp;Summary:" "&nbsp;" "&nbsp;" "$project_subtotal_01" "$project_subtotal_02" "$project_subtotal_03" "$project_subtotal_04" "$project_subtotal_05" "$project_subtotal_06" "$project_subtotal_07" "$project_subtotal_08" "$project_subtotal_09" "$project_subtotal_10" "$project_subtotal_11" "$project_subtotal_12" "$project_subtotal_13" "$project_subtotal_14" "$project_subtotal_15" "$project_subtotal_16" "$project_subtotal_17" "$project_subtotal_18" "$project_subtotal_19" "$project_subtotal_20" "$project_subtotal_21" "$project_subtotal_22" "$project_subtotal_23" "$project_subtotal_24" "$project_subtotal_25" "$project_subtotal_26" "$project_subtotal_27" "$project_subtotal_28" "$project_subtotal_29" "$project_subtotal_30" "$project_subtotal_31" "$project_subtotal_32" "#colspan=99"]
 
 im_report_render_row \
     -output_format $output_format \
