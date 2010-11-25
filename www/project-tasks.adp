@@ -7,7 +7,7 @@
 <property name="main_navbar_label">reporting</property>
 
 <br>
-<h1>List of project tasks</h1> 
+<h1>@page_title@</h1> 
 
 This report lists time sheet tasks for projects of type "Consulting" (including sub-types). 
 <br><br><br>
