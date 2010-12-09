@@ -506,8 +506,22 @@ switch $output_template {
 	    set user_id [lindex $user_tuple 0]
 	    set user_name [lindex $user_tuple 1]
 
-
-	    ns_write "
+	    if { "5" == $level_of_detail} {
+                   ns_write "
+                        <table id=timetable cellpadding=0 border=0 rules=all>
+                        <colgroup>
+                                <col id=datecol>
+                                <col id=hourcol>
+                                <col id=textcol>
+                                <col id=comment>
+                        </colgroup>
+                        <tbody>
+                        <tr>
+                                <td id=timetitle colspan=4>$user_name</td>
+                        </tr>
+                   "
+	    } else {
+                     ns_write "
                         <table id=timetable cellpadding=0 border=0 rules=all>
                         <colgroup>
                                 <col id=datecol>
@@ -516,29 +530,37 @@ switch $output_template {
                         </colgroup>
                         <tbody>
                         <tr>
-				<td id=timetitle colspan=3>$user_name</td>
+                                <td id=timetitle colspan=3>$user_name</td>
                         </tr>
-	    "
+                        "
+	    }
 
 	    set hours_sql "select * from ($sql) s where s.user_id = :user_id"
 	    set sub_total 0
-	    db_foreach hours $hours_sql {
-		set description $note
-		if { "5" == $level_of_detail} {
-		    set description "$sub_project_name<br>$description"
-		}
 
-		ns_write "
-	                <tr id=time>
+            db_foreach hours $hours_sql {
+                if { "5" == $level_of_detail} {
+                   ns_write "
+                        <tr id=time>
                            <td id=time>$date</td>
                            <td id=time>$hours</td>
-                           <td id=time>$description</td>
+                           <td id=time>$sub_project_name</td>
+                           <td id=time>$note</td>
                         </tr>
-		"
-		set sub_total [expr $sub_total + $hours]
-		set grand_total [expr $grand_total + $hours]
+                   "
+                } else {
+                  ns_write "
+                        <tr id=time>
+                           <td id=time>$date</td>
+                           <td id=time>$hours</td>
+                           <td id=time>$sub_project_name</td>
+                        </tr>
+                   "
+                }
+                set sub_total [expr $sub_total + $hours]
+                set grand_total [expr $grand_total + $hours]
 
-	    }
+            }
 
 	    ns_write "
                         <tr>
