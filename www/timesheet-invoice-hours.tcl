@@ -348,8 +348,8 @@ switch $output_template {
 		  <link rel='stylesheet' type='text/css' href='/intranet-reporting/timesheet-invoice-hours.css'>
 		 </head>
 		 <body>
-		  <div id=header>
-		   <p style='text-align:right'>[im_logo]</p>
+		  <div id='timesheet-invoice-hours-header'>
+		   <span id='timesheet-invoice-hours-logo'>[im_logo]</span>
 		  </div>
 		  <div id=main>
 			<div id=title>$timesheet_customer_l10n</div>

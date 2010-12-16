@@ -150,3 +150,10 @@
 				margin-bottom:0.5cm;
 			}
 			
+			#timesheet-invoice-hours-header {
+			        text-align:right;
+			}
+
+			#timesheet-invoice-hours-logo {
+				  max-height:100px;
+			}
