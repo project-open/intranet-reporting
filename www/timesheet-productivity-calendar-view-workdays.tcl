@@ -289,6 +289,12 @@ switch $output_format {
         ns_write "
 	[im_header]
 	[im_navbar]
+
+
+<table border=0 cellspacing=1 cellpadding=1>
+<tr>
+<td>
+
 	<form>
 		<table border=0 cellspacing=1 cellpadding=1>
 		<tr>
@@ -343,7 +349,19 @@ switch $output_format {
 		</tr>
 		</table>
 	</form>
-	<table border=0 cellspacing=1 cellpadding=1>\n
+</td>
+<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td valign='top' width='600px'>
+	<ul>
+        <li>Reports shows Main Projects w/ status = 'Open', hours logged on subprojects are accumulated</li>
+    	<li>Report shows only content for days where the logged hours pass a treshold as defined in filter: 'Daily hours logged'</li>
+	<li>Column 'Total working days per employee' counts the 'day columns' containing a value</li>
+        <li>Column 'Utilization': Relation btw. 'Number days worked' to 'Working days net' (weekdays of a month - absences (bank holidays, vacation, training, travel, sick/personal business days))</li>
+	</ul>
+</td>
+</tr>
+</table>
+	<table border=0 cellspacing=3 cellpadding=3>\n
 	"
     }
 }
