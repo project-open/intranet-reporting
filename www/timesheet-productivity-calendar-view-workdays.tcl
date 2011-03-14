@@ -16,7 +16,7 @@ ad_page_contract {
     { output_format "html" }
     { user_id 0 }
     { project_id 0 }
-    { project_status_id 0 }
+    { project_status_id 76 }
     { customer_id 0 }
     { daily_hours 0 }
 }
@@ -34,7 +34,7 @@ proc round_down {val rounder} {
 # Label: Provides the security context for this report
 # because it identifies unquely the report's Menu and
 # its permissions.
-set menu_label "reporting-timesheet-productivity"
+set menu_label "reporting-timesheet-productivity-calendar-view-workdays"
 
 set current_user_id [ad_maybe_redirect_for_registration]
 
@@ -325,7 +325,7 @@ switch $output_format {
                 <tr>
                   <td class=form-label>Project Status</td>
                   <td class=form-widget>
-                    [im_project_status_select "project_status_id" "76"]
+                    [im_project_status_select "project_status_id" $project_status_id]
                   </td>
                 </tr>
                 <tr>
@@ -353,8 +353,8 @@ switch $output_format {
 <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 <td valign='top' width='600px'>
 	<ul>
-        <li>Reports shows Main Projects w/ status = 'Open', hours logged on subprojects are accumulated</li>
-    	<li>Report shows only content for days where the logged hours pass a treshold as defined in filter: 'Daily hours logged'</li>
+        <li>Reports shows Main Projects w/ status = 'Open', hours logged on sub-projects are accumulated</li>
+    	<li>Report shows only content for days where the logged hours pass a threshold as defined in filter: 'Daily hours logged'</li>
 	<li>Column 'Total working days per employee' counts the 'day columns' containing a value</li>
         <li>Column 'Utilization': Relation btw. 'Number days worked' to 'Working days net' (weekdays of a month - absences (bank holidays, vacation, training, travel, sick/personal business days))</li>
 	</ul>
