@@ -217,7 +217,6 @@ set sql "
 		distinct on (u.user_id) u.user_id as sub_user_id,
 		p.project_id as sub_project_id,
 		p.project_name as sub_project_name, 
-
 		im_name_from_user_id(u.user_id) as sub_user_name
         from
                 im_hours h,
@@ -353,10 +352,12 @@ switch $output_format {
 <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 <td valign='top' width='600px'>
 	<ul>
-        <li>Reports shows Main Projects w/ status = 'Open', hours logged on sub-projects are accumulated</li>
-    	<li>Report shows only content for days where the logged hours pass a threshold as defined in filter: 'Daily hours logged'</li>
-	<li>Column 'Total working days per employee' counts the 'day columns' containing a value</li>
-        <li>Column 'Utilization': Relation btw. 'Number days worked' to 'Working days net' (weekdays of a month - absences (bank holidays, vacation, training, travel, sick/personal business days))</li>
+    	<li>Report shows only content for days where the logged hours pass a threshold as defined in filter: <strong>'Daily hours logged'</strong></li>
+        <li>Hours logged on sub-projects are accumulated</li>
+	<li>Column <strong>'Total working days per employee'</strong> adds all <strong>'Days shown'</strong> columns containing a value</li>
+        <li>Column <strong>'Utilization'</strong>: Relation btw. <strong>'Number days worked'</strong> to 
+	    <strong>'Working days net'</strong><br><strong>weekdays of a month</strong> - <strong>absences</strong> 
+	    (bank holidays, vacation, training, travel, sick/personal business days)</li>
 	</ul>
 </td>
 </tr>
