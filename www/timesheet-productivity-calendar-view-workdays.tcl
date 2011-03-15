@@ -151,12 +151,11 @@ if { ![empty_string_p $where_clause] } {
     set where_clause " and $where_clause"
 }
 
-if {"" != $daily_hours && 0 != $daily_hours} {
-    set criteria_inner_sql "and h.hours > :daily_hours"
-} else {
-    set criteria_inner_sql "and 1=1"
-}
-
+# if {"" != $daily_hours && 0 != $daily_hours} {
+#    set criteria_inner_sql "and h.hours > :daily_hours"
+#} else {
+#    set criteria_inner_sql "and 1=1"
+#}
 
 # ------------------------------------------------------------
 # Define the report - SQL, counters, headers and footers 
@@ -164,25 +163,30 @@ if {"" != $daily_hours && 0 != $daily_hours} {
 
 set day_placeholders ""
 set day_header ""
+
 for { set i 1 } { $i < $duration + 1 } { incr i } {
     if { 1 == [string length $i]} { set day_double_digit 0$i } else { set day_double_digit $i }
     lappend inner_sql_list "(select sum(hours) from im_hours h where
             h.user_id = s.sub_user_id
-            and h.project_id in (
-                select distinct
-                        children.project_id as subproject_id
-                from
-                        im_projects parent,
-                        im_projects children
-                where
-                        children.tree_sortkey between parent.tree_sortkey and tree_right(parent.tree_sortkey)
-                        and parent.project_id = h.project_id
-                        )
+--            and h.project_id in (
+--                select distinct
+--                        children.project_id as subproject_id
+--                from
+--                        im_projects parent,
+--                        im_projects children
+--                where
+--                        children.tree_sortkey between parent.tree_sortkey and tree_right(parent.tree_sortkey)
+--                        and parent.project_id = h.project_id
+--                        )
+	    and h.project_id = s.sub_project_id
             and h.day like '%$report_year-$report_month-$day_double_digit%'
-	    $criteria_inner_sql
+	    
 	) as day$day_double_digit
-
     "
+    lappend outer_sql_list "
+	CASE WHEN day$day_double_digit <= $daily_hours THEN null ELSE day$day_double_digit
+	END as day$day_double_digit
+    " 
     append day_placeholders "\\" "\$day$day_double_digit "
     append day_header \"$day_double_digit\"
     append day_header " "
@@ -196,11 +200,25 @@ for { set i 1 } { $i < $duration + 1 } { incr i } {
 
 # ad_return_complaint 1 $day_placeholders
 
-
 set inner_sql [join $inner_sql_list ", "]
+set outer_sql [join $outer_sql_list ", "]
 
 set sql "
-	select 
+
+select 
+	user_id,
+	user_name,
+	project_id, 
+	project_name,
+	work_days,
+	vacation_days,
+	training_days,
+	travel_days,
+	sick_days,
+	personal_days,
+	$outer_sql
+from 
+	(select 
 		s.sub_user_id as user_id,
 		s.sub_user_name as user_name,
 		s.sub_project_id as project_id,
@@ -213,29 +231,34 @@ set sql "
 		(select count(distinct absence_query.days) from (select * from im_absences_month_absence_type (s.sub_user_id, $report_month, $report_year, $im_absence_type_personal) AS (days date)) absence_query) as personal_days,
 		$inner_sql
 	from 
-	(select 
-		distinct on (u.user_id) u.user_id as sub_user_id,
-		p.project_id as sub_project_id,
-		p.project_name as sub_project_name, 
-		im_name_from_user_id(u.user_id) as sub_user_name
-        from
-                im_hours h,
-                im_projects p,
-                users u
-                LEFT OUTER JOIN
-                        im_employees e
-                        on (u.user_id = e.employee_id)
-        where
-                h.project_id = p.project_id
-                and h.user_id = u.user_id
-                and h.day >= to_date(:first_day_of_month, 'YYYY-MM-DD')
-                and h.day < to_date(:first_day_next_month, 'YYYY-MM-DD') 
-                $where_clause
-	order by 
-		u.user_id,
-		p.project_id,
-		h.day
-	) s 
+		(select
+			distinct on (p.project_id) p.project_id as sub_project_id,
+			-- distinct on (u.user_id) u.user_id as sub_user_id,
+			u.user_id as sub_user_id,
+			-- p.project_id as sub_project_id,
+			p.project_name as sub_project_name, 
+			im_name_from_user_id(u.user_id) as sub_user_name
+	        from
+        	        im_hours h,
+                	im_projects p,
+	                users u
+        	        LEFT OUTER JOIN
+                	        im_employees e
+                        	on (u.user_id = e.employee_id)
+	        where
+        	        h.project_id = p.project_id
+                	and h.user_id = u.user_id
+                	and h.day >= to_date(:first_day_of_month, 'YYYY-MM-DD')
+	                and h.day < to_date(:first_day_next_month, 'YYYY-MM-DD') 
+        	        $where_clause
+		order by 
+			p.project_id,
+			u.user_id,
+			h.day
+		) s 
+) t
+order by 
+	user_id
 "
 
 # ad_return_complaint 1 $sql
@@ -267,11 +290,13 @@ set no_empty_columns [expr $duration+1]
 
 set report_def 		[list group_by user_id header {"\#colspan=99 <b><a href=$user_url$user_id>$user_name</a></b>"} content]
 lappend report_def 	[list group_by project_id header $line_str content {}]
-lappend report_def 	footer { "Summary" "\#colspan=$no_empty_columns" "$number_days_ctr_pretty" "[expr $work_days - $vacation_days - $training_days - $travel_days - $sick_days - $personal_days ]" "[round_down [expr 100 * $number_days_ctr_pretty / $work_days ] 1000]%" }
+lappend report_def      footer { "Summary" "\\#colspan=$no_empty_columns" "$number_days_ctr_pretty"\
+				 "[expr $work_days - $vacation_days - $training_days - $travel_days - $sick_days - $personal_days ]"\
+				 "[round_down [expr 100 * $number_days_ctr_pretty / [expr $work_days - $vacation_days - $training_days - $travel_days - $sick_days - $personal_days ] ] 1000]%" }
 
 # Global header/footer
 # set header0 {"Employee" "Project" "01" "02" "03" "04" "05" "06" "07" "08" "09" "10" "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" "21" "22" "23" "24" "25" "26" "27" "28" "29" "30" "31" "Working<br>Days"}
-set header0 "\"Employee\" \"Project\" $day_header \"Days shown\" \"Working<br>Days net\" \"Utilization\" "
+set header0 "\"Employee\" \"Project\" $day_header \"Days<br>shown\" \"Working<br>Days net\" \"Utilization\" "
 set footer0 {"" "" "" "" "" "" "" "" ""}
 
 
@@ -328,7 +353,7 @@ switch $output_format {
                   </td>
                 </tr>
                 <tr>
-                  <td class=form-label>Daaily hours</td>
+                  <td class=form-label>Daily hours</td>
                   <td class=form-widget>
 			<select name='daily_hours'>
 "
@@ -352,12 +377,13 @@ switch $output_format {
 <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 <td valign='top' width='600px'>
 	<ul>
-    	<li>Report shows only content for days where the logged hours pass a threshold as defined in filter: <strong>'Daily hours logged'</strong></li>
+    	<li>Report shows only content for days where the logged hours pass a threshold as defined in filter: <strong>'Daily hours'</strong></li>
         <li>Hours logged on sub-projects are accumulated</li>
-	<li>Column <strong>'Total working days per employee'</strong> adds all <strong>'Days shown'</strong> columns containing a value</li>
-        <li>Column <strong>'Utilization'</strong>: Relation btw. <strong>'Number days worked'</strong> to 
-	    <strong>'Working days net'</strong><br><strong>weekdays of a month</strong> - <strong>absences</strong> 
-	    (bank holidays, vacation, training, travel, sick/personal business days)</li>
+	<li>Column <strong>'Days shown'</strong> is the sum of the day columns shown containing a value</li>
+        <li>Column <strong>'Working days net'</strong> <strong>Working days net</strong> is calculated as follows: Weekdays of a month - Absences
+            such as bank holidays, vacation, training, travel, sick/personal business days</li>
+        <li>Column <strong>'Utilization'</strong>: Relation btw. <strong>'Days shown'</strong> to 
+	    <strong>'Working days net'</strong></li>
 	</ul>
 </td>
 </tr>
@@ -381,7 +407,7 @@ set class "rowodd"
 set number_days_ctr 0
 
         set number_days_counter [list \
-                pretty_name "Invoice Amount" \
+                pretty_name "Number days" \
                 var number_days_ctr_pretty \
                 reset "\$user_id" \
                 expr "\$number_days_ctr+0" \
@@ -390,6 +416,16 @@ set number_days_ctr 0
         set counters [list \
                 $number_days_counter \
         ]
+
+#------------------------
+# Initialize
+#------------------------ 
+
+set saved_user_id 0
+for { set i 1 } { $i < $duration + 1 } { incr i } {
+        if { 1 == [string length $i]} { set day_double_digit day0$i } else { set day_double_digit day$i }
+	set month_arr($day_double_digit) 0
+}
 
 db_foreach sql $sql {
 
@@ -403,10 +439,23 @@ db_foreach sql $sql {
 	    -level_of_detail $level_of_detail \
 	    -row_class $class \
 	    -cell_class $class
+	
+	if { $user_id != $saved_user_id } {
+		set saved_user_id $user_id
+		for { set i 1 } { $i < $duration + 1 } { incr i } {
+	        	if { 1 == [string length $i]} { set day_double_digit day0$i } else { set day_double_digit day$i }
+	        	set month_arr($day_double_digit) 0
+		}
+	}	
 
 	for { set i 1 } { $i < $duration + 1 } { incr i } {
 		if { 1 == [string length $i]} { set day_double_digit day0$i } else { set day_double_digit day$i }
-		if { "" != [expr $$day_double_digit] } { set number_days_ctr [expr $number_days_ctr+1] } 
+		if { "" != [expr $$day_double_digit] } {
+			if { 0 == $month_arr($day_double_digit) } {
+				set number_days_ctr [expr $number_days_ctr+1]  
+				set month_arr($day_double_digit) 1  			
+			}
+		}
 	}
 		
 	im_report_update_counters -counters $counters
