@@ -215,6 +215,7 @@ set main_project_sql "
 			p.parent_id is null and
 			tree_level(p.tree_sortkey) <= 1
 "
+set ctr 0
 db_foreach main_project_sql $main_project_sql {
 
     set restrict_to_project_id $project_id
