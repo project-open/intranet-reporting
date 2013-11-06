@@ -205,7 +205,8 @@ db_multirow -extend {indent_spaces edit_html} reports get_reports "
 	order by tree_sortkey
 " {
     # Pass the report name though the localization system
-    regsub -all {[^0-9a-zA-Z]} $name "_" name_key
+    set name_key [string map {" " "_" "(" "" ")" ""} $name]
+    regsub -all {[^0-9a-zA-Z]} $name_key "_" name_key
     set name [lang::message::lookup "" "intranet-reporting.$name_key" $name]
 
     set indent_spaces ""
