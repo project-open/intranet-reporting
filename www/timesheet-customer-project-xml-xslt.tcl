@@ -22,6 +22,7 @@ ad_page_contract {
     { xslt_template_id 0 }
     { odt_template_id 0 }
     { print_hour_p:multiple ""}
+    { chart_type "" }
 }
 
 proc encodeXmlValue {value} {
@@ -311,7 +312,8 @@ proc im_reporting_render_odt_template {
 }
 
 # ------------------------------------------------------------
-# Security
+# Security & Defaults 
+# ------------------------------------------------------------
 
 # Label: Provides the security context for this report
 # because it identifies unquely the report's Menu and
@@ -342,10 +344,15 @@ set view_hours_all_p [im_permission $current_user_id "view_hours_all"]
 
 if {!$view_hours_all_p} { set user_id $current_user_id }
 
-
 # If project_id and task_id are set and equal, exclude task_id from sql   
 if {0 != $task_id && "" != $task_id && 0 != $project_id && "" != $project_id && $project_id == $task_id} {
     set task_id 0
+}
+
+set im_survey_installed_p [db_string get_package_id "select package_id from apm_packages where package_key = 'intranet-sencha'" -default 0]
+
+if { "chart"==$output_format && 0==$im_survey_installed_p } {
+    ad_return_complaint 1 "ExtJS libs required, please checkout and install package intranet-sencha"
 }
 
 # ------------------------------------------------------------
@@ -387,6 +394,13 @@ if {"" != $end_date && ![regexp {^[0-9][0-9][0-9][0-9]\-[0-9][0-9]\-[0-9][0-9]$}
 set page_title "Timesheet Report with XML/XSLT and ODT Support \[BETA\]"
 set context_bar [im_context_bar $page_title]
 set context ""
+
+
+switch output_format {
+    html { set page_title_adjusted [lang::message::lookup "" intranet-reporting.OutputFormatHTML "HTML"] }
+    chart { set page_title_adjusted [lang::message::lookup "" intranet-reporting.OutputFormatChart "Chart"] }
+    default { set page_title_adjusted $page_title }
+}
 
 # ------------------------------------------------------------
 # Defaults
@@ -514,16 +528,17 @@ if { ![empty_string_p $where_clause] } {
 # Define the report - SQL, counters, headers and footers 
 #
 
+
 set sql "
-select
+SELECT 
 	h.note,
 	h.internal_note,
 	h.hour_id,
 	to_char(h.day, 'YYYY-MM-DD') as date_pretty,
 	to_char(h.day, 'J') as julian_date,
-	to_char(h.day, 'J')::integer - to_char(to_date(:start_date, 'YYYY-MM-DD'), 'J')::integer as date_diff,
-	to_char(coalesce(h.hours,0), :number_format) as hours,
-	to_char(h.billing_rate, :number_format) || '&nbsp;' || co.currency as billing_rate,
+	to_char(h.day, 'J')::integer - to_char(to_date( :start_date , 'YYYY-MM-DD'), 'J')::integer as date_diff,
+	to_char(coalesce(h.hours,0), :number_format ) as hours,
+	to_char(h.billing_rate, :number_format ) || '&nbsp;' || co.currency as billing_rate,
 	u.user_id,
 	im_name_from_user_id(u.user_id) as user_name,
 	im_initials_from_user_id(u.user_id) as user_initials,
@@ -539,24 +554,24 @@ select
 	c.company_id || '-' || main_p.project_id as company_project_id,
 	c.company_id || '-' || main_p.project_id || '-' || p.project_id as company_project_sub_id,
 	c.company_id || '-' || main_p.project_id || '-' || p.project_id || '-' || u.user_id as company_project_sub_user_id
-from
+FROM 
 	im_hours h,
 	im_projects p,
 	im_projects main_p,
 	im_companies c,
 	users u, 
 	im_costs co
-where
+WHERE 
 	h.cost_id = co.cost_id 
 	and h.project_id = p.project_id
 	and main_p.project_status_id not in ([im_project_status_deleted])
 	and h.user_id = u.user_id
 	and main_p.tree_sortkey = tree_root_key(p.tree_sortkey)
-	and h.day >= to_timestamp(:start_date, 'YYYY-MM-DD')
-	and h.day < to_timestamp(:end_date, 'YYYY-MM-DD')
+	and h.day >= to_timestamp( :start_date , 'YYYY-MM-DD' )
+	and h.day < to_timestamp( :end_date , 'YYYY-MM-DD' )
 	and main_p.company_id = c.company_id
 	$where_clause
-order by
+ORDER BY 
 	c.company_path,
 	main_p.project_nr,
 	p.project_nr,
@@ -750,16 +765,19 @@ if {[info exists task_id]} {
 
 # Write out HTTP header, considering CSV/MS-Excel formatting
 switch $output_format {
-	   html - csv {
-	   		im_report_write_http_headers -output_format $output_format
-	   }
+    html - csv {
+	   im_report_write_http_headers -output_format $output_format
+    }
+    chart {
+	   im_report_write_http_headers -output_format "html"
+	   ns_write "<link rel='stylesheet' href='/intranet-sencha/css/ext-all.css'  type='text/css' media='screen'>"
+	   ns_write "<script type='text/javascript' src='/intranet-sencha/js/ext-all-debug-w-comments.js'></script>"
+    }
 }
 
 set project_id $org_project_id
 
-switch $output_format {
-    html {
-	ns_write "
+set sidebar_html "
 	[im_header $page_title]
 	[im_navbar reporting]
 	<form method='POST'>
@@ -802,10 +820,11 @@ switch $output_format {
 		    [im_project_select -include_empty_p 1 -exclude_subprojects_p 0 -include_empty_name [lang::message::lookup "" intranet-core.All "All"] project_id $project_id]
 		  </td>
 		</tr>
-	"
+
+"
 
 	if {$view_hours_all_p} {
-	    ns_write "
+	    append sidebar_html "
 		<tr>
 		  <td class=form-label>User's Department</td>
 		  <td class=form-widget>
@@ -829,47 +848,70 @@ switch $output_format {
 	    "
 	}
 
-	ns_write "
+
+if { ![info exists locale] || "" == $locale} { set locale [lang::user::locale] }
+set html_checked ""
+set excel_checked ""
+set csv_checked ""
+set xml_checked ""
+set template_checked ""
+set chart_checked ""
+set chart_type_pie_customer_checked ""
+set chart_type_pie_project_type_checked "" 
+
+set template_row_visibility "row_hidden"
+set chart_row_visibility "row_hidden"
+
+switch $output_format {
+    html - printer { set html_checked "checked" }
+    excel { set excel_checked "checked" }
+    csv { set csv_checked "checked" }
+    xml { set xml_checked "checked" }
+    template { 
+	   set template_checked "checked" 
+	   set template_row_visibility "row_visible"
+    }
+    chart { 
+	   set chart_checked "checked"
+	   set chart_row_visibility "row_visible"
+    }
+}
+
+switch chart_type {
+    chart_type_pie_customer { set chart_type_pie_customer_checked "checked" }
+    chart_type_pie_project_type { set chart_type_pie_project_type_checked "checked" }
+}
+
+append sidebar_html "
 		$report_options_html
-
 		<tr>
-		  <td class=form-label>Format</td>
+		  <td class=form-label>[lang::message::lookup "" intranet-reporting.Format "Format"]</td>
 		  <td class=form-widget>
-	"
-
-		if { ![info exists locale] || "" == $locale} { 
-			set locale [lang::user::locale] 
-		}
-		set html_checked ""
-		set excel_checked ""
-		set csv_checked ""
-		set xml_checked ""
-		set template_checked ""
-		switch $output_format {
-			html - printer { set html_checked "checked" }
-			excel { set excel_checked "checked" }
-			csv { set csv_checked "checked" }
-			xml { set xml_checked "checked" }
-			template { set template_checked "checked" }
-		}
-
-	ns_write "
-    	    	<input name='output_format' type=radio value='html' $html_checked>HTML<br>
-	   			<input name='output_format' type=radio value='csv' $csv_checked>CSV<br>
-	   			<input name='output_format' type=radio value='xml' $xml_checked>XML<br>
-	   			<input name='output_format' type=radio value='template' $template_checked>Template
+		    	    	<input name='output_format' type=radio value='html' $html_checked onclick='handleClick(this);'>HTML<br>
+	   			<input name='output_format' type=radio value='csv' $csv_checked onclick='handleClick(this);'>CSV<br>
+	   			<input name='output_format' type=radio value='xml' $xml_checked onclick='handleClick(this);'>XML<br>
+	   			<input name='output_format' type=radio value='template' $template_checked onclick='handleClick(this);'>Template<br/>
+	   			<input name='output_format' type=radio value='chart' $chart_checked onclick='handleClick(this);'>Chart
 		  </td>
 		</tr>
-    <tr>
-          <td class=form-label>XSLT Filter</td>
+    <tr class='$template_row_visibility' id='xslt_template'>
+          <td class=form-label> [lang::message::lookup "" intranet-reporting.XSLTFilter "XSLT Filter"]</td>
           <td class=form-widget>[im_category_select -include_empty_p 1 -include_empty_name [lang::message::lookup "" intranet-core.Please_Select "Please select"] -translate_p 0 "Intranet Cost Template" "xslt_template_id" $xslt_template_id]</td>
     </tr>
-    <tr>
-          <td class=form-label>ODT Template</td>
+    <tr class='$template_row_visibility' id='odt_template'>
+          <td class=form-label> [lang::message::lookup "" intranet-reporting.ODTTemplate "ODT Template"]</td>
           <td class=form-widget>[im_category_select -include_empty_p 1  -include_empty_name [lang::message::lookup "" intranet-core.Please_Select "Please select"] -translate_p 0 "Intranet Cost Template" "odt_template_id" $odt_template_id]</td>
     </tr>	
-
-	<tr>
+    <tr class='$chart_row_visibility' id='chart_type'>
+          <td class=form-label> [lang::message::lookup "" intranet-core.ChartType "Chart Type"]</td>
+          <td class=form-widget>
+<select name='chart_type'>
+<option value='chart_type_pie_customer' $chart_type_pie_customer_checked> [lang::message::lookup "" intranet-reporting.ChartPieCustomer "Pie - Customer"]</option>
+<option value='chart_type_pie_project_type' $chart_type_pie_project_type_checked> [lang::message::lookup "" intranet-reporting.ChartPieProjectType "Pie - Project Type"]</option>
+</select>
+		</td>
+    </tr>	
+    <tr>
 		  <td class=form-label></td>
 		  <td class=form-widget><input type=submit value=Submit></td>
 		</tr>
@@ -884,10 +926,33 @@ switch $output_format {
     </div> <!-- /slave-content -->
     </div> <!-- /slave -->
  
-	<div id=\"fullwidth-list\" class=\"fullwidth-list\">
-	[im_box_header $page_title]
 
-	<table border=0 cellspacing='2' cellpadding='2' class='table_list_simple'>\n"
+<script type='text/javascript'>
+function handleClick(myRadio) \{
+	if (\"chart\" == myRadio.value) \{
+    		document.getElementById('chart_type').className = document.getElementById('chart_type').className.replace('row_hidden', 'row_visible');
+	\} else \{
+	    document.getElementById('chart_type').className = document.getElementById('chart_type').className.replace('row_visible', 'row_hidden');
+	\};
+	if (\"template\" == myRadio.value) \{
+    		document.getElementById('odt_template').className = document.getElementById('odt_template').className.replace('row_hidden', 'row_visible');
+    		document.getElementById('xslt_template').className = document.getElementById('xslt_template').className.replace('row_hidden', 'row_visible');
+	\} else \{
+	    document.getElementById('odt_template').className = document.getElementById('odt_template').className.replace('row_visible', 'row_hidden');
+	    document.getElementById('xslt_template').className = document.getElementById('xslt_template').className.replace('row_visible', 'row_hidden');
+	\};
+\}
+</script>
+	<div id=\"fullwidth-list\" class=\"fullwidth-list\">
+     [im_box_header $page_title_adjusted]
+     <span id='chart_pie'></span> 
+"
+
+switch $output_format {
+
+    html {
+	   ns_write $sidebar_html
+	   ns_write "<table border=0 cellspacing='2' cellpadding='2' class='table_list_simple'>\n"
     }
 
     printer {
@@ -1171,6 +1236,54 @@ switch $output_format {
 	ns_set cput $outputheaders "Content-Disposition" "attachment; filename=timesheet-customer-project.$suffix"
 	ns_returnfile 200 application/odt $odt_zip
     }
+    chart {
+	   # These var values we need to wrap into ''
+	   set str_vars_list [list]
+	   lappend str_vars_list start_date
+	   lappend str_vars_list end_date
+        lappend str_vars_list number_format
+
+	   # replace colon vars with their values
+	   split $sql " "
+	   foreach sub_str $sql {
+		  if { -1 != [string first : $sub_str] } {
+			 if { -1 == [string first :: $sub_str] } {
+				set var_name [string range $sub_str 1 end]  
+				eval set str_r $$var_name
+				if { -1 == [lsearch -glob $str_vars_list $var_name] } {
+				    lappend parsed_sql $str_r 
+				} else {
+				    lappend parsed_sql "'$str_r'" 
+				}	   
+			 } else {
+				lappend parsed_sql $sub_str
+			 }
+		  } else {
+			 lappend parsed_sql $sub_str
+		  }
+    	   }
+
+	   set parsed_sql [join $parsed_sql " "]
+
+	   # set rand_key [ad_generate_random_string 256]
+	   # set sql_rep "
+	   #	   insert into im_cached_reports (user_id, rand_key, report_label, request_timestamp, report_sql) values (:current_user_id, :rand_key, 'reporting-timesheet-customer-project-xml-xslt', now(), :parsed_sql)
+        # "	   
+	   # set query_id [db_dml insert_report $sql_rep]
+
+	   ns_write $sidebar_html
+        ns_write "[im_box_footer]</div></form>"
+
+        # Todo: Verify how to include div id "monitor_frame" to make following js obsolete
+        ns_write "<script language='javascript' type='text/javascript'>document.getElementById('slave_content').style.visibility='visible';"
+        ns_write "document.getElementById('fullwidth-list').style.visibility='visible'; </script>"
+	   # Call template to generate JS that creates chart 
+	   # set params [list [list current_user_id $current_user_id] [list query_id $query_id] [list rand_key $rand_key] [list chart_type $chart_type] [list mode del] [sql $parsed_sql]]
+	   set params [list [list current_user_id $current_user_id] [list chart_type $chart_type] [list mode del] [list sql $parsed_sql] [list chart_type $chart_type]]
+	   ns_write [ad_parse_template -params $params "/packages/intranet-reporting/www/create-ts-chart"]
+        ns_write "[im_footer]\n"
+    }
+
     default {
 	ad_return_complaint 1 "Error: No template defined"
     }
