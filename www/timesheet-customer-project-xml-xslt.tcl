@@ -443,11 +443,10 @@ set company_url "/intranet/companies/view?company_id="
 set project_url "/intranet/projects/view?project_id="
 set user_url "/intranet/users/view?user_id="
 set hours_url "/intranet-timesheet2/hours/one"
-set this_url [export_vars -base "/intranet-reporting/timesheet-customer-project-v2" {start_date end_date level_of_detail project_id task_id company_id user_id } ]
+set this_url [export_vars -base "/intranet-reporting/timesheet-customer-project-xml-xslt" {start_date end_date level_of_detail project_id task_id company_id user_id } ]
 
 # BaseURL for drill-down. Needs company_id, project_id, user_id, level_of_detail
-set base_url [export_vars -base "/intranet-reporting/timesheet-customer-project-v2" {start_date end_date task_id} ]
-
+set base_url [export_vars -base "/intranet-reporting/timesheet-customer-project-xml-xslt" {start_date end_date task_id} ]
 
 # ------------------------------------------------------------
 # Conditional SQL Where-Clause
