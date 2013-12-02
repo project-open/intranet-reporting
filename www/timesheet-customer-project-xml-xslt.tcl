@@ -1288,14 +1288,17 @@ switch $output_format {
 	   ns_write $sidebar_html
         ns_write "[im_box_footer]</div></form>"
 
-        # Todo: Verify how to include div id "monitor_frame" to make following js obsolete
-        ns_write "<script language='javascript' type='text/javascript'>document.getElementById('slave_content').style.visibility='visible';"
-        ns_write "document.getElementById('fullwidth-list').style.visibility='visible'; </script>"
 	   # Call template to generate JS that creates chart 
 	   # set params [list [list current_user_id $current_user_id] [list query_id $query_id] [list rand_key $rand_key] [list chart_type $chart_type] [list mode del] [sql $parsed_sql]]
 	   set params [list [list current_user_id $current_user_id] [list chart_type $chart_type] [list mode del] [list sql $parsed_sql] [list chart_type $chart_type]]
 	   ns_write [ad_parse_template -params $params "/packages/intranet-reporting/lib/create-ts-chart"]
         ns_write "[im_footer]\n"
+
+        # Todo: Verify how to include div id "monitor_frame" to make following js obsolete
+        ns_write "<script language='javascript' type='text/javascript'>"
+        ns_write "document.getElementById('slave_content').style.visibility='visible';"
+        ns_write "document.getElementById('fullwidth-list').style.visibility='visible';" 
+        ns_write "</script>"
     }
 
     default {
