@@ -1,19 +1,14 @@
-
-<link rel='stylesheet' href='/intranet-sencha/css/ext-all.css'  type='text/css' media='screen'>
-<script type='text/javascript' src='/intranet-sencha/js/ext-all-debug-w-comments.js'></script>
-
 <script>
+
+<if @no_records_found_msg@ eq "">
 
 Ext.require('Ext.chart.*');
 Ext.require(['Ext.layout.container.Fit', 'Ext.window.MessageBox']);
-
 Ext.onReady(function () {
-
      window.store1 = Ext.create('Ext.data.JsonStore', {
         fields: [@json_data_fields;noquote@],
       data : [@json_data;noquote@]
     });
-
     var donut = false,
         chart = Ext.create('Ext.chart.Chart', {
 	       width: 600,
@@ -59,9 +54,15 @@ Ext.onReady(function () {
                 }
             }]
         });
-
-
-
 });
-</script>
 
+</if>
+<else>
+
+Ext.onReady(function () {
+	 Ext.fly('chart_pie').update('@no_records_found_msg@');
+});
+
+</else>
+
+</script>
