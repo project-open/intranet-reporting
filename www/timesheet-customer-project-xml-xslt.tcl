@@ -860,11 +860,14 @@ set chart_type_pie_project_type_checked ""
 
 set template_row_visibility "row_hidden"
 set chart_row_visibility "row_hidden"
-
+set csv_row_visibility "row_hidden"
 switch $output_format {
     html - printer { set html_checked "checked" }
     excel { set excel_checked "checked" }
-    csv { set csv_checked "checked" }
+    csv { 
+	   set csv_checked "checked" 
+        set csv_row_visibility "row_visible"
+    }
     xml { set xml_checked "checked" }
     template { 
 	   set template_checked "checked" 
@@ -893,6 +896,12 @@ append sidebar_html "
 	   			<input name='output_format' type=radio value='chart' $chart_checked onclick='handleClick(this);'>Chart
 		  </td>
 		</tr>
+    <!--
+    <tr class='$csv_row_visibility' id='csv'>
+          <td class=form-label> [lang::message::lookup "" intranet-reporting.ExportAbsences "Export Absences"]</td>
+          <td class=form-widget><input type='checkbox' name='export_absences'></td>
+    </tr>
+    --> 
     <tr class='$template_row_visibility' id='xslt_template'>
           <td class=form-label> [lang::message::lookup "" intranet-reporting.XSLTFilter "XSLT Filter"]</td>
           <td class=form-widget>[im_category_select -include_empty_p 1 -include_empty_name [lang::message::lookup "" intranet-core.Please_Select "Please select"] -translate_p 0 "Intranet Cost Template" "xslt_template_id" $xslt_template_id]</td>
@@ -940,6 +949,12 @@ function handleClick(myRadio) \{
 	    document.getElementById('odt_template').className = document.getElementById('odt_template').className.replace('row_visible', 'row_hidden');
 	    document.getElementById('xslt_template').className = document.getElementById('xslt_template').className.replace('row_visible', 'row_hidden');
 	\};
+	if (\"csv\" == myRadio.value) \{
+    		document.getElementById('csv').className = document.getElementById('csv').className.replace('row_hidden', 'row_visible');
+	\} else \{
+	    document.getElementById('csv').className = document.getElementById('csv').className.replace('row_visible', 'row_hidden');
+	\};
+
 \}
 </script>
 	<div id=\"fullwidth-list\" class=\"fullwidth-list\">
