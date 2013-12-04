@@ -948,7 +948,7 @@ append sidebar_html "
 		    	    	<input name='output_format' type=radio value='html' $html_checked onclick='handleClick(this);'>HTML<br>
 	   			<input name='output_format' type=radio value='csv' $csv_checked onclick='handleClick(this);'>CSV<br>
 	   			<input name='output_format' type=radio value='xml' $xml_checked onclick='handleClick(this);'>XML<br>
-	   			<input name='output_format' type=radio value='template' $template_checked onclick='handleClick(this);'> [lang::message::lookup "" intranet-reporting.Template "Template"]<br/>
+	   			<input name='output_format' type=radio value='template' $template_checked onclick='handleClick(this);'>[lang::message::lookup "" intranet-reporting.Template "Template"]<br/>
 	   			<input name='output_format' type=radio value='chart' $chart_checked onclick='handleClick(this);'>[lang::message::lookup "" intranet-reporting.Chart "Chart"]
 		  </td>
 		</tr>
@@ -1254,7 +1254,7 @@ foreach user_absence $absence_list {
     set hours [lindex $v 0]
     set hours_link $hours
     set billing_rate 0
-    set user_id 0
+    set user_id [lindex $v 3]
     set user_name [im_name_from_user_id [lindex $v 3]]
     set user_initials [lindex $v 4]
     set project_id 0
