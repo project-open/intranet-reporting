@@ -952,7 +952,7 @@ append sidebar_html "
 	   			<input name='output_format' type=radio value='chart' $chart_checked onclick='handleClick(this);'>[lang::message::lookup "" intranet-reporting.Chart "Chart"]
 		  </td>
 		</tr>
-    <tr class='$absence_row_visibility' id='csv'>
+    <tr class='$absence_row_visibility' id='absences'>
           <td class=form-label> [lang::message::lookup "" intranet-reporting.ExportAbsences "Show Absences"]</td>
           <td class=form-widget><input type='checkbox' name='export_absences' $export_absences_checked></td>
     </tr>
@@ -991,30 +991,41 @@ append sidebar_html "
 
 <script type='text/javascript'>
 function handleClick(myRadio) \{
+
 	if (\"html\" == myRadio.value) \{
-	    	  document.getElementById('csv').className = document.getElementById('chart_type').className.replace('row_hidden', 'row_visible');
-	\} else \{
-	    	  document.getElementById('csv').className = document.getElementById('chart_type').className.replace('row_visible', 'row_hidden');
+	   document.getElementById('absences').className = document.getElementById('absences').className.replace('row_hidden', 'row_visible');
+	   document.getElementById('chart_type').className = document.getElementById('chart_type').className.replace('row_visible', 'row_hidden');
+           document.getElementById('odt_template').className = document.getElementById('odt_template').className.replace('row_visible', 'row_hidden');
+           document.getElementById('xslt_template').className = document.getElementById('xslt_template').className.replace('row_visible', 'row_hidden');
+	\} 
+
+	if (\"csv\" == myRadio.value) \{
+	   document.getElementById('absences').className = document.getElementById('absences').className.replace('row_hidden', 'row_visible');
+	   document.getElementById('chart_type').className = document.getElementById('chart_type').className.replace('row_visible', 'row_hidden');
+           document.getElementById('odt_template').className = document.getElementById('odt_template').className.replace('row_visible', 'row_hidden');
+           document.getElementById('xslt_template').className = document.getElementById('xslt_template').className.replace('row_visible', 'row_hidden');
 	\};
+
+	if (\"xml\" == myRadio.value) \{
+	   document.getElementById('absences').className = document.getElementById('absences').className.replace('row_visible', 'row_hidden');
+	   document.getElementById('chart_type').className = document.getElementById('chart_type').className.replace('row_visible', 'row_hidden');
+           document.getElementById('odt_template').className = document.getElementById('odt_template').className.replace('row_visible', 'row_hidden');
+           document.getElementById('xslt_template').className = document.getElementById('xslt_template').className.replace('row_visible', 'row_hidden');
+	\};
+
+	if (\"template\" == myRadio.value) \{
+	   document.getElementById('odt_template').className = document.getElementById('odt_template').className.replace('row_hidden', 'row_visible');
+	   document.getElementById('xslt_template').className = document.getElementById('xslt_template').className.replace('row_hidden', 'row_visible');
+	   document.getElementById('chart_type').className = document.getElementById('chart_type').className.replace('row_visible', 'row_hidden');
+	   document.getElementById('absences').className = document.getElementById('absences').className.replace('row_visible', 'row_hidden');
+	\} 
 
 	if (\"chart\" == myRadio.value) \{
-    		document.getElementById('chart_type').className = document.getElementById('chart_type').className.replace('row_hidden', 'row_visible');
-	\} else \{
-	    document.getElementById('chart_type').className = document.getElementById('chart_type').className.replace('row_visible', 'row_hidden');
+	   document.getElementById('chart_type').className = document.getElementById('chart_type').className.replace('row_hidden', 'row_visible');
+	   document.getElementById('odt_template').className = document.getElementById('odt_template').className.replace('row_visible', 'row_hidden');
+	   document.getElementById('xslt_template').className = document.getElementById('xslt_template').className.replace('row_visible', 'row_hidden');
+	   document.getElementById('absences').className = document.getElementById('absences').className.replace('row_visible', 'row_hidden');
 	\};
-	if (\"template\" == myRadio.value) \{
-    		document.getElementById('odt_template').className = document.getElementById('odt_template').className.replace('row_hidden', 'row_visible');
-    		document.getElementById('xslt_template').className = document.getElementById('xslt_template').className.replace('row_hidden', 'row_visible');
-	\} else \{
-	    document.getElementById('odt_template').className = document.getElementById('odt_template').className.replace('row_visible', 'row_hidden');
-	    document.getElementById('xslt_template').className = document.getElementById('xslt_template').className.replace('row_visible', 'row_hidden');
-	\};
-	if (\"csv\" == myRadio.value) \{
-    		document.getElementById('csv').className = document.getElementById('csv').className.replace('row_hidden', 'row_visible');
-	\} else \{
-	    document.getElementById('csv').className = document.getElementById('csv').className.replace('row_visible', 'row_hidden');
-	\};
-
 \}
 </script>
 	<div id=\"fullwidth-list\" class=\"fullwidth-list\">
