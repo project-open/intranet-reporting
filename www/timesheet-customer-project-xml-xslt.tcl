@@ -23,6 +23,7 @@ ad_page_contract {
     { odt_template_id 0 }
     { print_hour_p:multiple ""}
     { chart_type "" }
+    { export_absences "" }
 }
 
 proc encodeXmlValue {value} {
@@ -391,10 +392,9 @@ if {"" != $end_date && ![regexp {^[0-9][0-9][0-9][0-9]\-[0-9][0-9]\-[0-9][0-9]$}
     Expected format: 'YYYY-MM-DD'"
 }
 
-set page_title "Timesheet Report with XML/XSLT and ODT Support \[BETA\]"
+set page_title "Timesheet Customer & Project - Extended Version \[BETA\]"
 set context_bar [im_context_bar $page_title]
 set context ""
-
 
 switch output_format {
     html { set page_title_adjusted [lang::message::lookup "" intranet-reporting.OutputFormatHTML "HTML"] }
@@ -523,10 +523,59 @@ if { ![empty_string_p $where_clause] } {
     set where_clause " and $where_clause"
 }
 
-# ------------------------------------------------------------
-# Define the report - SQL, counters, headers and footers 
-#
+# -- ----------------------------------------------------------
+#    Set absence array
+# -- ----------------------------------------------------------
 
+set absence_list [list]
+
+if { "" != $export_absences } {
+    set sql "
+    select 
+    	 cc.user_id as active_employee_id,
+	 im_initials_from_user_id(cc.user_id) as user_initials
+    from 
+	 cc_users cc,
+         acs_rels r
+    where 
+         r.object_id_one = 463 and 
+         r.object_id_two =cc.party_id and
+         r.rel_type = 'membership_rel' and
+         cc.member_state = 'approved'
+    " 
+    db_foreach active_employee_id $sql {
+	set inner_sql "select * from im_absences_get_absences_for_user_duration(:active_employee_id, :start_date, :end_date, null) AS (absence_date date, absence_type_id int, absence_id int, duration_days numeric)"
+	db_foreach r $inner_sql {
+	    
+	    # Building hash key out of julian date and user_id helps us to sort the arr/list
+	    set hash_key "[dt_ansi_to_julian_single_arg $absence_date].$active_employee_id"
+	    set hash_key "$absence_type_id.$active_employee_id"
+	    
+	    # For this report max absence for a single day is '1'  
+	    if { [info exists absence_hash($hash_key)] } {
+		# Add only when absence duration is less than one day
+		if { [lindex $absence_hash($hash_key) 0] < 1 } { 
+		    set absence_hash($hash_key) [list [expr [lindex $absence_hash($hash_key) 0] + $duration_days] "-1" $absence_date $active_employee_id $user_initials]
+		    if { [lindex $absence_hash($hash_key) 0] >= 1 } {
+			set absence_hash($hash_key) [list 1 "-1"]
+		    }
+		}
+	    } else {
+		set absence_hash($hash_key) [list $duration_days $absence_type_id $absence_date $active_employee_id $user_initials]
+	    }
+	}
+    }
+    
+    # We convert to list for tcl < 8.6 
+    set x [list]
+    foreach {k v} [array get absence_hash] { lappend x [list $k $v] }
+    set absence_list [lsort -real -index 0 $x]
+    # ns_return 1 text/html $absence_list
+}
+
+# -- ----------------------------------------------------------
+#    Define the report - SQL, counters, headers and footers 
+# -- ----------------------------------------------------------
 
 set sql "
 SELECT 
@@ -570,13 +619,14 @@ WHERE
 	and h.day < to_timestamp( :end_date , 'YYYY-MM-DD' )
 	and main_p.company_id = c.company_id
 	$where_clause
+
 ORDER BY 
-	c.company_path,
+	company_path,
 	main_p.project_nr,
-	p.project_nr,
+	project_nr,
 	user_name,
-	p.project_nr,
-	h.day
+	project_nr,
+	day
 "
 
 set report_def [list \
@@ -857,27 +907,33 @@ set template_checked ""
 set chart_checked ""
 set chart_type_pie_customer_checked ""
 set chart_type_pie_project_type_checked "" 
+set export_absences_checked ""
 
 set template_row_visibility "row_hidden"
 set chart_row_visibility "row_hidden"
-set csv_row_visibility "row_hidden"
+set absence_row_visibility "row_hidden"
 switch $output_format {
-    html - printer { set html_checked "checked" }
+    html - printer { 
+	set html_checked "checked" 
+        set absence_row_visibility "row_visible"
+    }
     excel { set excel_checked "checked" }
     csv { 
-	   set csv_checked "checked" 
-        set csv_row_visibility "row_visible"
+	set csv_checked "checked" 
+        set absence_row_visibility "row_visible"
     }
     xml { set xml_checked "checked" }
     template { 
-	   set template_checked "checked" 
-	   set template_row_visibility "row_visible"
+	set template_checked "checked" 
+	set template_row_visibility "row_visible"
     }
     chart { 
-	   set chart_checked "checked"
-	   set chart_row_visibility "row_visible"
+	set chart_checked "checked"
+	set chart_row_visibility "row_visible"
     }
 }
+
+if { "" != $export_absences } { set export_absences_checked "checked" }
 
 switch chart_type {
     chart_type_pie_customer { set chart_type_pie_customer_checked "checked" }
@@ -892,16 +948,14 @@ append sidebar_html "
 		    	    	<input name='output_format' type=radio value='html' $html_checked onclick='handleClick(this);'>HTML<br>
 	   			<input name='output_format' type=radio value='csv' $csv_checked onclick='handleClick(this);'>CSV<br>
 	   			<input name='output_format' type=radio value='xml' $xml_checked onclick='handleClick(this);'>XML<br>
-	   			<input name='output_format' type=radio value='template' $template_checked onclick='handleClick(this);'>Template<br/>
-	   			<input name='output_format' type=radio value='chart' $chart_checked onclick='handleClick(this);'>Chart
+	   			<input name='output_format' type=radio value='template' $template_checked onclick='handleClick(this);'> [lang::message::lookup "" intranet-reporting.Template "Template"]<br/>
+	   			<input name='output_format' type=radio value='chart' $chart_checked onclick='handleClick(this);'>[lang::message::lookup "" intranet-reporting.Chart "Chart"]
 		  </td>
 		</tr>
-    <!--
-    <tr class='$csv_row_visibility' id='csv'>
-          <td class=form-label> [lang::message::lookup "" intranet-reporting.ExportAbsences "Export Absences"]</td>
-          <td class=form-widget><input type='checkbox' name='export_absences'></td>
+    <tr class='$absence_row_visibility' id='csv'>
+          <td class=form-label> [lang::message::lookup "" intranet-reporting.ExportAbsences "Show Absences"]</td>
+          <td class=form-widget><input type='checkbox' name='export_absences' $export_absences_checked></td>
     </tr>
-    --> 
     <tr class='$template_row_visibility' id='xslt_template'>
           <td class=form-label> [lang::message::lookup "" intranet-reporting.XSLTFilter "XSLT Filter"]</td>
           <td class=form-widget>[im_category_select -include_empty_p 1 -include_empty_name [lang::message::lookup "" intranet-core.Please_Select "Please select"] -translate_p 0 "Intranet Cost Template" "xslt_template_id" $xslt_template_id]</td>
@@ -933,10 +987,16 @@ append sidebar_html "
     </div> <!-- /filter-list -->
     </div> <!-- /slave-content -->
     </div> <!-- /slave -->
- 
+
 
 <script type='text/javascript'>
 function handleClick(myRadio) \{
+	if (\"html\" == myRadio.value) \{
+	    	  document.getElementById('csv').className = document.getElementById('chart_type').className.replace('row_hidden', 'row_visible');
+	\} else \{
+	    	  document.getElementById('csv').className = document.getElementById('chart_type').className.replace('row_visible', 'row_hidden');
+	\};
+
 	if (\"chart\" == myRadio.value) \{
     		document.getElementById('chart_type').className = document.getElementById('chart_type').className.replace('row_hidden', 'row_visible');
 	\} else \{
@@ -1087,9 +1147,10 @@ im_report_render_row \
 set footer_array_list [list]
 set last_value_list [list]
 set class "rowodd"
+
 db_foreach sql $sql {
 
-	# Does the user prefer to read project_name instead of project_nr? (Genedata...)
+	# Does the user prefer to read project_name instead of project_nr?
 	if {$use_project_name_p} { 
 	    set project_nr $project_name
 	    set sub_project_name [im_reporting_sub_project_name_path $sub_project_id]
@@ -1161,6 +1222,75 @@ db_foreach sql $sql {
 	}
 }
 
+#-- ------------------------------------------------------------------------------------
+#   Creating absences 
+#-- ------------------------------------------------------------------------------------
+
+foreach user_absence $absence_list {
+
+    set k [lindex $user_absence 0]
+    set v [lindex $user_absence 1]
+    
+    # ds_comment "$k / $v"  
+    # ds_comment "company_project_sub_id: $company_project_sub_id"
+
+    set note ""
+    set internal_note ""
+    set hour_id 0 
+    set date_pretty [lindex $v 2]
+    set julian_date "0"
+    set date_diff ""
+    set hours [lindex $v 0]
+    set hours_link $hours
+    set billing_rate 0
+    set user_id 0
+    set user_name [im_name_from_user_id [lindex $v 3]]
+    set user_initials [lindex $v 4]
+    set project_id 0
+    set project_nr ""
+    set project_name "Absences"
+    set sub_project_id [lindex $v 1]
+    set sub_project_nr [im_category_from_id [lindex $v 1]]
+    set sub_project_name [im_category_from_id [lindex $v 1]]
+    set company_id 0
+    set company_nr ""
+    set company_name "Company"
+    set company_project_id 99
+    set company_project_sub_id [lindex $v 1] 
+    set company_project_sub_user_id [lindex $v 3]
+
+    im_report_display_footer \
+         -output_format $output_format \
+         -group_def $report_def \
+         -footer_array_list $footer_array_list \
+         -last_value_array_list $last_value_list \
+         -level_of_detail $level_of_detail \
+         -row_class $class \
+         -cell_class $class
+
+    im_report_update_counters -counters $counters
+    ns_log Notice "timesheet-customer-project: company_project_id=$company_project_id, val=[im_opt_val hours_project_subtotal]"
+
+    set last_value_list [im_report_render_header \
+         -output_format $output_format \
+         -group_def $report_def \
+         -last_value_array_list $last_value_list \
+         -level_of_detail $level_of_detail \
+         -row_class $class \
+         -cell_class $class
+    ]
+
+    set footer_array_list [im_report_render_footer \
+         -output_format $output_format \
+         -group_def $report_def \
+         -last_value_array_list $last_value_list \
+         -level_of_detail $level_of_detail \
+         -row_class $class \
+         -cell_class $class
+    ]
+}
+
+
 im_report_display_footer \
     -output_format $output_format \
     -group_def $report_def \
@@ -1190,7 +1320,7 @@ switch $output_format {
 	ns_write "[im_footer]\n"
     }
     printer { ns_write "</table>\n</div>\n"}
-    cvs { }
+    csv { }
     xml {
         if { "" != $xslt_template_id  } {
             set uri_xslt "$invoice_template_base_path/[im_category_from_id $xslt_template_id]"
