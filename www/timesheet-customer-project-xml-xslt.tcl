@@ -453,6 +453,7 @@ set base_url [export_vars -base "/intranet-reporting/timesheet-customer-project-
 #
 
 set criteria [list]
+set criteria_absences [list]
 
 if {0 != $company_id && "" != $company_id} {
     lappend criteria "p.company_id = :company_id"
@@ -460,6 +461,7 @@ if {0 != $company_id && "" != $company_id} {
 
 if {0 != $user_id && "" != $user_id} {
     lappend criteria "h.user_id = :user_id"
+    lappend criteria_absences "cc.user_id = :user_id"
 }
 
 if {0 != $cost_center_id && "" != $cost_center_id} {
@@ -474,6 +476,16 @@ if {0 != $cost_center_id && "" != $cost_center_id} {
 			from	im_cost_centers
 			where	substring(cost_center_code, 1, :cc_code_len) = :cc_code
 		)
+    )"
+
+    lappend criteria_absences "cc.user_id in (
+                select  e.employee_id
+                from    im_employees e
+                where   e.department_id in (
+                        select  cost_center_id
+                        from    im_cost_centers
+                        where   substring(cost_center_code, 1, :cc_code_len) = :cc_code
+                )
     )"
 }
 
@@ -523,6 +535,12 @@ if { ![empty_string_p $where_clause] } {
     set where_clause " and $where_clause"
 }
 
+set where_clause_absences [join $criteria_absences " and\n	    "]
+if { ![empty_string_p $where_clause_absences ] } {
+    set where_clause_absences " and $where_clause_absences"
+}
+
+
 # -- ----------------------------------------------------------
 #    Set absence array
 # -- ----------------------------------------------------------
@@ -542,6 +560,7 @@ if { "" != $export_absences } {
          r.object_id_two =cc.party_id and
          r.rel_type = 'membership_rel' and
          cc.member_state = 'approved'
+         $where_clause_absences
     " 
     db_foreach active_employee_id $sql {
 	set inner_sql "select * from im_absences_get_absences_for_user_duration(:active_employee_id, :start_date, :end_date, null) AS (absence_date date, absence_type_id int, absence_id int, duration_days numeric)"
@@ -1239,11 +1258,19 @@ db_foreach sql $sql {
 
 foreach user_absence $absence_list {
 
+   #     $hours_user_counter 
+   #     $hours_project_sub_counter 
+   #     $hours_project_counter 
+   #     $hours_customer_counter 
+   # 
+
     set k [lindex $user_absence 0]
     set v [lindex $user_absence 1]
     
     # ds_comment "$k / $v"  
     # ds_comment "company_project_sub_id: $company_project_sub_id"
+
+    # 0=$hours, 1=Absence Type, 2=Date, 3=user_id   
 
     set note ""
     set internal_note ""
