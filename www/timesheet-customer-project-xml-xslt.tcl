@@ -548,8 +548,8 @@ if { "" != $export_absences } {
 	db_foreach r $inner_sql {
 	    
 	    # Building hash key out of julian date and user_id helps us to sort the arr/list
-	    set hash_key "[dt_ansi_to_julian_single_arg $absence_date].$active_employee_id"
-	    set hash_key "$absence_type_id.$active_employee_id"
+	    # Please note: To achieve same sort order in all absence-type-groups all user_id's woudl need to have the same number of digits 
+	    set hash_key "${absence_type_id}.${active_employee_id}[dt_ansi_to_julian_single_arg $absence_date]"
 	    
 	    # For this report max absence for a single day is '1'  
 	    if { [info exists absence_hash($hash_key)] } {
