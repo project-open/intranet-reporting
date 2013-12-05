@@ -384,12 +384,12 @@ set internal_company_id [im_company_internal]
 
 set num_format "999,990.99"
 
-set im_absence_type_vacation 5000
-set im_absence_type_personal 5001
-set im_absence_type_sick 5002
-set im_absence_type_travel 5003
-set im_absence_type_bankholiday 5005
-set im_absence_type_training 5004
+set im_user_absence_type_vacation 5000
+set im_user_absence_type_personal 5001
+set im_user_absence_type_sick 5002
+set im_user_absence_type_travel 5003
+set im_user_absence_type_bankholiday 5005
+set im_user_absence_type_training 5004
 
 # ------------------------------------------------------------
 # Conditional SQL Where-Clause
