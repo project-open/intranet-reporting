@@ -1,6 +1,6 @@
 # /packages/intranet-reporting/www/timesheet-customer-project-xml-xslt.tcl
 #
-# Copyright (C) 2003 - 2013 ]project-open[
+# Copyright (C) 2003-now Project Open Business Solutions S.L. 
 #
 # All rights reserved. Please check
 # http://www.project-open.com/ for licensing details.
@@ -834,7 +834,7 @@ if {[info exists task_id]} {
 # Write out HTTP header, considering CSV/MS-Excel formatting
 switch $output_format {
     html - csv {
-	   im_report_write_http_headers -output_format $output_format
+	   im_report_write_http_headers -output_format $output_format -report_name "timesheet-customer-project-xml-xslt"
     }
     chart {
 	   im_report_write_http_headers -output_format "html"
