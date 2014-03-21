@@ -90,22 +90,22 @@ set help_text "
 	The report lists all main projects with a set 'Budget' or 'Budget Hours' field
 	in the given interval.<br>
 	<ul>
-	<li><b>%Compl</b>: Completion degree of the project. Calculated automatically from the
-	    completion of sub-projects and tasks.
+	<li><b>%Completed</b>: Completion degree of the project taken from the Project attribute 'Percent Completed'. This attribute is either set manually or calculated automatically based on the completion rate set on a task level.</li>
+	<li><b>Planned Hours</b>: The manually specified budget hours for the project - Project attribute 'Project Budget Hours'</li>
+	<li><b>Logged Hours</b>: All hours logged on the project and its sub-projects and tasks.Red color indicates that the hourly budget has been exceeded.</li>
+	<li><b>EoP Hours</b> (End of Project Hours): Logged Hours / %Completed - represents the hours necessary to finish the project at the current pace. Red color indicates that the project will exceed the hourly budget.<br><br></li>
 
-	<li><b>Budget Hours</b>: The manually specified budget hours for the project.
-	<li><b>Logged Hours</b>: All hours logged on the project and its sub-projects and tasks.
-	    Red color indicates that the hourly budget has been exceeded.
-	<li><b>EoP Hours</b> (End of Project Hours): = Logged Hours / %Comp. Represents the hours necessary
-	    to finish the project at the current pace.
-	    Brown color indicates that the project will exceed the hourly budget.
+        <li><b>Planned Costs -Providers</b>: Total of 'Purchase Orders' created for Project</li>
+        <li><b>Planned Costs -Timesheet</b>: Project attribute 'Project Budget Hours' multiplied by 'Default internal cost per hour' (PARAMETER: DefaultTimesheetHourlyCost of package: intranet-cost)</li>
+        <li><b>Planned Costs -Expenses</b>: Not yet fully implemented, requires package \]po\[ Intranet Planning</li>
+        <li><b>Planned Costs -Total</b>: Sum of 'Planned Costs'<br><br></li>
 
-	<li><b>Budget Costs</b>: The manually specified budget for the project.
-	<li><b>Logged Costs</b>: All costs logged on the project and its sub-projects and tasks.
-	    Red color indicates that the budget has been exceeded.
-	<li><b>EoP Costs</b> (End of Project Costs): = Logged Costs / %Comp. Represents the costs necessary
-	    to finish the project at the current pace. Brown color indicates that the project 
-	    will exceed the budget.
+        <li><b>Real Costs: Providers</b>: Total of 'Provider Invoices' created for Project</li>
+	<li><b>Real Costs: Timesheet</b>: Number of hours logged on Project multiplied with the Employee attribute 'Hourly Cost'</li>
+	<li><b>Real Costs: Expenses</b>: Sum of Project Expenses</li>
+
+	<li><b>EoP Costs</b> (End of Project Costs): = Sum Real Costs / %Completed Represents the costs necessary to finish the project at the current pace. Red color indicates that the project will exceed the budget.</li><br>
+	<li><b>Overrun</b>: Planned Budget - EoP Costs: Total
 
 	</ul><br/>
 	<strong>Please Note:</strong><br>
@@ -231,33 +231,33 @@ set header0 {
 	"Project<br>Nr" 
 	"Project<br>Name" 
 	"Project<br>Manager" 
-	"%<br>Compl"
+	"%<br>Compl."
 
         "|<br>|"
 
-	"Budget<br>Hours"
+	"Planned<br>Hours"
 	"Logged<br>Hours"
 	"EoP<br>Hours"
 
         "|<br>|"
 
-	"Planned<br>Providers"
-	"Planned<br>Timesheet"
-	"Planned<br>Expenses"
-	"Planned<br>Total"
-	"Budget"
+	"Planned Costs:<br>Providers"
+	"Planned Costs:<br>Timesheet"
+	"Planned Costs:<br>Expenses"
+	"Planned Costs:<br>Total"
+	"Planned <br>Budget"
 
         "|<br>|"
 
-	"Real<br>Providers"
-	"Real<br>Timesheet"
-	"Real<br>Expenses"
-	"Real<br>Total"
-	"EoP<br>Total"
+	"Real Costs:<br>Providers"
+	"Real Costs:<br>Timesheet"
+	"Real Costs:<br>Expenses"
+	"Real Costs: <br>Total"
+	"EoP Costs:<br>Total"
 
         "|<br>|"
 
-	"Overrun"
+	"%<br>Overrun"
 }
 
 
@@ -306,7 +306,7 @@ set report_def [list \
 
 			"\#align=center |"
 
-			"\#align=right <font color=$overrun_color>$percent_overrun_pretty</font>"
+			"\#align=right <font color=$overrun_color>${percent_overrun_pretty}%</font>"
 		    } \
 		    content {} \
 	    ] \
