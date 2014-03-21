@@ -720,9 +720,9 @@ if { 0 != $user_id_from_search } { set inner_hours_where "and ho.user_id = $user
 
 template::multirow foreach project_list {
 
-   	ds_comment "----------------------------------------------------------------------------------------------------"
-   	ds_comment "company_id: $company_id, child_id: $child_id, parent_id: $parent_id, project_name: $project_name"
-   	ds_comment "----------------------------------------------------------------------------------------------------"
+   	# ds_comment "----------------------------------------------------------------------------------------------------"
+   	# ds_comment "company_id: $company_id, child_id: $child_id, parent_id: $parent_id, project_name: $project_name"
+   	# ds_comment "----------------------------------------------------------------------------------------------------"
 
 	# ds_comment "project-budget::set_cost_timesheet_logged_cache: set cost_timesheet_logged_cache to value: $employee_hours_amount "
 	# set cost_timesheet_logged_cache $employee_hours_amount
@@ -775,65 +775,65 @@ template::multirow foreach project_list {
 	set sum_hours 0
 	db_foreach rec $sql {
 
-		# Sum up hours for this project 
-    	set sum_hours [expr $sum_hours + $hours]
+	    # Sum up hours for this project 
+	    set sum_hours [expr $sum_hours + $hours]
 
-    	set costs_staff_rate $hourly_cost
-
-		ds_comment "Hourly rate for user_id: $user_id: $costs_staff_rate "
-		
-        if { "" == $costs_staff_rate || 0 == $costs_staff_rate } {
-			append err_mess [lang::message::lookup "" intranet-reporting.MissingPrice "No price found for user/project:<br>"]
-            append err_mess "<a href='/intranet/users/view?user_id=$user_id'>[im_name_from_user_id $user_id]</a> / <a href='/intranet/projects/view?project_id=$project_id'>"
-            append err_mess [db_string get_data "select project_name from im_projects where project_id = $project_id" -default "$project_id"]
-            append err_mess "</a><br><br>"
-		} else {
-            set amount_costs_staff [expr $amount_costs_staff + [expr $costs_staff_rate * $hours]]		
-		}
-	
+	    set costs_staff_rate $hourly_cost
+	    
+	    # ds_comment "Hourly rate for user_id: $user_id: $costs_staff_rate "
+	    
+	    if { "" == $costs_staff_rate || 0 == $costs_staff_rate } {
+		append err_mess [lang::message::lookup "" intranet-reporting.MissingPrice "No price found for user/project:<br>"]
+		append err_mess "<a href='/intranet/users/view?user_id=$user_id'>[im_name_from_user_id $user_id]</a> / <a href='/intranet/projects/view?project_id=$project_id'>"
+		append err_mess [db_string get_data "select project_name from im_projects where project_id = $project_id" -default "$project_id"]
+		append err_mess "</a><br><br>"
+	    } else {
+		set amount_costs_staff [expr $amount_costs_staff + [expr $costs_staff_rate * $hours]]		
+	    }
+	    
 	}
-
+	
 	# Company Id 
   	template::multirow set project_list $i company_id $company_id
-
+	
 	# Avoid showing multiple company_names in html view  
 	if { "html" == $output_format } {
-		if {$company_name_saved == $company_name } {set company_name ""} else {set company_name_saved $company_name}
+	    if {$company_name_saved == $company_name } {set company_name ""} else {set company_name_saved $company_name}
 	}
-
-    # Project Id 
-    template::multirow set project_list $i project_id $child_id
-
-    # Project Type Id 
-    template::multirow set project_list $i project_type_id $project_type_id
-
-    # Project name 
-    template::multirow set project_list $i project_name "$project_nr $project_name"
-
-    # Project Manager
-    template::multirow set project_list $i project_manager $project_lead_name
-
-    # End Date (Fertigstellung)
-    template::multirow set project_list $i end_date [lc_time_fmt $child_end_date "%x" locale]
-
-    # percent_completed (Fortschritt)
+	
+	# Project Id 
+	template::multirow set project_list $i project_id $child_id
+	
+	# Project Type Id 
+	template::multirow set project_list $i project_type_id $project_type_id
+	
+	# Project name 
+	template::multirow set project_list $i project_name "$project_nr $project_name"
+	
+	# Project Manager
+	template::multirow set project_list $i project_manager $project_lead_name
+	
+	# End Date (Fertigstellung)
+	template::multirow set project_list $i end_date [lc_time_fmt $child_end_date "%x" locale]
+	
+	# percent_completed (Fortschritt)
 	set percent_completed_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $percent_completed+0] $rounding_precision] $format_string $locale]
-    template::multirow set project_list $i percent_completed $percent_completed_pretty
-
+	template::multirow set project_list $i percent_completed $percent_completed_pretty
+	
 	# project_budget_hours
-    template::multirow set project_list $i project_budget_hours $project_budget_hours
+	template::multirow set project_list $i project_budget_hours $project_budget_hours
 
 	# hours_logged
-    template::multirow set project_list $i hours_logged $sum_hours
-
+	template::multirow set project_list $i hours_logged $sum_hours
+	
 	# deviation_target (project_budget_hours * percent_completed - hours_logged)
 	if { "0" == $percent_completed  } {
 	    set deviation_target [expr $project_budget_hours - $sum_hours]
 	} else {
 	    set deviation_target [expr $project_budget_hours * $percent_completed/100 - $sum_hours]
 	}
-    set deviation_target_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $deviation_target+0] $rounding_precision] $format_string $locale]
-    template::multirow set project_list $i deviation_target $deviation_target_pretty
+	set deviation_target_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $deviation_target+0] $rounding_precision] $format_string $locale]
+	template::multirow set project_list $i deviation_target $deviation_target_pretty
 	
 	# Projection_hours (hours_logged / project_budget_hours / percent_completed * project_budget_hours)
 	# If conditions remain the same, how many hours will be probably needed to finish the project
@@ -852,61 +852,60 @@ template::multirow foreach project_list {
 
 	# project_budget 
 	set project_budget_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $project_budget+0] $rounding_precision] $format_string $locale]
-    template::multirow set project_list $i project_budget $project_budget_pretty
+	template::multirow set project_list $i project_budget $project_budget_pretty
 
 	# Costs staff 
 	set amount_costs_staff_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $amount_costs_staff+0] $rounding_precision] $format_string $locale]
 
-    # Provider Bills
+	# Provider Bills
 	set amount_provider_bills_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $provider_bills+0] $rounding_precision] $format_string $locale]
 
-    # Costs Material (billable)
-    set total_expenses_billable_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $total_expenses_billable+0] $rounding_precision] $format_string $locale]
-    ds_comment "Expenses (billable): $total_expenses_billable"
-
+	# Costs Material (billable)
+	set total_expenses_billable_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $total_expenses_billable+0] $rounding_precision] $format_string $locale]
+	# ds_comment "Expenses (billable): $total_expenses_billable"
+	
 	set costs_matrix [expr $amount_invoicable_matrix + $provider_bills + $total_expenses_billable + $amount_costs_staff]
 	set costs_matrix_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $costs_matrix+0] $rounding_precision] $format_string $locale]
-    template::multirow set project_list $i costs_matrix $costs_matrix_pretty		
-
+	template::multirow set project_list $i costs_matrix $costs_matrix_pretty		
+	
 	# delta_budget_costs (project_budget * percent_completed - costs_matrix)
-    set delta_budget_costs [expr $project_budget * $percent_completed/100 - $costs_matrix]
-    set delta_budget_costs_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $delta_budget_costs+0] $rounding_precision] $format_string $locale]
-    template::multirow set project_list $i delta_budget_costs $delta_budget_costs_pretty
-
+	set delta_budget_costs [expr $project_budget * $percent_completed/100 - $costs_matrix]
+	set delta_budget_costs_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $delta_budget_costs+0] $rounding_precision] $format_string $locale]
+	template::multirow set project_list $i delta_budget_costs $delta_budget_costs_pretty
+	
 	# projection_costs (costs_matrix / project_budget / percent_completed * project_budget)
 	if { 0 == $project_budget_hours || 0 == $percent_completed  } {
-        template::multirow set project_list $i projection_costs [lang::message::lookup "" intranet-reporting.NotComputable  "Not computable"]
+	    template::multirow set project_list $i projection_costs [lang::message::lookup "" intranet-reporting.NotComputable  "Not computable"]
 	    set projection_costs 0 
-    } else {
+	} else {
 	    set projection_costs [expr $costs_matrix / ($percent_completed/100.0)]
 	    set projection_costs_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $projection_costs+0] $rounding_precision] $format_string $locale]
 	    template::multirow set project_list $i projection_costs $projection_costs_pretty
-    }
-
+	}
+	
 	# delta_budget_projection (project_budget - projection_costs) 
-    if { 0 == $projection_costs } {
+	if { 0 == $projection_costs } {
 	    set delta_budget_projection_pretty [lang::message::lookup "" intranet-reporting.NotComputable  "Not computable"]
 	} else {
 	    set delta_budget_projection [expr $project_budget - $projection_costs]
 	    set delta_budget_projection_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $delta_budget_projection+0] $rounding_precision] $format_string $locale]
 	}
         template::multirow set project_list $i delta_budget_projection $delta_budget_projection_pretty
-
+	
 	# If CVS, write inmediately to browser ...  
 	if { "csv" == $output_format } {
-		if { 1 == $i  } {
-		    im_report_write_http_headers -output_format $output_format
-		    set title_line "\"Firma\"\t\"Project Nr./Name\"\t\"Schrftl. Best.\"\t\"Projekt Status\"\t\"Personalkosten\"\t\"Selbstkosten\"\t\"Kosten lt. Preis-Matrix\"\t\"Sonstige Kosten (abrechenbar)\"\t"
-	            append title_line "\"Sonstige Kosten (nicht abrechenbar\"\t\"Lieferantenrechnungen\"\t\"Anspruch\"\t\"Abgerechnet\"\t\"GuV Project\"\t\"GuV 1\"\t\"GuV 2\"\t\n" 
-		    ns_write $title_line 
-		}
-		set output_row "\"$company_name\"\t" 
-		append output_row "\"$project_nr $project_name\"\t"
-		append output_row "\"$amount_costs_staff_pretty\"\t"
-       	append output_row "\"$target_benefit_pretty\"\t"
-	  	if { 100 != $project_type_id } { ns_write $output_row }
+	    if { 1 == $i  } {
+		im_report_write_http_headers -output_format $output_format
+		set title_line "\"Firma\"\t\"Project Nr./Name\"\t\"Schrftl. Best.\"\t\"Projekt Status\"\t\"Personalkosten\"\t\"Selbstkosten\"\t\"Kosten lt. Preis-Matrix\"\t\"Sonstige Kosten (abrechenbar)\"\t"
+		append title_line "\"Sonstige Kosten (nicht abrechenbar\"\t\"Lieferantenrechnungen\"\t\"Anspruch\"\t\"Abgerechnet\"\t\"GuV Project\"\t\"GuV 1\"\t\"GuV 2\"\t\n" 
+		ns_write $title_line 
+	    }
+	    set output_row "\"$company_name\"\t" 
+	    append output_row "\"$project_nr $project_name\"\t"
+	    append output_row "\"$amount_costs_staff_pretty\"\t"
+	    append output_row "\"$target_benefit_pretty\"\t"
+	    if { 100 != $project_type_id } { ns_write $output_row }
 	}
-
 	incr i
 }
 
