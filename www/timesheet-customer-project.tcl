@@ -484,7 +484,7 @@ switch $output_format {
 		<tr>
 		  <td class=form-label>Customer</td>
 		  <td class=form-widget>
-		    [im_company_select -include_empty_name [lang::message::lookup "" intranet-core.All "All"] company_id $company_id]
+		    [im_company_select -include_empty_name [lang::message::lookup "" intranet-core.All "All"] -with_active_projects_p 1 company_id $company_id]
 		  </td>
 		</tr>
 		<tr>
