@@ -15,8 +15,11 @@
 # See the GNU General Public License for more details.
 
 ad_page_contract {
-    Show all the Reports
 
+    Show list of reports
+
+    @author frank.bergmann@project-open.com
+    @author klaus.hofeditz@project-open.com
     @author juanjoruizx@yahoo.es
 } {
     { return_url "" }
@@ -80,7 +83,7 @@ set action_list [list "[_ intranet-reporting.Add_new_Report]" "[export_vars -bas
 
 set elements_list {
     name {
-	label $page_title
+	label ""
 	display_template {
 	    <nobr>
 	    <if @reports.indent_level@ gt 4>
@@ -102,12 +105,18 @@ set group_list [list]
 if {$reports_exist_p && $user_admin_p} {
     lappend elements_list \
         edit {
-            label "[im_gif wrench]"
+            label "MEN"
             display_template {
                 @reports.edit_html;noquote@
             }
         }
-    
+    lappend elements_list \
+        permission {
+            label "PERM"
+            display_template {
+                @reports.permission_html;noquote@
+            }
+        }        
 
     # ---------------------------------------------------
     # Add columns for each of the profiles
@@ -186,7 +195,7 @@ if { $user_admin_p } {
 }
 
 
-db_multirow -extend {indent_spaces edit_html} reports get_reports "
+db_multirow -extend {indent_spaces edit_html permission_html} reports get_reports "
 	select
 		r.report_id,
 		$main_sql_select
@@ -217,12 +226,15 @@ db_multirow -extend {indent_spaces edit_html} reports get_reports "
     # Show an "edit" icon for dynamic reports
     if {"" == $report_id} {
 	# TCL Report - edit the menu
-	set edit_html "<a href='[export_vars -base "/intranet/admin/menus/new" {menu_id return_url}]'>[im_gif "wrench"]</a>"
+	set edit_html "&nbsp;&nbsp;&nbsp;<a href='[export_vars -base "/intranet/admin/menus/new" {menu_id return_url}]'>[im_gif "wrench"]</a>"
     } else {
 	# SQL report - edit the report itself
-	set edit_html "<a href='[export_vars -base "new" {report_id return_url}]'>[im_gif "wrench"]</a>"
+	set edit_html "&nbsp;&nbsp;&nbsp;<a href='[export_vars -base "new" {report_id return_url}]'>[im_gif "wrench"]</a>"
 	set url [export_vars -base "view" {report_id}]
     }
+
+    # Edit permissions 
+    if {4 != $indent_level} { set permission_html "&nbsp;&nbsp;&nbsp;<a href='/intranet/admin/permissions/one?object_id=$menu_id'>[im_gif "wrench"]</a>" }
 
     # Skip the wrench for the headers
     if {4 == $indent_level} { set edit_html "" }
@@ -234,10 +246,10 @@ db_multirow -extend {indent_spaces edit_html} reports get_reports "
 	set t_or_f [set $varname]
 	if {"t" == $t_or_f} {
 	    set toggle_url [export_vars -base "/intranet/admin/toggle" {{action remove_readable} {horiz_group_id $gid} {object_id $menu_id} return_url}]
- 	    set p${gid}_read_p "<a href='$toggle_url'><b>R</b></a>\n"
+ 	    set p${gid}_read_p "&nbsp;&nbsp;&nbsp;<a href='$toggle_url'><b>R</b></a>\n"
 	} else {
 	    set toggle_url [export_vars -base "/intranet/admin/toggle" {{action add_readable} {horiz_group_id $gid} {object_id $menu_id} return_url}]
-	    set p${gid}_read_p "<a href='$toggle_url'>r</a>\n"
+	    set p${gid}_read_p "&nbsp;&nbsp;&nbsp;<a href='$toggle_url'>r</a>\n"
 	}
 
 	if {$indent_level < 5} {
