@@ -704,13 +704,13 @@ switch $output_format {
 		<tr>
                   <td class=form-label>[_ intranet-core.Cost_Center]:</td>
                   <td class=form-widget>
-		      [im_cost_center_select -include_empty 1  -department_only_p 0  cost_center_id $cost_center_id [im_cost_type_timesheet]]
+		      [im_cost_center_select -include_empty 1  -department_only_p 0  -show_inactive_cc_p 1  cost_center_id  $cost_center_id  [im_cost_type_timesheet]]
                  </td>
 		</tr>
 		<tr>
                   <td class=form-label>[_ intranet-core.Department]:</td>
                   <td class=form-widget>
-		      [im_cost_center_select -include_empty 1  -department_only_p 1  department_id $department_id [im_cost_type_timesheet]]
+		      [im_cost_center_select -include_empty 1  -department_only_p 1  -show_inactive_cc_p 1  department_id  $department_id  [im_cost_type_timesheet]]
                  </td>
 		</tr>
 		<tr>
