@@ -27,7 +27,7 @@ ad_proc -public im_report_type_indicator {} { return 15110 }
 ad_proc -public im_package_reporting_id {} {
     Returns the package id of the intranet-reporting module
 } {
-    return [util_memoize "im_package_reporting_id_helper"]
+    return [util_memoize im_package_reporting_id_helper]
 }
 
 ad_proc -private im_package_reporting_id_helper {} {
@@ -883,7 +883,6 @@ ad_proc -public im_reporting_sub_project_name_path {
     Returns a subproject name composed by all superior project in the hierarchy
 } {
     return [im_reporting_sub_project_name_path_helper -exlude_main_project_p $exlude_main_project_p $sub_project_id]
-#    return [util_memoize [list im_reporting_sub_project_name_path_helper -exlude_main_project_p $exlude_main_project_p $sub_project_id] 3600]
 }
 
 ad_proc -public im_reporting_sub_project_name_path_helper { 
