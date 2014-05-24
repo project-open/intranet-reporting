@@ -1421,41 +1421,44 @@ switch $output_format {
 	ns_returnfile 200 application/odt $odt_zip
     }
     chart {
-	   # These var values we need to wrap into ''
-	   set str_vars_list [list]
-	   lappend str_vars_list start_date
-	   lappend str_vars_list end_date
+	# Todo: Verify how to include div id "monitor_frame" to make following js obsolete 
+	ns_write "<script language='javascript' type='text/javascript'>document.getElementById('slave_content').style.visibility='visible';"
+	ns_write "document.getElementById('fullwidth-list').style.visibility='visible'; </script>"
+	# These var values we need to wrap into ''
+	set str_vars_list [list]
+	lappend str_vars_list start_date
+	lappend str_vars_list end_date
         lappend str_vars_list number_format
 
-	   # replace colon vars with their values
-	   split $sql " "
-	   foreach sub_str $sql {
-		  if { -1 != [string first : $sub_str] } {
-			 if { -1 == [string first :: $sub_str] } {
-				set var_name [string range $sub_str 1 end]  
-				eval set str_r $$var_name
-				if { -1 == [lsearch -glob $str_vars_list $var_name] } {
-				    lappend parsed_sql $str_r 
-				} else {
-				    lappend parsed_sql "'$str_r'" 
-				}	   
-			 } else {
-				lappend parsed_sql $sub_str
-			 }
-		  } else {
-			 lappend parsed_sql $sub_str
-		  }
-    	   }
-
-	   set parsed_sql [join $parsed_sql " "]
-
-	   # set rand_key [ad_generate_random_string 256]
-	   # set sql_rep "
-	   #	   insert into im_cached_reports (user_id, rand_key, report_label, request_timestamp, report_sql) values (:current_user_id, :rand_key, 'reporting-timesheet-customer-project-xml-xslt', now(), :parsed_sql)
-        # "	   
-	   # set query_id [db_dml insert_report $sql_rep]
-
-	   ns_write $sidebar_html
+	# replace colon vars with their values
+	split $sql " "
+	foreach sub_str $sql {
+	    if { -1 != [string first : $sub_str] } {
+		if { -1 == [string first :: $sub_str] } {
+		    set var_name [string range $sub_str 1 end]  
+		    eval set str_r $$var_name
+		    if { -1 == [lsearch -glob $str_vars_list $var_name] } {
+			lappend parsed_sql $str_r 
+		    } else {
+			lappend parsed_sql "'$str_r'" 
+		    }	   
+		} else {
+		    lappend parsed_sql $sub_str
+		}
+	    } else {
+		lappend parsed_sql $sub_str
+	    }
+	}
+	
+	set parsed_sql [join $parsed_sql " "]
+	
+	# set rand_key [ad_generate_random_string 256]
+	# set sql_rep "
+	#	   insert into im_cached_reports (user_id, rand_key, report_label, request_timestamp, report_sql) values (:current_user_id, :rand_key, 'reporting-timesheet-customer-project-xml-xslt', now(), :parsed_sql)
+	# "	   
+	# set query_id [db_dml insert_report $sql_rep]
+	
+	ns_write $sidebar_html
         ns_write "[im_box_footer]</div></form>"
 
 	   # Call template to generate JS that creates chart 
