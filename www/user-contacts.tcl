@@ -49,13 +49,13 @@ set offset [expr $page * $limit]
 # Page Title, Bread Crums and Help
 #
 
-set page_title "Users and Contacts"
+set page_title [lang::message::lookup "" intranet-reporting_Users_and_Contacts "Users and Contacts"]
 set context_bar [im_context_bar $page_title]
-set help_text "
+set help_text [lang::message::lookup "" intranet-reporting_Users_and_Contacts_help "
 	<strong>Users and Contacts:</strong><br>
         This report shows all users in the system, together with
         their state and their contact details.
-"
+"]
 
 
 # ------------------------------------------------------------
@@ -154,25 +154,25 @@ OFFSET	:offset
 
 # Global Header Line
 set header0 [list \
-	"<input type=checkbox name=_dummy onclick=\\\"acs_ListCheckAll('user',this.checked)\\\">" \
-	"Comp"  \
-	"C" \
-	"E" \
-	"F" \
-	"Email" \
-	"Name" \
-	"Home" \
-	"Work" \
-	"Cell" \
-	"Pager" \
-	"Fax" \
-	"AIM" \
-	"MSN" \
-	"ICQ" \
-	"Home" \
-	"Work" \
-	"Note" \
-]
+		 "<input type=checkbox name=_dummy onclick=\\\"acs_ListCheckAll('user',this.checked)\\\">" \
+		 [lang::message::lookup "" intranet-reporting.Company_short Comp]  \
+		 [lang::message::lookup "" intranet-reporting.Customer_oneletter "C"] \
+		 [lang::message::lookup "" intranet-reporting.Employee_oneletter "E"] \
+		 [lang::message::lookup "" intranet-reporting.Freelancer_oneletter "F"] \
+		 [_ intranet-core.Email] \
+		 [_ intranet-core.Name] \
+		 [_ intranet-core.Home_phone] \
+		 [_ intranet-core.Work_phone] \
+		 [_ intranet-core.Cell_phone] \
+		 [_ intranet-core.Pager] \
+		 [_ intranet-core.Fax] \
+		 [_ intranet-core.Aim_Screen_Name] \
+		 [lang::message::lookup "" intranet-core.MSN "MSN"] \
+		 [_ intranet-core.ICQ_Number] \
+		 [_ intranet-core.Home_Country] \
+		 [_ intranet-core.Work_Country] \
+		 [_ intranet-core.Note] \
+		]
 
 
 
@@ -269,40 +269,40 @@ switch $output_format {
 		<form>
 		<table cellspacing=2>
 		<tr class=rowtitle>
-		  <td class=rowtitle colspan=2 align=center>Filters</td>
+		  <td class=rowtitle colspan=2 align=center>[lang::message::lookup "" intranet-core.Filters "Filters"]</td>
 		</tr>
 		<tr>
-		  <td class=form-label>Level of<br>Details</td>
+		  <td class=form-label>[lang::message::lookup "" intranet-reporting.Level_of_Detail "Level of<br>Detail"]</td>
 		  <td class=form-widget>
 		    [im_select -translate_p 0 level_of_detail $levels $level_of_detail]
 		  </td>
 		</tr>
 		<tr>
-		  <td class=form-label>Company<br>Type</td>
+		  <td class=form-label>[_ intranet-core.Company_Type]</td>
 		  <td class=form-widget>
 		    [im_category_select -include_empty_p 1 "Intranet Company Type" filter_company_type_id $filter_company_type_id]
 		  </td>
 		</tr>
 		<tr>
-		  <td class=form-label>User Profile</td>
+		  <td class=form-label>[lang::message::lookup "" intranet-core.User_Profile "User Profile"]</td>
 		  <td class=form-widget>
-		    [im_select -ad_form_option_list_style_p 1 profile_id [im_profile::profile_options_all -include_empty_p 1 -include_empty_name "All"] $profile_id]
+		    [im_select -ad_form_option_list_style_p 1 profile_id [im_profile::profile_options_all -include_empty_p 1 -include_empty_name [_ intranet-core.All]] $profile_id]
 		  </td>
 		</tr>
 
 		<tr>
-		  <td class=form-label>Pagination</td>
+		  <td class=form-label>[lang::message::lookup "" intranet-core.Pagination Pagination]</td>
 		  <td class=form-widget>
-		    Entries per Page:
+		    [lang::message::lookup "" intranet-reporting.Entries_per_Page "Entries per Page"]:
 		    [im_select -translate_p 0 limit $limits $limit]
-		    Page:
+		    [lang::message::lookup "" intranet-reporting.Page Page]:
 		    [im_select -translate_p 0 page $pages $page]
 		  </td>
 		</tr>
 
 
 		<tr>
-		  <td class=form-label>Format</td>
+		  <td class=form-label>[lang::message::lookup "" intranet-reporting.Format Format]</td>
 		  <td class=form-widget>
 		    [im_report_output_format_select output_format "" $output_format]
 		  </td>
@@ -310,7 +310,7 @@ switch $output_format {
 
 		<tr>
 		  <td class=form-label></td>
-		  <td class=form-widget><input type=submit value='Submit'></td>
+		  <td class=form-widget><input type=submit value='[_ intranet-core.Submit]'></td>
 		</tr>
 		</table>
 		</form>
