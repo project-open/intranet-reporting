@@ -85,7 +85,12 @@ set this_url [export_vars -base "/intranet-reporting/timesheet-productivity" {st
 
 set internal_company_id [im_company_internal]
 
-set levels {1 "User Only" 2 "User+Company" 3 "User+Company+Project" 4 "All Details"} 
+set levels [list \
+		1 [lang::message::lookup "" intranet-reporting.User_Only "User Only"] \
+		2 [lang::message::lookup "" intranet-reporting.User_Company "User+Company"] \
+		3 [lang::message::lookup "" intranet-reporting.User_Company_Project "User+Company+Project"] \
+		4 [lang::message::lookup "" intranet-reporting.All_Details "All Details"] \
+]
 
 set num_format "999,990.99"
 
@@ -252,7 +257,25 @@ set report_def [list \
 ]
 
 # Global header/footer
-set header0 {"Employee" "Customer" "Project" "Date" Avail Salary SS Ins Other "\#Pay" Total "Hourly<br>Rate" "&nbsp;" "Intl<br>Hours" "Extl<br>Hours" "&nbsp;" "Total<br>Hours"}
+set header0 [list \
+		 [lang::message::lookup "" intranet-reporting.Employee "Employee"] \
+		 [lang::message::lookup "" intranet-reporting.Cusomer "Customer"] \
+		 [lang::message::lookup "" intranet-reporting.Project "Project"] \
+		 [lang::message::lookup "" intranet-reporting.Date "Date"] \
+		 [lang::message::lookup "" intranet-reporting.Avail Avalil] \
+		 [lang::message::lookup "" intranet-reporting.Salary Salary] \
+		 [lang::message::lookup "" intranet-reporting.SS SS] \
+		 [lang::message::lookup "" intranet-reporting.Ins Ins] \
+		 [lang::message::lookup "" intranet-reporting.Other Other] \
+		 [lang::message::lookup "" intranet-reporting.Number_of_Payments "\#Pay"] \
+		 [lang::message::lookup "" intranet-reporting.Total Total] \
+		 [lang::message::lookup "" intranet-reporting.Hourly_Rate "Hourly<br>Rate"] \
+		 [lang::message::lookup "" intranet-reporting.nbsp "&nbsp;"] \
+		 [lang::message::lookup "" intranet-reporting.Intl_Hours "Intl<br>Hours"] \
+		 [lang::message::lookup "" intranet-reporting.Extl_Hours "Extl<br>Hours"] \
+		 [lang::message::lookup "" intranet-reporting.nbsp "&nbsp;"] \
+		 [lang::message::lookup "" intranet-reporting.Total_Hours "Total<br>Hours"] \
+]
 set footer0 {"" "" "" "" "" "" "" "" ""}
 
 # --------------------------------------------------------------
@@ -350,32 +373,32 @@ switch $output_format {
 	<form>
 		<table border=0 cellspacing=1 cellpadding=1>
 		<tr>
-		  <td class=form-label>Level of Details</td>
+		  <td class=form-label>[lang::message::lookup "" intranet-reporting.Level_of_Detail "Level of Detail"]</td>
 		  <td class=form-widget>
 		    [im_select -translate_p 0 level_of_detail $levels $level_of_detail]
 		  </td>
 		</tr>
 		<tr>
-		  <td class=form-label>Month</td>
+		  <td class=form-label>[_ intranet-core.Month]</td>
 		  <td class=form-widget>
 		    <input type=textfield name=start_date value=$start_date>
 		  </td>
 		</tr>
 		<tr>
-		  <td class=form-label>User</td>
+		  <td class=form-label>[_ intranet-core.User]</td>
 		  <td class=form-widget>
 		    [im_user_select -include_empty_p 1 user_id $user_id]
 		  </td>
 		</tr>
                 <tr>
-                  <td class=form-label>Format</td>
+                  <td class=form-label>[lang::message::lookup "" intranet-reporting.Format Format]</td>
                   <td class=form-widget>
                     [im_report_output_format_select output_format "" $output_format]
                   </td>
                 </tr>
 		<tr>
 		  <td class=form-label></td>
-		  <td class=form-widget><input type=submit value=Submit></td>
+		  <td class=form-widget><input type=submit value='[_ intranet-core.Submit]'></td>
 		</tr>
 		</table>
 	</form>
