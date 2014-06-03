@@ -223,7 +223,7 @@ select
 	to_char(h.day, 'YYYY-MM-DD') as date_pretty,
 	to_char(h.day, 'J') as julian_date,
 	to_char(h.day, 'J')::integer - to_char(to_date(:start_date, 'YYYY-MM-DD'), 'J')::integer as date_diff,
-	to_char(coalesce(h.hours,0), :number_format) as hours,
+	coalesce(h.hours,0) as hours,
 	to_char(h.billing_rate, :number_format) || '&nbsp;' || co.currency as billing_rate,
 	u.user_id,
 	im_name_from_user_id(u.user_id) as user_name,
@@ -608,8 +608,10 @@ db_foreach sql $sql {
 	    -cell_class $class
 
 	im_report_update_counters -counters $counters
-	ns_log Notice "timesheet-customer-project: company_project_id=$company_project_id, val=[im_opt_val hours_project_subtotal]"
-	
+	set hours_user_subtotal [expr round(100.0 * $hours_user_subtotal) / 100.0]
+	set hours_project_sub_subtotal [expr round(100.0 * $hours_project_sub_subtotal) / 100.0]
+	set hours_project_subtotal [expr round(100.0 * $hours_project_subtotal) / 100.0]
+
 	set last_value_list [im_report_render_header \
 	    -output_format $output_format \
 	    -group_def $report_def \
