@@ -105,14 +105,14 @@ set group_list [list]
 if {$reports_exist_p && $user_admin_p} {
     lappend elements_list \
         edit {
-            label "MEN"
+            label "<img src='/intranet/images/navbar_default/wrench.png' width=16 height=16>"
             display_template {
                 @reports.edit_html;noquote@
             }
         }
     lappend elements_list \
         permission {
-            label "PERM"
+            label "<img src='/intranet/images/lock-add.png' width=16 height=16>"
             display_template {
                 @reports.permission_html;noquote@
             }
@@ -234,7 +234,7 @@ db_multirow -extend {indent_spaces edit_html permission_html} reports get_report
     }
 
     # Edit permissions 
-    if {4 != $indent_level} { set permission_html "&nbsp;&nbsp;&nbsp;<a href='/intranet/admin/permissions/one?object_id=$menu_id'>[im_gif "wrench"]</a>" }
+    if {4 != $indent_level} { set permission_html "&nbsp;&nbsp;&nbsp;<a href='/intranet/admin/permissions/one?object_id=$menu_id'>[im_gif "lock_add"]</a>" }
 
     # Skip the wrench for the headers
     if {4 == $indent_level} { set edit_html "" }
