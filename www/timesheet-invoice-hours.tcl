@@ -58,7 +58,7 @@ set undefined_l10n [lang::message::lookup "" intranet-reporting.undefined "&lt;u
 set grand_total_l10n [lang::message::lookup "" intranet-reporting.Grand_Total "Grand Total"]
 set customer_l10n [lang::message::lookup "" intranet-core.Customer "Customer"]
 set project_l10n [lang::message::lookup "" intranet-core.Project "Project"]
-set project_number_l10n [lang::message::lookup "" intranet-core.Project_Number "Project Number"]
+set project_number_l10n [lang::message::lookup "" intranet-core.Project_nr "Project Number"]
 set customer_po_l10n [lang::message::lookup "" intranet-reporting.Customer_PO "Customer PO"]
 set date_signature_l10n [lang::message::lookup "" intranet-reporting.Date_Signature "&nbsp;&nbsp;Date, Signature"]
 
@@ -354,28 +354,25 @@ switch $output_template {
 		  </div>
 		  <div id=main>
 			<div id=title>$timesheet_customer_l10n</div>
-			<div id=subtitle>Period: $hours_start_date to $hours_end_date</div>
-			
-			<table id=headertable cellpadding=0 border=0 rules=all>
-			 <tbody>
-			  <tr>
-			   <td id=head>$customer_l10n:</td>
-			   <td id=head>$project_l10n:</td>
-			   <td id=head>$project_number_l10n:</td>
-			   <td id=head>$customer_po_l10n:</td>
-			  </tr>
-			  
-			  <tr>
-			   <td id=content>$customer_name</td>
-			  <td id=content>$project_name</td>
-			   <td id=content>$project_nr</td>
-			   <td id=content></td>
-			  </tr>
-			  
-			 </tbody>
-			</table>
-	
-	
+			<div id=subtitle>[lang::message::lookup "" intranet-incoices.Period "Period"]: $hours_start_date - $hours_end_date</div>
+                        <table id=headertable cellpadding=0 border=0 rules=all>
+                         <tbody>
+                          <tr>
+                           <td id=head>$customer_l10n:</td>
+                           <td id=head>$project_l10n:</td>
+                           <td id=head>$project_number_l10n:</td>
+                           <!--<td id=head>$customer_po_l10n:</td>-->
+                          </tr>
+
+                          <tr>
+                           <td id=content>$customer_name</td>
+                           <td id=content>$project_name</td>
+                           <td id=content>$project_nr</td>
+                           <!--<td id=content></td>-->
+                          </tr>
+
+                         </tbody>
+                        </table>
 	"
     }
     html {
@@ -543,15 +540,13 @@ switch $output_template {
 
 	    ns_write "
                         <tr>
-                           <td id=timesum>Sum</td>
+                           <td id=timesum>[lang::message::lookup "" intranet-core.Sum "Sum"]</td>
                            <td id=timesum>$sub_total</td>
                            <td id=timesum></td>
                         </tr>
                         </tbody>
                         </table>
               "
-
-
 	}
 
 
