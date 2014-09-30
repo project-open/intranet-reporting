@@ -575,7 +575,7 @@ switch $output_template {
 			</colgroup>
 			 <tbody>
 			 <tr>
-					<td id=totalsum>Grand Total</td>
+					<td id=totalsum>[lang::message::lookup "" intranet-reporting.GrandTotal "Grand Total"]</td>
 					<td id=totalsum>$grand_total</td>
 					<td id=totalsum>X</td>
 				</tr>
