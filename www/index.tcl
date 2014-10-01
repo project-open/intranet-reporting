@@ -140,9 +140,9 @@ if {$reports_exist_p && $user_admin_p} {
 	lappend group_list $group_id
 
 	if { $user_admin_p } {
-	    set label_group_header "<div><span>$group_name</span></div><br>[im_gif $profile_gif $group_name]"
+	    set label_group_header "<div><span>$group_name</span></div><br>[im_gif -translate_p 1 $profile_gif $group_name]"
 	} else {
-            set label_group_header "[im_gif $profile_gif $group_name]"
+            set label_group_header "[im_gif -translate_p 1 $profile_gif $group_name]"
 	}
 
 	lappend elements_list \
