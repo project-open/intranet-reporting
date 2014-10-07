@@ -905,22 +905,27 @@ db_foreach sql $sql {
 	    set absences_list [array get absence_arr]
 	}	
 
-	# Formating and row totals 
-	for { set i 1 } { $i < $duration + 1 } { incr i } {
-	        # Make sure that day_double_digit is always a 2-digit number  
-		if { 1 == [string length $i]} { set day_double_digit day0$i } else { set day_double_digit day$i }
-		# Building totals for each row
-		if { "" != [expr $$day_double_digit] } {
-			set ts_hours_arr($day_double_digit) [expr $ts_hours_arr($day_double_digit) + $$day_double_digit]
-   		        set number_hours_project_ctr [expr $number_hours_project_ctr + [expr $$day_double_digit]] 
-		        set number_hours_ctr_pretty [expr $number_hours_ctr_pretty + [expr $$day_double_digit]]
-			if { 0 == $month_arr($day_double_digit) } {
-				set month_arr($day_double_digit) 1
-			        set number_hours_ctr [expr $number_hours_ctr + $ts_hours_arr($day_double_digit)] 
-			}
-		}
-	}
+        # Formating and row totals
+        for { set i 1 } { $i < $duration + 1 } { incr i } {
 
+	    # Make sure that day_double_digit is always a 2-digit number
+	    if { 1 == [string length $i]} { set day_double_digit day0$i } else { set day_double_digit day$i }
+
+	    # Building totals for each row
+	    if { "" != [expr $$day_double_digit] } {
+		set ts_hours_arr($day_double_digit) [expr $ts_hours_arr($day_double_digit) + $$day_double_digit]
+		
+		# Rounding
+		set ts_hours_arr($day_double_digit) [format "%.2f" [expr {double(round(100*$ts_hours_arr($day_double_digit)))/100}]]
+
+		set number_hours_project_ctr [expr $number_hours_project_ctr + [expr $$day_double_digit]]
+		set number_hours_ctr_pretty [expr $number_hours_ctr_pretty + [expr $$day_double_digit]]
+		if { 0 == $month_arr($day_double_digit) } {
+		    set month_arr($day_double_digit) 1
+		    set number_hours_ctr [expr $number_hours_ctr + $ts_hours_arr($day_double_digit)]
+		}
+	    }
+        }
 
 	im_report_update_counters -counters $counters
 
