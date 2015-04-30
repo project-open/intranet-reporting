@@ -107,8 +107,41 @@ set im_report_get_ts_costs_im_hours_sql "
 db_dml create_im_report_get_ts_costs_im_hours_sql $im_report_get_ts_costs_im_hours_sql
 
 
-set im_report_get_ts_costs_no_cache_sql "
-	CREATE OR REPLACE FUNCTION pg_temp.im_report_get_ts_costs_no_cache (int4)
+set im_report_get_ts_costs_im_costs_sql "
+        CREATE OR REPLACE FUNCTION pg_temp.im_report_get_ts_costs_im_costs (int4)
+        RETURNS NUMERIC AS \$BODY\$
+
+        declare
+                p_project_id        alias for \$1;
+                v_sum_ts_cost       numeric;
+                v_total_ts_cost     numeric;
+                r                   record;
+
+        begin
+                v_total_ts_cost := 0;
+                    FOR r IN
+                        select      amount
+                        from        im_costs
+                        where       project_id = p_project_id
+				    and cost_type_id = [im_cost_type_timesheet]
+                LOOP
+                        v_sum_ts_cost := r.amount;
+                        IF v_sum_ts_cost is null THEN
+                                v_sum_ts_cost := 0;
+                        END IF;
+                        v_total_ts_cost := v_total_ts_cost + v_sum_ts_cost;
+                        v_sum_ts_cost := 0;
+                END LOOP;
+                return v_total_ts_cost;
+
+        end;\$BODY\$ LANGUAGE 'plpgsql';
+"
+
+db_dml create_im_report_get_ts_costs_im_costs_sql $im_report_get_ts_costs_im_costs_sql
+
+
+set im_report_get_ts_costs_no_cache_im_hours_sql "
+	CREATE OR REPLACE FUNCTION pg_temp.im_report_get_ts_costs_no_cache_im_hours (int4)
 	RETURNS NUMERIC AS \$BODY\$
 
 	declare
@@ -136,7 +169,39 @@ set im_report_get_ts_costs_no_cache_sql "
 	return v_total_ts_cost;
 	end;\$BODY\$ LANGUAGE 'plpgsql';
 "
-db_dml create_im_report_get_ts_costs_no_cache_sql $im_report_get_ts_costs_no_cache_sql
+db_dml create_im_report_get_ts_costs_no_cache_im_hours_sql $im_report_get_ts_costs_no_cache_im_hours_sql
+
+set im_report_get_ts_costs_no_cache_im_costs_sql "
+        CREATE OR REPLACE FUNCTION pg_temp.im_report_get_ts_costs_no_cache_im_costs (int4)
+        RETURNS NUMERIC AS \$BODY\$
+
+        declare
+        p_project_id        alias for \$1;
+        v_child_project_id  int;
+        v_sum_ts_cost       numeric;
+        v_total_ts_cost     numeric;
+        r                   record;
+
+        begin
+                v_total_ts_cost := 0;
+                FOR r IN
+                        select      p_child.project_id
+                        from        im_projects p_parent,
+                                    im_projects p_child
+                        where       p_child.tree_sortkey between p_parent.tree_sortkey
+                                    and tree_right(p_parent.tree_sortkey)
+                                    and p_parent.project_id = p_project_id
+        LOOP
+
+                select pg_temp.im_report_get_ts_costs_im_costs(r.project_id) into v_sum_ts_cost;
+                v_total_ts_cost := v_total_ts_cost + v_sum_ts_cost;
+                v_sum_ts_cost := 0;
+        END LOOP;
+        return v_total_ts_cost;
+        end;\$BODY\$ LANGUAGE 'plpgsql';
+"
+db_dml create_im_report_get_ts_costs_no_cache_im_costs_sql $im_report_get_ts_costs_no_cache_im_costs_sql
+
 
 # ------------------------------------------------------------
 # Report SQL 
@@ -159,14 +224,16 @@ set sql "
 		'<a href=\"/intranet/projects/view?project_id=' || p.project_id  || '\">' || p.project_name || '</a>' as project_name,
 		to_char(p.end_date, 'YYYY-MM-DD') as start_date,
  		to_char(p.end_date, 'YYYY-MM-DD') as end_date,
-		pg_temp.im_report_get_ts_costs_no_cache(p.project_id) as costs_no_cache,
+		pg_temp.im_report_get_ts_costs_no_cache_im_hours(p.project_id) as costs_no_cache_im_hours,
+
 		CASE p.cost_timesheet_logged_cache is null OR p.cost_timesheet_logged_cache = 0
 			WHEN true THEN 
 				0
 			ELSE	
 				cost_timesheet_logged_cache
 		END as cost_timesheet_logged_cache,
-		pg_temp.im_report_get_ts_costs_no_cache(p.project_id) - p.cost_timesheet_logged_cache as diff,
+		pg_temp.im_report_get_ts_costs_no_cache_im_hours(p.project_id) - p.cost_timesheet_logged_cache as diff,
+                pg_temp.im_report_get_ts_costs_no_cache_im_costs(p.project_id) as costs_no_cache_im_costs,
 		im_name_from_id(p.project_status_id) as status
 	from 
 		im_projects p 
@@ -181,7 +248,7 @@ set sql "
 ad_return_top_of_page "
 	[im_header]
 	[im_navbar]
-	<table cellspacing=0 cellpadding=0 border=0>
+	<table cellspacing=0 cellpadding=5 border=0>
 
         <tr valign=top>
           <td width='30%'>
@@ -226,8 +293,9 @@ ad_return_top_of_page "
 	<table border=1 cellspacing=2 cellpadding=5>
     	     <tr>
                 <td><strong>Project Name</strong></td>\n
+                <td><strong>TS Costs<br>im_costs</strong></td>\n
                 <td><strong>TS Costs<br>im_hours</strong></td>\n
-                <td><strong>Cached Costs</strong></td>\n
+                <td><strong>TS Costs<br>(Cached)</strong></td>\n
                 <td><strong>Difference</strong></td>\n
                 <td><strong>Project Status</strong></td>\n
              </tr>
@@ -242,7 +310,8 @@ db_foreach r $sql {
     set diff_total [expr $diff_total + $diff]
     ns_write "<tr>\n
 		<td>$project_name</td>\n
-		<td>[expr {double(round(100*$costs_no_cache))/100}]</td>\n
+		<td>[expr {double(round(100*$costs_no_cache_im_costs))/100}]</td>\n
+		<td>[expr {double(round(100*$costs_no_cache_im_hours))/100}]</td>\n
 		<td>$cost_timesheet_logged_cache</td>\n
     "
 
@@ -261,10 +330,11 @@ db_foreach r $sql {
 ns_write "
     	<tr>\n
                 <td><strong>Total:</strong></td>\n
-                <td></td>\n
-                <td></td>\n
+                <td>&nbsp;</td>\n
+                <td>&nbsp;</td>\n
 		<td>[format "%.2f" [expr {double(round(100*$diff_total))/100}]]</td>\n
-                <td></td>\n
+                <td>&nbsp;</td>\n
+                <td>&nbsp;</td>\n
         </tr>
 	</table>
 	[im_footer]
