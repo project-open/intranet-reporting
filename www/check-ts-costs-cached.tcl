@@ -17,6 +17,8 @@ ad_page_contract {
     { start_date "2010-01-01" }
     { project_status_id:integer 0 }
     { show_diff_only_p:optional }
+    { fix_project_id:array,multiple {} }
+    btn:optional
 }
 
 # ------------------------------------------------------------
@@ -69,6 +71,92 @@ if { 0 == $project_status_id } {
 set show_diff_only_p_checked ""
 if { [info exists show_diff_only_p] } {
     set show_diff_only_p_checked "checked"
+}
+
+if { "POST" == [ad_conn method] && [info exists btn] } {
+
+    set del_cost_ids [list]
+    foreach { p_id foo } [array get fix_project_id] {
+
+	# Check for mismatch between im_hour::project_id and im_costs::project_id
+	set sql "
+	select  
+		c.cost_id
+        from 
+                im_hours h, 
+                im_costs c
+        where 
+                h.cost_id = c.cost_id 
+                and h.project_id <> c.project_id
+                and h.project_id in (
+                             select      p_child.project_id
+                             from        im_projects p_parent,
+                                         im_projects p_child
+                             where       p_child.tree_sortkey between p_parent.tree_sortkey
+                                         and tree_right(p_parent.tree_sortkey)
+                                         and p_parent.project_id = :p_id
+	        ) 
+	"
+
+	foreach cid [db_list del_cost_ids $sql] {
+	    lappend del_cost_ids $cid
+	}
+
+	# Check if there are im_cost items with no TS record 
+	set sql "
+        select  
+            c.cost_id
+        from 
+            im_costs c
+        where 
+            c.project_id in (
+                     select      p_child.project_id
+                     from        im_projects p_parent,
+                                 im_projects p_child
+                     where       p_child.tree_sortkey between p_parent.tree_sortkey
+                                 and tree_right(p_parent.tree_sortkey)
+                                 and p_parent.project_id = :p_id
+            )
+            and c.cost_type_id = 3718
+            and c.cost_id not in (
+                select cost_id from im_hours where project_id in (  
+                         select      p_child.project_id
+                       from        im_projects p_parent,
+                                     im_projects p_child
+                         where       p_child.tree_sortkey between p_parent.tree_sortkey
+                                   and tree_right(p_parent.tree_sortkey)
+                                     and p_parent.project_id = :p_id
+                    )
+            )
+    	"
+
+	foreach cid [db_list del_cost_ids $sql] {
+	    lappend del_cost_ids $cid
+	}
+    }
+
+
+    # ad_return_complaint xx $del_cost_ids
+    # ad_script_abort
+
+    foreach cost_id $del_cost_ids {
+	db_dml update_hours "update im_hours set cost_id = null where cost_id = :cost_id"
+	db_string del_ts_costs "select im_cost__delete(:cost_id)"
+    }
+
+    
+    # Set dirty flag for project 
+    db_dml set_dirty_flag "update im_projects set cost_cache_dirty=now() where project_id = $p_id"
+    
+    im_timesheet_update_timesheet_cache -project_id $p_id
+    im_timesheet2_sync_timesheet_costs -project_id $p_id
+    
+    # Recalculate the cost caches
+    im_cost_cache_sweeper
+    
+    # Reset
+    unset del_cost_ids
+
 }
 
 # ------------------------------------------------------------
@@ -222,6 +310,7 @@ if { ![empty_string_p $where_clause] } {
 set sql "
 	select 
 		'<a href=\"/intranet/projects/view?project_id=' || p.project_id  || '\">' || p.project_name || '</a>' as project_name,
+		p.project_id,
 		to_char(p.end_date, 'YYYY-MM-DD') as start_date,
  		to_char(p.end_date, 'YYYY-MM-DD') as end_date,
 		pg_temp.im_report_get_ts_costs_no_cache_im_hours(p.project_id) as costs_no_cache_im_hours,
@@ -240,6 +329,8 @@ set sql "
 	where 
 		p.parent_id is null
 		$where_clause
+	order by 
+		p.project_id
 "
 
 # ------------------------------------------------------------
@@ -248,12 +339,12 @@ set sql "
 ad_return_top_of_page "
 	[im_header]
 	[im_navbar]
+        <form method='POST'>
 	<table cellspacing=0 cellpadding=5 border=0>
-
         <tr valign=top>
           <td width='30%'>
                 <!-- 'Filters' - Show the Report parameters -->
-                <form method='POST'>
+
                 <table cellspacing=2>
                 <tr class=rowtitle>
                   <td class=rowtitle colspan=2 align=center>Filters</td>
@@ -277,7 +368,6 @@ ad_return_top_of_page "
                   <td><input type=submit value='Submit'></td>
                 </tr>
                 </table>
-                </form>
           </td>
 	  <td>
 		<table cellspacing=2 width='90%'>
@@ -298,6 +388,7 @@ ad_return_top_of_page "
                 <td><strong>TS Costs<br>im_hours</strong></td>\n
                 <td><strong>Difference</strong></td>\n
                 <td><strong>Project Status</strong></td>\n
+                <td><strong>Fix</strong></td>\n
              </tr>
 "
 
@@ -323,6 +414,7 @@ db_foreach r $sql {
 
     ns_write "
 		<td>$status</td>\n
+		<td><input type='checkbox' name='fix_project_id.$project_id'/></td>\n
 	      </tr>
     "
 }
@@ -334,8 +426,9 @@ ns_write "
                 <td>&nbsp;</td>\n
                 <td>&nbsp;</td>\n
 		<td>[format "%.2f" [expr {double(round(100*$diff_total))/100}]]</td>\n
-                <td>&nbsp;</td>\n
+                <td colspan='2' align='right'><input name='btn' type=submit value='Fix marked projects'></td>\n
         </tr>
-	</table>
+	</table><br><br>
+        </form>
 	[im_footer]
 "
