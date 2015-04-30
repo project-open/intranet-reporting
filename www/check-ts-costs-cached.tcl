@@ -78,6 +78,7 @@ if { "POST" == [ad_conn method] && [info exists btn] } {
     set del_cost_ids [list]
     foreach { p_id foo } [array get fix_project_id] {
 
+	# Wrong project assignments
 	# Check for mismatch between im_hour::project_id and im_costs::project_id
 	set sql "
 	select  
@@ -102,6 +103,7 @@ if { "POST" == [ad_conn method] && [info exists btn] } {
 	    lappend del_cost_ids $cid
 	}
 
+	# Missing TS items 
 	# Check if there are im_cost items with no TS record 
 	set sql "
         select  
@@ -133,18 +135,73 @@ if { "POST" == [ad_conn method] && [info exists btn] } {
 	foreach cid [db_list del_cost_ids $sql] {
 	    lappend del_cost_ids $cid
 	}
+
+	# Mismatch btw. im_cost::amount and im_hours::hours * im_hours::billing_rate
+        # Check if there are im_cost items with no TS record
+
+	set sql "
+            select 
+                h.cost_id 
+            from 
+                im_hours h, 
+                im_costs c 
+            where 
+                c.cost_id = h.cost_id 
+                and c.amount <> (h.hours * h.billing_rate)
+                and c.project_id = h.project_id 
+                and c.project_id in (
+                    select      p_child.project_id
+                    from        im_projects p_parent,
+                                im_projects p_child
+                    where       p_child.tree_sortkey between p_parent.tree_sortkey
+                                and tree_right(p_parent.tree_sortkey)
+                                and p_parent.project_id = :p_id
+                )
+	"
+
+        foreach cid [db_list del_cost_ids $sql] {
+            lappend del_cost_ids $cid
+        }
+
+
+
+        # Missing Cost Items. Cost items miss project_id and have amount = 0  
+	set sql "	
+            select
+                h.cost_id
+            from
+                im_hours h
+            where
+                h.project_id in (
+                         select      p_child.project_id
+                         from        im_projects p_parent,
+                                     im_projects p_child
+                         where       p_child.tree_sortkey between p_parent.tree_sortkey
+                                     and tree_right(p_parent.tree_sortkey)
+                                     and p_parent.project_id = :p_id
+                )
+                and h.cost_id not in (
+                    select cost_id from im_costs where project_id in (
+                             select     p_child.project_id
+                             from       im_projects p_parent,
+                                        im_projects p_child
+                             where      p_child.tree_sortkey between p_parent.tree_sortkey
+                                       	and tree_right(p_parent.tree_sortkey)
+                                        and p_parent.project_id = :p_id
+                        )
+                )
+	"
+
+        foreach cid [db_list del_cost_ids $sql] {
+            lappend del_cost_ids $cid
+        }
     }
-
-
-    # ad_return_complaint xx $del_cost_ids
-    # ad_script_abort
 
     foreach cost_id $del_cost_ids {
 	db_dml update_hours "update im_hours set cost_id = null where cost_id = :cost_id"
 	db_string del_ts_costs "select im_cost__delete(:cost_id)"
     }
 
-    
     # Set dirty flag for project 
     db_dml set_dirty_flag "update im_projects set cost_cache_dirty=now() where project_id = $p_id"
     
