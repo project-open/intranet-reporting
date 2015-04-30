@@ -294,8 +294,8 @@ ad_return_top_of_page "
     	     <tr>
                 <td><strong>Project Name</strong></td>\n
                 <td><strong>TS Costs<br>im_costs</strong></td>\n
-                <td><strong>TS Costs<br>im_hours</strong></td>\n
                 <td><strong>TS Costs<br>(Cached)</strong></td>\n
+                <td><strong>TS Costs<br>im_hours</strong></td>\n
                 <td><strong>Difference</strong></td>\n
                 <td><strong>Project Status</strong></td>\n
              </tr>
@@ -311,8 +311,8 @@ db_foreach r $sql {
     ns_write "<tr>\n
 		<td>$project_name</td>\n
 		<td>[expr {double(round(100*$costs_no_cache_im_costs))/100}]</td>\n
-		<td>[expr {double(round(100*$costs_no_cache_im_hours))/100}]</td>\n
 		<td>$cost_timesheet_logged_cache</td>\n
+		<td>[expr {double(round(100*$costs_no_cache_im_hours))/100}]</td>\n
     "
 
     if { 0 == $diff } {
@@ -332,8 +332,8 @@ ns_write "
                 <td><strong>Total:</strong></td>\n
                 <td>&nbsp;</td>\n
                 <td>&nbsp;</td>\n
-		<td>[format "%.2f" [expr {double(round(100*$diff_total))/100}]]</td>\n
                 <td>&nbsp;</td>\n
+		<td>[format "%.2f" [expr {double(round(100*$diff_total))/100}]]</td>\n
                 <td>&nbsp;</td>\n
         </tr>
 	</table>
