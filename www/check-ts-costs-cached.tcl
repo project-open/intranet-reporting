@@ -409,7 +409,8 @@ ad_return_top_of_page "
                 <tr>
                   <td>Project Status</td>
                   <td>
-                    [im_project_status_select project_status_id $project_status_id]
+                    <!--[im_project_status_select project_status_id $project_status_id]-->
+		    [im_category_select -include_empty_p 1 "Intranet Project Status" project_status_id $project_status_id]
                   </td>
                 </tr>
                 <tr>
