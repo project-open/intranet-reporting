@@ -356,7 +356,7 @@ if { ![empty_string_p $project_status_id] && $project_status_id > 0 } {
     lappend criteria "p.project_status_id in ([join [im_sub_categories $project_status_id] ","])"
 }
 if {"" != $start_date} {
-    lappend criteria "p.end_date >= :start_date::timestamptz"
+    lappend criteria "p.start_date >= :start_date::timestamptz"
 }
 
 set where_clause [join $criteria " and\n            "]
