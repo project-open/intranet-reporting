@@ -92,7 +92,7 @@ if {"" != $auto_login} {
 
 if {("xml" == $format || "json" == $format) && 0 == $current_user_id} {
     # Return a XML authentication error
-    im_rest_error -http_status 401 -message "Not authenticated"
+    im_rest_error -http_status 401 -message "intranet-reporting/view.tcl: Not authenticated"
     ad_script_abort
 }
 
