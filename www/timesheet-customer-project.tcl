@@ -464,31 +464,31 @@ switch $output_format {
 	<tr valign=top><td>
 		<table border=0 cellspacing=1 cellpadding=1>
 		<tr>
-		  <td class=form-label>Level of Details</td>
+		  <td class=form-label>[lang::message::lookup "" intranet-reporting.LevelOfDetails "Level of Details"]</td>
 		  <td class=form-widget>
 		    [im_select -translate_p 0 level_of_detail $levels $level_of_detail]
 		  </td>
 		</tr>
 		<tr>
-		  <td class=form-label>Start Date</td>
+		  <td class=form-label>[lang::message::lookup "" intranet-core.Start_Date "Start Date"]</td>
 		  <td class=form-widget>
 		    <input type=textfield name=start_date value=$start_date>
 		  </td>
 		</tr>
 		<tr>
-		  <td class=form-label>End Date</td>
+		  <td class=form-label>[lang::message::lookup "" intranet-core.End_Date "End Date"]</td>
 		  <td class=form-widget>
 		    <input type=textfield name=end_date value=$end_date>
 		  </td>
 		</tr>
 		<tr>
-		  <td class=form-label>Customer</td>
+		  <td class=form-label>[lang::message::lookup "" intranet-core.Customer "Customer"]</td>
 		  <td class=form-widget>
 		    [im_company_select -include_empty_name [lang::message::lookup "" intranet-core.All "All"] -with_projects_p 1 company_id $company_id]
 		  </td>
 		</tr>
 		<tr>
-		  <td class=form-label>Project</td>
+		  <td class=form-label>[lang::message::lookup "" intranet-core.Project "Project"]</td>
 		  <td class=form-widget>
 		    [im_project_select -include_empty_p 1 -exclude_subprojects_p 0 -include_empty_name [lang::message::lookup "" intranet-core.All "All"] project_id $project_id]
 		  </td>
@@ -498,13 +498,13 @@ switch $output_format {
 	if {$view_hours_all_p} {
 	    ns_write "
 		<tr>
-		  <td class=form-label>User's Department</td>
+		  <td class=form-label>[lang::message::lookup "" intranet-reporting.UsersDepartment "User's Department"]</td>
 		  <td class=form-widget>
 		    [im_cost_center_select -include_empty 1 -include_empty_name [lang::message::lookup "" intranet-core.All "All"] -department_only_p 1 cost_center_id $cost_center_id]
 		  </td>
 		</tr>
 		<tr>
-		  <td class=form-label>User</td>
+		  <td class=form-label>[lang::message::lookup "" intranet-core.User "User"]</td>
 		  <td class=form-widget>
 		    [im_user_select -include_empty_p 1 -group_id [list [im_employee_group_id] [im_freelance_group_id]] -include_empty_name [lang::message::lookup "" intranet-core.All "All"] user_id $user_id] 
 		</td>
@@ -524,14 +524,14 @@ switch $output_format {
 		$report_options_html
 
 		<tr>
-		  <td class=form-label>Format</td>
+		  <td class=form-label>[lang::message::lookup "" intranet-reporting.Format "Format"]</td>
 		  <td class=form-widget>
 		    [im_report_output_format_select output_format "" $output_format]
 		  </td>
 		</tr>
 		<tr>
 		  <td class=form-label></td>
-		  <td class=form-widget><input type=submit value=Submit></td>
+		  <td class=form-widget><input type=submit value='[lang::message::lookup "" acs-kernel.common_Submit "Submit"]'></td>
 		</tr>
 		</table>
 
