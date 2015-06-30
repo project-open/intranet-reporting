@@ -30,13 +30,13 @@ ad_proc -private im_report_render_absences {
     -group_def
     -last_value_array_list
     -report_year_month
-    {-encoding ""}
-    {-output_format "html"}
-    {-row_class ""}
-    {-cell_class ""}
-    {-level_of_detail 999}
-    {-debug 0}
-    {-absences_list ""}
+    { -encoding "" }
+    { -output_format "html" }
+    { -row_class "" }
+    { -cell_class "" }
+    { -level_of_detail 999 }
+    { -debug 0 }
+    { -absences_list "" }
 } {
     Renders the footer stack of a single row in a project-open report. 
     The procedure acts similar to im_report_render_header,
@@ -51,12 +51,13 @@ ad_proc -private im_report_render_absences {
 
     set timesheet_hours_per_day [parameter::get -package_id [apm_package_id_from_key intranet-timesheet2] -parameter "TimesheetHoursPerDay" -default 8]
     if { "" != $absences_list  } { array set absence_arr $absences_list }
-
+ 
     if {$debug} { ns_log Notice "render_footer:" }
     array set last_value_array $last_value_array_list
     if {$debug} { ns_log NOTICE "intranet-reporting-procs::im_report_render_absences:: ==============================================================" }
     if {$debug} { ns_log NOTICE "intranet-reporting-procs::im_report_render_absences:: group_def: $group_def" }
     if {$debug} { ns_log NOTICE "intranet-reporting-procs::im_report_render_absences:: last_value_array_list: $last_value_array_list" }
+    if {$debug} { ns_log NOTICE "intranet-reporting-procs::im_report_render_absences:: absences_list: $absences_list" }
 
     # Split group_def and assign to an array for reverse access
     set group_level 1
@@ -100,6 +101,7 @@ ad_proc -private im_report_render_absences {
 	# -------------------------------------------------------
 	# Determine month 
 	if {$debug} { ns_log NOTICE "intranet-reporting-procs::im_report_render_absences::group_var: $group_var" }
+
 	# -------------------------------------------------------
 	# Write out absences to an array
 	# -------------------------------------------------------
@@ -133,6 +135,11 @@ ad_proc -private im_report_render_absences {
 			    set total_absence [expr [expr $timesheet_hours_per_day + 0] * [expr [lindex $absence_list_item 0]]]
 			}
 		    }
+		    
+		    # Apply employee availability 
+		    set employee_id [lindex $last_value_array_list 1]
+		    set employee_availability [db_string get_employee_availability "select availability from im_employees where employee_id = :employee_id" -default 100]
+		    set total_absence [format "%.2f" [expr {double(round(100*[expr $total_absence * $employee_availability / 100])) / 100}]] 
 		    
 		    if { "html" == $output_format } {
 			set value "<a href='/intranet-timesheet2/absences?view_name=absence_list_home&user_selection=$new_value"
