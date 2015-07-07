@@ -139,6 +139,7 @@ ad_proc -private im_report_render_absences {
 		    # Apply employee availability 
 		    set employee_id [lindex $last_value_array_list 1]
 		    set employee_availability [db_string get_employee_availability "select availability from im_employees where employee_id = :employee_id" -default 100]
+		    if { "" == $employee_availability } { set employee_availability 100 }
 		    set total_absence [format "%.2f" [expr {double(round(100*[expr $total_absence * $employee_availability / 100])) / 100}]] 
 		    
 		    if { "html" == $output_format } {
