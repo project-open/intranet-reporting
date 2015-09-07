@@ -97,6 +97,8 @@ if {"" != $profile_id && 0 != $profile_id} {
     append filter_sql "and u.user_id in (select member_id from group_distinct_member_map where group_id = :profile_id)\n"
 }
 
+# DynField "spam_frequency_id" is not part of the default product...
+# category_id=11130: No spam email whatsoever.
 set nospam_sql ""
 if {[im_column_exists persons spam_frequency_id]} {
     set nospam_sql "and pe.spam_frequency_id != 11130"
