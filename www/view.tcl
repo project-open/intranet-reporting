@@ -23,8 +23,9 @@ ad_page_contract {
     {return_url "/intranet-reporting/index"}
     { user_id:integer 0}
     { auto_login "" }
+    { email "" }
+    { password "" }
 }
-
 
 ad_proc im_reporting_rest_error {
     -format:required
@@ -66,11 +67,36 @@ if {"" != $report_code} {
 
 ns_log Notice "/intranet-reporting/view: report_code='[im_opt_val report_code]', report_id='[im_opt_val report_id]'"
 
-
 # ---------------------------------------------------------------
 # Authentication
 
 set current_user_id 0
+
+# Email + password
+if {"" != $password && "" != $email} {
+    array set result_array [auth::authenticate \
+		    -email $email \
+		    -password $password \
+		   ]
+
+    set account_status "undefined"
+    set auth_message ""
+    set user_id 0
+    if {[info exists result_array(account_status)]} { set account_status $result_array(account_status) }
+    if {[info exists result_array(user_id)]} { set user_id $result_array(user_id) }
+    if {[info exists result_array(auth_message)]} { set auth_message $result_array(auth_message) }
+
+    if {"ok" == $account_status && 0 != $user_id} { 
+	set current_user_id $user_id
+    } else {
+        ad_return_complaint 1 "<b>[lang::message::lookup "" intranet-core.Wrong_Security_Token "Wrong Security Token"]</b>:<br>
+        [lang::message::lookup "" intranet-core.Wrong_Security_Token_msg "Your security token is not valid. Please contact the system owner."]<br><pre>$auth_message</pre>"
+	ad_script_abort
+    }
+}
+
+
+
 if {"" != $auto_login} {
 
     # Provide a reasonable error message if a rookie user forgot to put user_id...
@@ -80,15 +106,18 @@ if {"" != $auto_login} {
     }
 
     set valid_login_p [im_valid_auto_login_p -user_id $user_id -auto_login $auto_login]
-    if {$valid_login_p} { set current_user_id $user_id }
+    if {$valid_login_p} { 
+	set current_user_id $user_id 
+    }
 
-} else {
+}
 
+if {0 == $current_user_id} {
     set no_redirect_p 0
     if {"xml" == $format || "json" == $format} { set no_redirect_p 1 }
     set current_user_id [im_require_login -no_redirect_p $no_redirect_p]
-
 }
+
 
 if {("xml" == $format || "json" == $format) && 0 == $current_user_id} {
     # Return a XML authentication error
