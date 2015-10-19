@@ -91,6 +91,7 @@ set user_url "/intranet/users/view?user_id="
 set this_url [export_vars -base "/intranet-reporting/timesheet-days-per-project-and-month" {start_date} ]
 set levels {2 "Users" 3 "Users and Projects"} 
 set num_format "999,990.99"
+set hours_per_day [parameter::get_from_package_key -package_key intranet-timesheet2-tasks -parameter "TimesheetHoursPerDay" -default 8]
 
 
 # ------------------------------------------------------------
@@ -167,7 +168,7 @@ for {set i 0} {[expr $year * 12 + $month] <= [expr $year_end * 12 + $month_end]}
     set interval_end_date [db_string interval_end "select ('$year-$month-01'::date + '1 month'::interval - '1 day'::interval)::date from dual"]
     append select_sum_sql "\t\t,round(sum(
     	   CASE WHEN h.day between '$year-$month-01' and '$interval_end_date'
-	   THEN h.hours ELSE 0 END),1) as h${year}_${month_formatted}"
+	   THEN h.hours ELSE 0 END) / :hours_per_day,1) as h${year}_${month_formatted}"
     lappend report_line_specs "\$h${year}_${month_formatted}"
     lappend report_footer_specs "<b>\$h${year}_${month_formatted}_subtotal</b>"
     lappend header0 "${year}<br>-${month_formatted}"
@@ -185,7 +186,7 @@ lappend report_line_specs "<b>\$htotal</b>"
 lappend header0 "Total"
 append select_sum_sql "\t\t,round(sum(
 	CASE WHEN h.day between '$first_month-01' and '$interval_end_date'
-	THEN h.hours ELSE 0 END),1) as htotal"
+	THEN h.hours ELSE 0 END) / :hours_per_day,1) as htotal"
 
 lappend counters [list \
         pretty_name "Hours Total Subtotal" \
@@ -262,6 +263,8 @@ switch $output_format {
         ns_write "
 	[im_header]
 	[im_navbar]
+	<table border=0 'width=100%' cellspacing=10 cellpadding=10>
+	<tr><td>
 	<form>
 		<table border=0 cellspacing=1 cellpadding=1>
 		<tr>
@@ -312,6 +315,12 @@ switch $output_format {
 		</tr>
 		</table>
 	</form>
+	</td><td valign=top>
+		<b>$page_title</b>
+		<p>This report shows <i>days</i> of logged hours per month for several months.<br>
+		The number of days are calculated by dividing the number of hours by <br>
+		the TimesheetHoursPerDay parameter (by default 8 hours).
+	</td></tr>
 	<table border=0 cellspacing=1 cellpadding=1>\n"
     }
 }
