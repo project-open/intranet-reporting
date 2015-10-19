@@ -12,6 +12,7 @@ ad_page_contract {
     @param start_unit Month or week to start within the start_year
 } {
     { start_date "" }
+    { end_date "" }
     { level_of_detail 3 }
     { output_format "html" }
     { user_id "" }
@@ -46,10 +47,17 @@ set context ""
 
 
 # Check that Start-Date have correct format
-set start_date [string range $start_date 0 6]
-if {"" != $start_date && ![regexp {^[0-9][0-9][0-9][0-9]\-[0-9][0-9]$} $start_date]} {
+set start_date [string range $start_date 0 9]
+if {"" != $start_date && ![regexp {^[0-9][0-9][0-9][0-9]\-[0-9][0-9]\-[0-9][0-9]$} $start_date]} {
     ad_return_complaint 1 "Start Date doesn't have the right format.<br>
     Current value: '$start_date'<br>
+    Expected format: 'YYYY-MM'"
+}
+
+set end_date [string range $end_date 0 9]
+if {"" != $end_date && ![regexp {^[0-9][0-9][0-9][0-9]\-[0-9][0-9]\-[0-9][0-9]$} $end_date]} {
+    ad_return_complaint 1 "End Date doesn't have the right format.<br>
+    Current value: '$end_date'<br>
     Expected format: 'YYYY-MM'"
 }
 
@@ -61,21 +69,27 @@ if {"" != $start_date && ![regexp {^[0-9][0-9][0-9][0-9]\-[0-9][0-9]$} $start_da
 set days_in_past 365
 db_1row todays_date "
 select
-	to_char(sysdate::date - :days_in_past::integer, 'YYYY') as todays_year,
-	to_char(sysdate::date - :days_in_past::integer, 'MM') as todays_month
+	to_char(sysdate::date, 'YYYY') as todays_year,
+	to_char(sysdate::date, 'MM') as todays_month,
+	to_char(sysdate::date - '1 year'::interval + '1 month'::interval, 'YYYY') as start_year,
+	to_char(sysdate::date - '1 year'::interval + '1 month'::interval, 'MM') as start_month
 from dual
 "
 
-if {"" == $start_date} { 
-    set start_date "$todays_year-$todays_month"
+if {"" == $start_date & "" == $end_date} {
+    set end_date [db_string end_date "select ('$todays_year-$todays_month-01'::date + '1 month'::interval - '1 day'::interval)::date"]
+    set start_date [db_string start_date "select to_char(:end_date::date - '1 year'::interval + '1 month'::interval, 'YYYY-MM-DD')"]
 }
+
+if {"" == $start_date} { set start_date "$start_year-$start_month-01" }
+if {"" == $end_date} { set end_date [db_string end_date "select ('$todays_year-$todays_month-01'::date + '1 month'::interval - '1 day'::interval)::date"] }
 
 set internal_company_id [im_company_internal]
 set company_url "/intranet/companies/view?company_id="
 set project_url "/intranet/projects/view?project_id="
 set user_url "/intranet/users/view?user_id="
 set this_url [export_vars -base "/intranet-reporting/timesheet-days-per-project-and-month" {start_date} ]
-set levels {1 "User Only" 2 "User+Company" 3 "User+Company+Project" 4 "All Details"} 
+set levels {2 "Users" 3 "Users and Projects"} 
 set num_format "999,990.99"
 
 
@@ -86,15 +100,24 @@ set num_format "999,990.99"
 set criteria [list]
 
 if {"" != $project_id && 0 != $project_id} {
-    lappend criteria "p.project_id = :project_id"
+    lappend criteria "main_p.project_id = :project_id"
 }
 
 if {[info exists user_id] && 0 != $user_id && "" != $user_id} {
     lappend criteria "h.user_id = :user_id"
 }
 
-if { [info exists cost_center_id] && 0 != $cost_center_id && "" != $cost_center_id && 525 != $cost_center_id } {
-    lappend criteria "e.department_id = :cost_center_id"
+if { [info exists cost_center_id] && 0 != $cost_center_id && "" != $cost_center_id && [im_cost_center_company] != $cost_center_id } {
+    set cost_center_code [db_string cc_code "select cost_center_code from im_cost_centers where cost_center_id = :cost_center_id" -default ""]
+    lappend criteria "h.user_id in (
+		select	e.employee_id
+		from	im_employees e
+		where	e.department_id in (
+			select	cc.cost_center_id
+			from	im_cost_centers cc
+			where	position(:cost_center_code in cc.cost_center_code) > 0
+			)
+	)"
 }
 
 set where_clause [join $criteria " and\n            "]
@@ -103,81 +126,135 @@ if { ![empty_string_p $where_clause] } {
 }
 
 
+
 # ------------------------------------------------------------
-# Define the list of months to display
 #
+if {![regexp {^(....)-(..)-(..)$} $start_date match year_start month_start]} {
+    ad_return_complaint 1 "Error parsing start_date='$start_date'"
+}
+if {![regexp {^(....)-(..)-(..)$} $end_date match year_end month_end]} {
+    ad_return_complaint 1 "Error parsing end_date='$end_date'"
+}
 
 
 # ------------------------------------------------------------
-# Define the report - SQL, counters, headers and footers 
+# List of months to report on
 #
-set sql "
-	select	e.employee_id as user_id,
-		e.job_title,
-		cc.cost_center_code,
-		cc.cost_center_name,
-		im_name_from_user_id(e.employee_id) as user_name,
-		main_p.project_id as main_project_id,
-		main_p.project_name as main_project_name,
-		(select sum(h.hours) from im_hours h where 
-			h.project_id = sub_p.project_id and h.user_id = e.employee_id and 
-			h.day between '2015-01-01' and '2015-01-31'
-		) as h2015_01
+set months [list]
+set year $year_start
+set month $month_start
+set select_sum_sql ""
+set report_line_specs {$user_name $cost_center_name $job_title $project_name }
+set report_footer_specs {"" "" "" ""}
+set header0 {"User" "Department" "Job Title" "Project"}
+set footer0 {}
+set first_month ""
+
+# ad_return_complaint 1 "$year_end - $month_end<br>$year_start - $month_start"
+
+for {set i 0} {[expr $year * 12 + $month] <= [expr $year_end * 12 + $month_end]} {incr i} {
+    if {$month > 12} {
+	set month 1
+	incr year
+    }
+    set month_formatted $month
+    if {[string length $month_formatted] < 2} { set month_formatted "0$month_formatted" }
+
+    # Start building lists of things per month
+    if {"" == $first_month} { set first_month "$year-$month" }
+    lappend months "${year}-${month_formatted}"
+
+    set interval_end_date [db_string interval_end "select ('$year-$month-01'::date + '1 month'::interval - '1 day'::interval)::date from dual"]
+    append select_sum_sql "\t\t,round(sum(
+    	   CASE WHEN h.day between '$year-$month-01' and '$interval_end_date'
+	   THEN h.hours ELSE 0 END),1) as h${year}_${month_formatted}"
+    lappend report_line_specs "\$h${year}_${month_formatted}"
+    lappend report_footer_specs "<b>\$h${year}_${month_formatted}_subtotal</b>"
+    lappend header0 "${year}<br>-${month_formatted}"
+    lappend counters [list \
+        pretty_name "Hours $year-$month_formatted" \
+	var "h${year}_${month_formatted}_subtotal" \
+        reset \$user_id \
+	expr "\$h${year}_${month_formatted}" \
+    ]
+
+    incr month
+}
+
+lappend report_line_specs "<b>\$htotal</b>"
+lappend header0 "Total"
+append select_sum_sql "\t\t,round(sum(
+	CASE WHEN h.day between '$first_month-01' and '$interval_end_date'
+	THEN h.hours ELSE 0 END),1) as htotal"
+
+lappend counters [list \
+        pretty_name "Hours Total Subtotal" \
+	var "htotal_subtotal" \
+        reset \$user_id \
+	expr "\$htotal" \
+]
+lappend report_footer_specs "<b>\$htotal_subtotal</b>"
+
+# Select out all hours and 
+set inner_sql "
+	select	h.user_id,
+		main_p.project_id
+		$select_sum_sql
 	from	im_projects main_p,
 		im_projects sub_p,
+		im_hours h
+	where	h.project_id = sub_p.project_id and
+		main_p.tree_sortkey = tree_root_key(sub_p.tree_sortkey)
+		$where_clause
+	group by
+		h.user_id,
+		main_p.project_id
+"
+
+set sql "
+	select	t.*,
+		e.job_title,
+		e.employee_id as user_id,
+		im_name_from_user_id(e.employee_id) as user_name,
+		cc.cost_center_code,
+		cc.cost_center_name,
+		acs_object__name(t.project_id) as project_name
+	from	($inner_sql) t,
 		im_employees e,
 		im_cost_centers cc
-	where	
-		main_p.tree_sortkey = tree_root_key(sub_p.tree_sortkey) and
+	where	t.user_id = e.employee_id and
 		e.department_id = cc.cost_center_id
-        	$where_clause
-	order by 
+	order by
 	        user_name,
-		main_project_name
+		project_name
 "
+
+
 
 set report_def [list \
     group_by user_id \
     header {
 	"\#colspan=99 <b><a href=$user_url$user_id>$user_name</a></b>"
     } \
-        content [list \
-            group_by main_project_id \
-            header {
-                "\#colspan=1 "
-		"\#colspan=99 <b><a href=$project_url$main_project_id>$main_project_name</a></b>"
-            } \
-		     content [list \
-				  header {
-				      $user_name
-				      $cost_center_name
-				      $job_title
-				      $main_project_name
-				      $h2015_01
-				  } \
-				  content {} \
-				 ] \
-		     footer {
-			 "#colspan=99"
-		     } \
-	] \
-	footer {
-		"#colspan=99 Summary"
-	} \
+    content [list \
+            group_by project_id \
+            header {} \
+	    content [list \
+		header $report_line_specs \
+		content {} \
+	    ] \
+	    footer {} \
+    ] \
+    footer $report_footer_specs \
 ]
-
-
-# Global header/footer
-set header0 {"Project" "Employee" "01" "02" "03" "04" "05" "06" "07" "08" "09" "10" "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" "21" "22" "23" "24" "25" "26" "27" "28" "29" "30" "31" "% of <br>total hours<br>logged by user<br>this month"}
-set footer0 {"" "" "" "" "" "" "" "" ""}
-
 
 # ------------------------------------------------------------
 # Start formatting the page
 #
 
 # Write out HTTP header, considering CSV/MS-Excel formatting
-im_report_write_http_headers -output_format $output_format
+im_report_write_http_headers -output_format $output_format -report_name "timesheet-days-per-project-and-month.csv"
+
 
 # Add the HTML select box to the head of the page
 switch $output_format {
@@ -188,27 +265,39 @@ switch $output_format {
 	<form>
 		<table border=0 cellspacing=1 cellpadding=1>
 		<tr>
-		  <td class=form-label>Start-Month (YYYY-MM)</td>
+		  <td class=form-label>[lang::message::lookup "" intranet-reporting.LevelOfDetails "Level of Details"]</td>
+		  <td class=form-widget>
+		    [im_select -translate_p 0 level_of_detail $levels $level_of_detail]
+		  </td>
+		</tr>
+		<tr>
+		  <td class=form-label>Start</td>
 		  <td class=form-widget>
 		    <input type=textfield name=start_date value=$start_date>
 		  </td>
 		</tr>
 		<tr>
+		  <td class=form-label>End</td>
+		  <td class=form-widget>
+		    <input type=textfield name=end_date value=$end_date>
+		  </td>
+		</tr>
+		<tr>
 		  <td class=form-label>User</td>
 		  <td class=form-widget>
-		    [im_user_select -include_empty_p 1 user_id $user_id]
+		    [im_user_select -include_empty_p 1 -include_empty_name "" user_id $user_id]
 		  </td>
 		</tr>
                 <tr>
                   <td class=form-label>Project</td>
                   <td class=form-widget>
-                    [im_project_select project_id $project_id]
+                    [im_project_select -include_empty_p 1 project_id $project_id]
                   </td>
                 </tr>
                 <tr>
                   <td class=form-label>Department</td>
                   <td class=form-widget>
-                    [im_cost_center_select cost_center_id $cost_center_id]
+                    [im_cost_center_select -include_empty 1 cost_center_id $cost_center_id]
                   </td>
                 </tr>
                 <tr>
@@ -248,7 +337,7 @@ db_foreach sql $sql {
 	    -row_class $class \
 	    -cell_class $class
 	
-#	im_report_update_counters -counters $counters
+	im_report_update_counters -counters $counters
 	
 
 	set last_value_list [im_report_render_header \
