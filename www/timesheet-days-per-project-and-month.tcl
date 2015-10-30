@@ -137,13 +137,18 @@ if {![regexp {^(....)-(..)-(..)$} $end_date match year_end month_end]} {
     ad_return_complaint 1 "Error parsing end_date='$end_date'"
 }
 
+set month_start [scan $month_start %d]
+set month_end [scan $month_end %d]
+
+
+
 
 # ------------------------------------------------------------
 # List of months to report on
 #
 set months [list]
 set year $year_start
-set month [scan $month_start %d]
+set month $month_start
 set select_sum_sql ""
 set report_line_specs {$user_name $cost_center_name $job_title $project_name }
 set report_footer_specs {"" "" "" ""}
@@ -348,6 +353,22 @@ db_foreach sql $sql {
 	
 	im_report_update_counters -counters $counters
 	
+
+	# Rounding for counter sums
+	set year $year_start
+	set month $month_start
+	for {set i 0} {[expr $year * 12 + $month] <= [expr $year_end * 12 + $month_end]} {incr i} {
+	    if {$month > 12} {
+		set month 1
+		incr year
+	    }
+	    set month_formatted $month
+	    if {[string length $month_formatted] < 2} { set month_formatted "0$month_formatted" }
+	    set "h${year}_${month_formatted}_subtotal" [expr round(10.0 * [expr "\$h${year}_${month_formatted}_subtotal"])/10.0 ]
+	    incr month
+	}
+	set "htotal_subtotal" [expr round(10.0 * [expr "\$htotal_subtotal"])/10.0 ]
+
 
 	set last_value_list [im_report_render_header \
 	    -output_format $output_format \
