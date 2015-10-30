@@ -143,7 +143,7 @@ if {![regexp {^(....)-(..)-(..)$} $end_date match year_end month_end]} {
 #
 set months [list]
 set year $year_start
-set month $month_start
+set month [scan $month_start %d]
 set select_sum_sql ""
 set report_line_specs {$user_name $cost_center_name $job_title $project_name }
 set report_footer_specs {"" "" "" ""}
@@ -151,7 +151,7 @@ set header0 {"User" "Department" "Job Title" "Project"}
 set footer0 {}
 set first_month ""
 
-# ad_return_complaint 1 "$year_end - $month_end<br>$year_start - $month_start"
+# ad_return_complaint 1 "$year_end - $month_end<br>$year_start - $month"
 
 for {set i 0} {[expr $year * 12 + $month] <= [expr $year_end * 12 + $month_end]} {incr i} {
     if {$month > 12} {
