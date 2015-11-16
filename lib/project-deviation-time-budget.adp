@@ -8,7 +8,7 @@
         <table border=0 cellspacing="1" cellpadding="1" width="100%">
         <tr valign=top>
 		<td>
-                <table border=0 cellspacing=1 cellpadding=1 width='420px'>
+                <table border=0 cellspacing=1 cellpadding=1 width="420px">
                 <tr>
                   <td class=form-label><%=[lang::message::lookup "" intranet-core.Start_Date "Start Date"]%></td>
                   <td class=form-widget>
