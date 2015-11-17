@@ -93,7 +93,7 @@ set rowclass(1) "rowodd"
 
 set days_in_past 7
 
-set default_currency [ad_parameter -package_id [im_package_cost_id] "DefaultCurrency" "" "EUR"]
+set default_currency [im_parameter -package_id [im_package_cost_id] "DefaultCurrency" "" "EUR"]
 set cur_format [im_l10n_sql_currency_format]
 set date_format [im_l10n_sql_date_format]
 

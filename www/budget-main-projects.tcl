@@ -135,7 +135,7 @@ set rowclass(1) "rowodd"
 set currency_format "999,999,999"
 set percent_format "999.9"
 set date_format "YYYY-MM-DD"
-set default_currency [ad_parameter -package_id [im_package_cost_id] "DefaultCurrency" "" "EUR"]
+set default_currency [im_parameter -package_id [im_package_cost_id] "DefaultCurrency" "" "EUR"]
 
 
 # Set URLs on how to get to other parts of the system

@@ -50,7 +50,7 @@ set edit_timesheet_p [im_permission $current_user_id "edit_hours_all"]
 
 set date_format "YYYY-MM-DD"
 set number_format "999,999.99"
-set system_url [ad_parameter -package_id [ad_acs_kernel_id] SystemURL "" ""]
+set system_url [im_parameter -package_id [ad_acs_kernel_id] SystemURL "" ""]
 
 # ------------------------------------------------------------
 

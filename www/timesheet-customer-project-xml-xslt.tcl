@@ -361,7 +361,7 @@ if { "chart"==$output_format && 0==$im_survey_installed_p } {
 # Constants
 
 set number_format "999,990.99"
-set invoice_template_base_path [ad_parameter -package_id [im_package_invoices_id] InvoiceTemplatePathUnix "" "/tmp/templates/"]
+set invoice_template_base_path [im_parameter -package_id [im_package_invoices_id] InvoiceTemplatePathUnix "" "/tmp/templates/"]
 set path_saxon  [parameter::get -package_id [apm_package_id_from_key intranet-openoffice] -parameter "PathSaxonParser" -default ""]
 if { "" == $path_saxon  } {
     ad_return_complaint 1  [lang::message::lookup "" intranet-openoffice.PathToSaxonParserNotFound "Path to Saxon Parser not defined. Please check Parameter 'PathSaxonParser' of package 'intranet-openoffice'"]
