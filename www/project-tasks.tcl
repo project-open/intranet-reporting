@@ -58,7 +58,7 @@ set page_title "Project-Tasks \[BETA\]"
 set current_url "/intranet-reporting/project-tasks.tcl"
 set return_url "/intranet-reporting/project-tasks.tcl"
 set export_var_list ""
-set user_id [ad_get_user_id]
+set user_id [ad_conn user_id]
 set include_subprojects 0
 set max_entries_per_page $task_max_entries_per_page
 set restrict_to_cost_center_id 0
@@ -306,7 +306,7 @@ db_foreach main_project_sql $main_project_sql {
     }
 
     if {"mine" == $restrict_to_mine_p} {
-	lappend criteria "p.project_id in (select object_id_one from acs_rels where object_id_two = [ad_get_user_id])"
+	lappend criteria "p.project_id in (select object_id_one from acs_rels where object_id_two = [ad_conn user_id])"
     }
 
     if {[string is integer $restrict_to_with_member_id] && $restrict_to_with_member_id > 0} {

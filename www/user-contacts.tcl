@@ -20,7 +20,7 @@ ad_page_contract {
 }
 
 # set current_user_id [ad_maybe_redirect_for_registration]
-set current_user_id [ad_get_user_id]
+set current_user_id [ad_conn user_id]
 set menu_label "reporting-user-contacts"
 set read_p [db_string report_perms "
 	select	im_object_permission_p(m.menu_id, :current_user_id, 'read')

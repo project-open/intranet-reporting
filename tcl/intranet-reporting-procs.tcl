@@ -71,7 +71,7 @@ ad_proc -public im_report_options {
 } {
     Returns a list of all Reports. 
 } {
-    set current_user_id [ad_get_user_id]
+    set current_user_id [ad_conn user_id]
 
     set where_clause ""
     if {"" != $report_type_id && 0 != $report_type_id} {
