@@ -3,7 +3,7 @@
         <%=[im_navbar]%>
 
         <form action='project-deviation-time-budget' id='intranet-reporting-project-deviation-time-budget'>
-        <%=[export_form_vars opened_projects]%>
+        <%=[export_vars -form {opened_projects}]%>
 
         <table border=0 cellspacing="1" cellpadding="1" width="100%">
         <tr valign=top>

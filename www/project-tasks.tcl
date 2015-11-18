@@ -845,7 +845,7 @@ set left_navbar_html "
 set project_id $restrict_to_project_id
 
 set component_html "
-    [export_form_vars project_id return_url]
+    [export_vars -form {project_id return_url}]
         <table bgcolor=white border=0 cellpadding=1 cellspacing=1 class=\"table_list_page\">
           $table_header_html
           $table_body_html

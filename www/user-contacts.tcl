@@ -329,7 +329,7 @@ switch $output_format {
 	
 	<!-- Here starts the main report table -->
 	<form action='/intranet/member-add-2' method=POST>
-	[export_form_vars return_url role_id object_id notify_asignee]
+	[export_vars -form {return_url role_id object_id notify_asignee}]
 	<table border=0 cellspacing=1 cellpadding=1>
         "
     }

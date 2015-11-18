@@ -855,7 +855,7 @@ set sidebar_html "
 				 <div class=\"filter-list\">
 				  	<div class=\"filter\">
 						<div class=\"filter-block\">
-							[export_form_vars invoice_id]
+							[export_vars -form {invoice_id}]
 								<table border=0 cellspacing=1 cellpadding=1>
 									<tr valign=top><td>
 											<table border=0 cellspacing=1 cellpadding=1>

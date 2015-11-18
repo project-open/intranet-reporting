@@ -459,7 +459,7 @@ switch $output_format {
 	<div class=\"filter-block\">
 
 	<form>
-	[export_form_vars invoice_id]
+	[export_vars -form {invoice_id}]
 	<table border=0 cellspacing=1 cellpadding=1>
 	<tr valign=top><td>
 		<table border=0 cellspacing=1 cellpadding=1>

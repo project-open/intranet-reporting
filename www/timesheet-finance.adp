@@ -8,7 +8,7 @@
 
 
 <form>
-<%= [export_form_vars opened_projects project_id] %>
+<%= [export_vars -form {opened_projects project_id}] %>
 
 <table border=0 cellspacing=1 cellpadding=1>
 <tr valign=top><td>

@@ -387,7 +387,7 @@ switch $output_template {
 
 	<form>
 	<table border=0 cellspacing=1 cellpadding=1>
-	[export_form_vars company_id invoice_id]
+	[export_vars -form {company_id invoice_id}]
 	<tr valign=top><td>
 		<table border=0 cellspacing=1 cellpadding=1>
 		<tr>

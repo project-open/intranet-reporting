@@ -236,7 +236,7 @@ if {$no_template_p} {
 
 set filter_html "
 	<form method=get name=filter action='/intranet-reporting/view'>
-	[export_form_vars report_id]
+	[export_vars -form {report_id}]
 	<table border=0 cellpadding=0 cellspacing=1>
 	<tr>
 	    <td class=form-label>[lang::message::lookup "" intranet-reporting.Format "Format"]</td>
