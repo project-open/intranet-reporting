@@ -730,7 +730,7 @@ if { [info exists ctr] } {
         # Include a link to go to the next page
         set next_start_idx [expr $end_idx + 1]
         set task_max_entries_per_page $max_entries_per_page
-        set next_page_url  "$current_page_url?[export_url_vars project_id task_object_id task_max_entries_per_page order_by]&task_start_idx=$next_start_idx&$pass_through_vars_html"
+        set next_page_url  "$current_page_url?[export_vars -url {project_id task_object_id task_max_entries_per_page order_by}]&task_start_idx=$next_start_idx&$pass_through_vars_html"
         set next_page_html "($remaining_items more) <A href=\"$next_page_url\">&gt;&gt;</a>"
     }
 
@@ -739,7 +739,7 @@ if { [info exists ctr] } {
         # at least 1 previous row. add a previous page link
         set previous_start_idx [expr $start_idx - $max_entries_per_page]
         if { $previous_start_idx < 0 } { set previous_start_idx 0 }
-        set previous_page_html "<A href=$current_page_url?[export_url_vars project_id]&$pass_through_vars_html&order_by=$order_by&task_start_idx=$previous_start_idx>&lt;&lt;</a>"
+        set previous_page_html "<A href=$current_page_url?[export_vars -url {project_id}]&$pass_through_vars_html&order_by=$order_by&task_start_idx=$previous_start_idx>&lt;&lt;</a>"
     }
 }
 
