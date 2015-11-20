@@ -54,10 +54,10 @@ ad_proc -private im_report_render_absences {
  
     if {$debug} { ns_log Notice "render_footer:" }
     array set last_value_array $last_value_array_list
-    if {$debug} { ns_log NOTICE "intranet-reporting-procs::im_report_render_absences:: ==============================================================" }
-    if {$debug} { ns_log NOTICE "intranet-reporting-procs::im_report_render_absences:: group_def: $group_def" }
-    if {$debug} { ns_log NOTICE "intranet-reporting-procs::im_report_render_absences:: last_value_array_list: $last_value_array_list" }
-    if {$debug} { ns_log NOTICE "intranet-reporting-procs::im_report_render_absences:: absences_list: $absences_list" }
+    if {$debug} { ns_log Notice "intranet-reporting-procs::im_report_render_absences:: ==============================================================" }
+    if {$debug} { ns_log Notice "intranet-reporting-procs::im_report_render_absences:: group_def: $group_def" }
+    if {$debug} { ns_log Notice "intranet-reporting-procs::im_report_render_absences:: last_value_array_list: $last_value_array_list" }
+    if {$debug} { ns_log Notice "intranet-reporting-procs::im_report_render_absences:: absences_list: $absences_list" }
 
     # Split group_def and assign to an array for reverse access
     set group_level 1
@@ -100,7 +100,7 @@ ad_proc -private im_report_render_absences {
 	# Get absences for user 
 	# -------------------------------------------------------
 	# Determine month 
-	if {$debug} { ns_log NOTICE "intranet-reporting-procs::im_report_render_absences::group_var: $group_var" }
+	if {$debug} { ns_log Notice "intranet-reporting-procs::im_report_render_absences::group_var: $group_var" }
 
 	# -------------------------------------------------------
 	# Write out absences to an array
@@ -109,18 +109,18 @@ ad_proc -private im_report_render_absences {
 	set ctr 0
 	set total_sum_absences 0
 	foreach field $footer {
-	    ns_log NOTICE "intranet-reporting-procs::im_report_render_absences::field: $field"
+	    ns_log Notice "intranet-reporting-procs::im_report_render_absences::field: $field"
 	    set position_day_str [string first "(day" [string tolower $field]]
-            if {$debug} { ns_log NOTICE "intranet-reporting-procs::im_report_render_absences::position found: $position_day_str" }
+            if {$debug} { ns_log Notice "intranet-reporting-procs::im_report_render_absences::position found: $position_day_str" }
 	    if { "-1" != $position_day_str } {
 		set calendar_day [string range $field [expr $position_day_str + 4] [expr $position_day_str + 5]] 
-		if {$debug} { ns_log NOTICE "intranet-reporting-procs::im_report_render_absences::calendar_day: $calendar_day" }
+		if {$debug} { ns_log Notice "intranet-reporting-procs::im_report_render_absences::calendar_day: $calendar_day" }
 		set report_year [string range $report_year_month 0 3]
 		set report_month [string range $report_year_month 5 6 ]
 		set date_ansi_key "$report_year-$report_month-$calendar_day"
-		if {$debug} { ns_log NOTICE "intranet-reporting-procs::im_report_render_absences::looking up key: $date_ansi_key" }
+		if {$debug} { ns_log Notice "intranet-reporting-procs::im_report_render_absences::looking up key: $date_ansi_key" }
 		if { [info exists absence_arr($date_ansi_key)] } {	    
-		    if {$debug} { ns_log NOTICE "intranet-reporting-procs::im_report_render_absences::found absence" }
+		    if {$debug} { ns_log Notice "intranet-reporting-procs::im_report_render_absences::found absence" }
 		    # Evaluate absence amount  
 		    # absence_arr($date_ansi_key) is list of lists
 		    set total_absence 0 
@@ -150,11 +150,11 @@ ad_proc -private im_report_render_absences {
 		    }
 		    set total_sum_absences [expr $total_sum_absences + [expr $total_absence + 0]]  
 		} else {
-		    if {$debug} { ns_log NOTICE "intranet-reporting-procs::im_report_render_absences::did not found absence in array" }
+		    if {$debug} { ns_log Notice "intranet-reporting-procs::im_report_render_absences::did not found absence in array" }
                     set value "&nbsp;"
 		}
 	    } else { 
-		if {$debug} { ns_log NOTICE "intranet-reporting-procs::im_report_render_absences::No day column" }
+		if {$debug} { ns_log Notice "intranet-reporting-procs::im_report_render_absences::No day column" }
 		set value ""
 		if { 0 == $ctr } {
 		    set value <strong>[lang::message::lookup "" intranet-core.Absences "Absences"]</strong>
@@ -870,17 +870,17 @@ db_foreach sql $sql {
 	    array unset absence_arr 
 
 	    # Get absences for this user 
-	    if {$debug} { ns_log NOTICE "timesheet-monthly-hours-absences::get-absences: new_value: $new_value, report_month: $report_month, report_year: $report_year," }
+	    if {$debug} { ns_log Notice "timesheet-monthly-hours-absences::get-absences: new_value: $new_value, report_month: $report_month, report_year: $report_year," }
 	    set column_sql "select * from im_absences_month_absence_duration_type (:user_id, :report_month, :report_year, null) AS (days date, total_days numeric, absence_type_id integer)"
 	    db_foreach col $column_sql {
-		if {$debug} { ns_log NOTICE "timesheet-monthly-hours-absences::switch_user - setting absence_arr($days)" }
+		if {$debug} { ns_log Notice "timesheet-monthly-hours-absences::switch_user - setting absence_arr($days)" }
 		set duration_absence_type_list [list $total_days [im_category_from_id $absence_type_id]]
 		if { [info exists absence_arr($days)] } {
 		    set absence_arr($days) [lappend absence_arr($days) $duration_absence_type_list]
 		} else {
 		    set absence_arr($days) "{$duration_absence_type_list}"
 		}
-		if {$debug} { ns_log NOTICE "timesheet-monthly-hours-absences::new absence_arr($days): $absence_arr($days)" }
+		if {$debug} { ns_log Notice "timesheet-monthly-hours-absences::new absence_arr($days): $absence_arr($days)" }
 	    }
 
 	    # Preset ts_hours_arr with absences 
@@ -888,7 +888,7 @@ db_foreach sql $sql {
 		if { 1 == [string length $i]} { set day_double_digit 0$i } else { set day_double_digit $i }
 		set date_ansi_key "$report_year-$report_month-$day_double_digit"
                 if { [info exists absence_arr($date_ansi_key)] } {
-                    ns_log NOTICE "timesheet-monthly-hours-absences::switch_user - new User: $user_id - found absence for key: $date_ansi_key"
+                    ns_log Notice "timesheet-monthly-hours-absences::switch_user - new User: $user_id - found absence for key: $date_ansi_key"
                     # Evaluate absence amount
                     # absence_arr($date_ansi_key) is list of lists
                     set total_absence 0
@@ -903,9 +903,9 @@ db_foreach sql $sql {
                             set total_absence [expr [expr $timesheet_hours_per_day + 0] * [expr [lindex $absence_list_item 0]]]
                         }
                     }
-		    if {$debug} { ns_log NOTICE "timesheet-monthly-hours-absences::switch_user - Found total_absence: $total_absence" }
+		    if {$debug} { ns_log Notice "timesheet-monthly-hours-absences::switch_user - Found total_absence: $total_absence" }
 		    set ts_hours_arr(day$day_double_digit) $total_absence
-		    if {$debug} { ns_log NOTICE "timesheet-monthly-hours-absences::switch_user - Setting ts_hours_arr(day$day_double_digit) to: $total_absence"	}
+		    if {$debug} { ns_log Notice "timesheet-monthly-hours-absences::switch_user - Setting ts_hours_arr(day$day_double_digit) to: $total_absence"	}
 		    set number_hours_ctr_pretty [expr $number_hours_ctr_pretty + $total_absence]
 		}
 	    }

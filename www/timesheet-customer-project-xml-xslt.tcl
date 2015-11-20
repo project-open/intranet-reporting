@@ -160,13 +160,13 @@ proc im_reporting_render_odt_template {
 
     foreach row_node $odt_table_rows_nodes {
 	set row_as_list [$row_node asList]
-	ns_log NOTICE "timesheet-customer-project-xml-xslt:: row_as_list: $row_as_list"
-	ns_log NOTICE "timesheet-customer-project-xml-xslt:: --------------------------"
+	ns_log Notice "timesheet-customer-project-xml-xslt:: row_as_list: $row_as_list"
+	ns_log Notice "timesheet-customer-project-xml-xslt:: --------------------------"
 	# Looking for the @@ row ... 
 	if {[regexp {@@} $row_as_list match]} { set odt_template_double_vars_row_node $row_node }
 	# Looking for a formular 
 	if { [string first "ooow:sum" [string tolower $row_as_list]] != -1 } {
-	    ns_log NOTICE "timesheet-customer-project-xml-xslt:: Found formular"
+	    ns_log Notice "timesheet-customer-project-xml-xslt:: Found formular"
 	    set odt_template_formular_row_node $row_node 
 	}		
     }
@@ -201,7 +201,7 @@ proc im_reporting_render_odt_template {
 	
         # Replace vars - expecting a well formed key/value list ...
         foreach {i j} $line {
-	    # ns_log NOTICE "timesheet-customer-project-xml-xslt:: $row_mold_list ::: $i $j/[list $j] <br><br>"
+	    # ns_log Notice "timesheet-customer-project-xml-xslt:: $row_mold_list ::: $i $j/[list $j] <br><br>"
 	    regsub -all "@@$i@@" $new_node [list [string map {& \\&} $j]] new_node
         }
 		
@@ -235,7 +235,7 @@ proc im_reporting_render_odt_template {
 		if {[catch {
 		    # Calculate new target cell coordinate
 		    set coordinate_int_new [expr $coordinate_int_orig + $ctr_new_nodes_created -1]
-		    ns_log NOTICE "timesheet-customer-project-xml-xslt:: New value of coordinate_int: $coordinate_int_new"
+		    ns_log Notice "timesheet-customer-project-xml-xslt:: New value of coordinate_int: $coordinate_int_new"
 		    
 		    set cmd "set target_coordinate \[string map \{$coordinate_int_orig $coordinate_int_new\} \"[lindex [split $coordinate_pair ":"] 1]\"\]"
 		    eval $cmd
@@ -244,7 +244,7 @@ proc im_reporting_render_odt_template {
 		    $cell_node setAttribute "table:formula" $formular
 		    
 		} err_msg]} {				
-		    ns_log NOTICE "timesheet-customer-project-xml-xslt:: Error updating forumular: $err_msg"
+		    ns_log Notice "timesheet-customer-project-xml-xslt:: Error updating forumular: $err_msg"
 		}
 	    }
 	}
@@ -1363,7 +1363,7 @@ switch $output_format {
     xml {
         if { "" != $xslt_template_id  } {
             set uri_xslt "$invoice_template_base_path/[im_category_from_id $xslt_template_id]"
-            ns_log NOTICE "timesheet-customer-project-v2 :: uri_xslt: $uri_xslt"
+            ns_log Notice "timesheet-customer-project-v2 :: uri_xslt: $uri_xslt"
 
 	    # Create tmp file for Reports Default XML
 	    set uri_report_default_xml [ns_tmpnam]
@@ -1396,7 +1396,7 @@ switch $output_format {
 	# Get URI of XSLT choosen by user  
 	if { "" != $xslt_template_id  } {
 	    set uri_xslt "$invoice_template_base_path/[im_category_from_id $xslt_template_id]"
-	    ns_log NOTICE "timesheet-customer-project-v2 :: uri_xslt: $uri_xslt"
+	    ns_log Notice "timesheet-customer-project-v2 :: uri_xslt: $uri_xslt"
 	    
 	    # Create tmp file for Report Custom XML 
 	    set uri_report_custom_xml [ns_tmpnam]
@@ -1409,7 +1409,7 @@ switch $output_format {
 	    set uri_report_custom_xml $uri_report_default_xml
 	}
 	
-	ns_log NOTICE "timesheet-customer-project-v2 :: uri_report_xml: $uri_report_custom_xml"
+	ns_log Notice "timesheet-customer-project-v2 :: uri_report_xml: $uri_report_custom_xml"
 	
 	# Render Template
 	set odt_zip [im_reporting_render_odt_template "${invoice_template_base_path}/[im_category_from_id $odt_template_id]" $uri_report_custom_xml ""]

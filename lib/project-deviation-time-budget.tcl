@@ -666,7 +666,7 @@ db_multirow -extend {level_spacer open_gif} project_list project_list $sql  {
 	lappend opened $child_id
 	set url [export_vars -base $this_url {project_id customer_id employee_id {opened_projects $opened}}]
 
-	ns_log NOTICE "intranet-reporting::project-budget--no_project_childs: $no_project_childs; project_id: $child_id "
+	ns_log Notice "intranet-reporting::project-budget--no_project_childs: $no_project_childs; project_id: $child_id "
 	if { 0 != $no_project_childs } {set gif [im_gif "plus_9"]} else {set gif [im_gif "minus_9"]}	
 
     }
@@ -677,7 +677,7 @@ db_multirow -extend {level_spacer open_gif} project_list project_list $sql  {
 	set open_gif [im_gif empty21 "" 0 9 9] 
     }
 
-    # ns_log NOTICE "intranet-reporting::project-budget project_type_id: $project_type_id; project_id: $child_id "
+    # ns_log Notice "intranet-reporting::project-budget project_type_id: $project_type_id; project_id: $child_id "
 
 }
 

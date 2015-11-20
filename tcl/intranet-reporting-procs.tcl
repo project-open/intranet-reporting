@@ -185,7 +185,7 @@ ad_proc im_report_render_cell {
     into a report HTTP session
 } {
     set td_fields ""
-    ns_log NOTICE "intranet-reporting-procs::im_report_render_cell: $cell" 
+    ns_log Notice "intranet-reporting-procs::im_report_render_cell: $cell" 
     # Remove leading spaces
     regexp {^[ ]*(.*)} $cell match cell
 
