@@ -145,7 +145,7 @@ set read_p [db_string report_perms "
         from    im_menus m
         where   m.menu_id = :menu_id
 " -default 'f']
-if {![string equal "t" $read_p]} {
+if {"t" ne $read_p } {
     set msg_l10n [lang::message::lookup "" intranet-reporting.You_dont_have_permissions "You don't have the necessary permissions to view this page"]
     im_reporting_rest_error -format $format -error_message $msg_l10n
 }

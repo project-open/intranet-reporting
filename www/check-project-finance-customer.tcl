@@ -32,7 +32,7 @@ ad_page_contract {
 # Security
 
 set menu_label "reporting-check-project-finance-customer"
-set current_user_id [ad_maybe_redirect_for_registration]
+set current_user_id [auth::require_login]
 set read_p [db_string report_perms "
 	select	im_object_permission_p(m.menu_id, :current_user_id, 'read')
 	from	im_menus m
@@ -42,7 +42,7 @@ set read_p [db_string report_perms "
 # ToDo: Remove
 set read_p "t"
 
-if {![string equal "t" $read_p]} {
+if {"t" ne $read_p } {
     set message "You don't have the necessary permissions to view this page"
     ad_return_complaint 1 "<li>$message"
     ad_script_abort
@@ -256,7 +256,7 @@ set class ""
 db_foreach sql $report_sql {
 
 	# Select either "roweven" or "rowodd"
-	set class $rowclass([expr $counter % 2])
+	set class $rowclass([expr {$counter % 2}])
 
 	im_report_display_footer \
 	    -group_def $report_def \

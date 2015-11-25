@@ -30,13 +30,13 @@ set cnt 0
 # because it identifies unquely the report's Menu and
 # its permissions.
 set menu_label "reporting-community-stats"
-set current_user_id [ad_maybe_redirect_for_registration]
+set current_user_id [auth::require_login]
 set read_p [db_string report_perms "
         select  im_object_permission_p(m.menu_id, :current_user_id, 'read')
         from    im_menus m
         where   m.label = :menu_label
 " -default 'f']
-if {![string equal "t" $read_p]} {
+if {"t" ne $read_p } {
     ad_return_complaint 1 [lang::message::lookup "" intranet-reporting.You_dont_have_permissions "You don't have the necessary permissions to view this page"]
     ad_script_abort
 }
@@ -56,7 +56,7 @@ set total_users [db_string total_users "
 	select	count(*)
 	from	persons
 "]
-append content "<tr><td $bgcolor([expr $cnt%2])>Total users in the system</td><td $bgcolor([expr $cnt%2])>$total_users</td></tr>\n"
+append content "<tr><td $bgcolor([expr {$cnt%2}])>Total users in the system</td><td $bgcolor([expr {$cnt%2}])>$total_users</td></tr>\n"
 incr cnt
 
 append content "<tr><td class=rowplain colspan=2>&nbsp;</td></tr>\n"
@@ -73,7 +73,7 @@ set users_status_sql "
 "
 db_foreach users_status $users_status_sql {
     set status [lang::message::lookup "" intranet-reporting.User_status_$member_state $member_state]
-    append content "<tr><td $bgcolor([expr $cnt%2])>Users with status $status</td><td $bgcolor([expr $cnt%2])>$users</td></tr>\n"
+    append content "<tr><td $bgcolor([expr {$cnt%2}])>Users with status $status</td><td $bgcolor([expr {$cnt%2}])>$users</td></tr>\n"
     incr cnt
 }
 
@@ -93,11 +93,11 @@ db_1row user_groups_sql "
 "
 
 append content "<tr><td class=rowplain colspan=2>&nbsp;</td></tr>\n"
-append content "<tr><td $bgcolor([expr $cnt%2])>Members of group 'Employees'</td><td $bgcolor([expr $cnt%2])>$emps</td></tr>\n"
+append content "<tr><td $bgcolor([expr {$cnt%2}])>Members of group 'Employees'</td><td $bgcolor([expr {$cnt%2}])>$emps</td></tr>\n"
 incr cnt
-append content "<tr><td $bgcolor([expr $cnt%2])>Members of group 'Customers'</td><td $bgcolor([expr $cnt%2])>$custs</td></tr>\n"
+append content "<tr><td $bgcolor([expr {$cnt%2}])>Members of group 'Customers'</td><td $bgcolor([expr {$cnt%2}])>$custs</td></tr>\n"
 incr cnt
-append content "<tr><td $bgcolor([expr $cnt%2])>Members of group 'Freelancers'</td><td $bgcolor([expr $cnt%2])>$provs</td></tr>\n"
+append content "<tr><td $bgcolor([expr {$cnt%2}])>Members of group 'Freelancers'</td><td $bgcolor([expr {$cnt%2}])>$provs</td></tr>\n"
 incr cnt
 
 

@@ -22,7 +22,7 @@ ad_page_contract {
 # Security & Permissions
 # ------------------------------------------------------------
 
-set current_user_id [ad_maybe_redirect_for_registration]
+set current_user_id [auth::require_login]
 
 # Check privileges 
 set view_hours_all_p [im_permission $current_user_id view_hours_all]
@@ -40,7 +40,7 @@ set read_p [db_string report_perms "
 	where	m.label = 'timesheet-incomplete-days'
 " -default 'f']
 
-if {![string equal "t" $read_p] && ![im_is_user_site_wide_or_intranet_admin $current_user_id]} {
+if {"t" ne $read_p && ![im_is_user_site_wide_or_intranet_admin $current_user_id]} {
     ad_return_complaint 1 "<li>
     [lang::message::lookup "" intranet-reporting.You_dont_have_permissions "You don't have the necessary permissions to view this page"]"
     return
@@ -71,7 +71,7 @@ if { [dt_ansi_to_julian_single_arg $start_date] > [dt_ansi_to_julian_single_arg 
     ad_return_complaint 1 "<strong>End Date</strong> must be later than <strong>Start Date</strong>"
 }
 
-set duration_in_days [expr [db_string get_data "select date_part('day', :end_date::timestamp - :start_date::timestamp)" -default 0] +1]
+set duration_in_days [expr {[db_string get_data "select date_part('day', :end_date::timestamp - :start_date::timestamp)" -default 0] +1}]
 
 if { $duration_in_days > 365 } {
     ad_return_complaint 1 "Periods > 1 year are not allowed"
@@ -106,7 +106,7 @@ set inner_where ""
 set criteria_inner [list]
 
 # Check for filter "Employee"  
-if { [info exists user_id] && $user_id != "" } { lappend criteria_inner "user_id = :user_id" } else { set user_id ""}
+if { [info exists user_id] && $user_id ne "" } { lappend criteria_inner "user_id = :user_id" } else { set user_id ""}
 
 # Check for filter "Cost Center"  
 if { "0" != $cost_center_id &&  "" != $cost_center_id } {
@@ -139,7 +139,7 @@ if { 0 != $skill_profile_id  } {
 }
 
 # Create "inner where" 
-if { ![empty_string_p $criteria_inner] } { 
+if { $criteria_inner ne "" } { 
    set inner_where [join $criteria_inner " and\n   "] 
 } 
 if {"" != $inner_where} { set inner_where "and $inner_where" }

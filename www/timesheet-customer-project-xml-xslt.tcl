@@ -57,7 +57,7 @@ proc im_reporting_render_odt_template {
     # </report>
 
     # Create a temporary directory
-    set odt_tmp_path [ns_tmpnam]
+    set odt_tmp_path [ad_tmpnam]
     ns_log Notice "im_reporting_render_odt_template: tmp_path=$odt_tmp_path"
     ns_mkdir $odt_tmp_path
 
@@ -234,9 +234,8 @@ proc im_reporting_render_odt_template {
 		# Update target cell coordinate
 		if {[catch {
 		    # Calculate new target cell coordinate
-		    set coordinate_int_new [expr $coordinate_int_orig + $ctr_new_nodes_created -1]
-		    ns_log Notice "timesheet-customer-project-xml-xslt:: New value of coordinate_int: $coordinate_int_new"
-		    
+		    set coordinate_int_new [expr {$coordinate_int_orig + $ctr_new_nodes_created -1}]
+		    ns_log NOTICE "timesheet-customer-project-xml-xslt:: New value of coordinate_int: $coordinate_int_new"
 		    set cmd "set target_coordinate \[string map \{$coordinate_int_orig $coordinate_int_new\} \"[lindex [split $coordinate_pair ":"] 1]\"\]"
 		    eval $cmd
 		    
@@ -321,7 +320,7 @@ proc im_reporting_render_odt_template {
 # because it identifies unquely the report's Menu and
 # its permissions.
 set menu_label "reporting-timesheet-customer-project-xml-xslt"
-set current_user_id [ad_maybe_redirect_for_registration]
+set current_user_id [auth::require_login]
 set use_project_name_p [parameter::get_from_package_key -package_key intranet-reporting -parameter "UseProjectNameInsteadOfProjectNr" -default 0]
 set xml_output ""
 
@@ -374,7 +373,7 @@ if { "template" == $output_format && "" == $odt_template_id } {
 	ad_return_complaint 1  [lang::message::lookup "" intranet-reporting.ChooseTemplate "Please choose a template"]
 }
 
-if {![string equal "t" $read_p]} {
+if {"t" ne $read_p } {
     ad_return_complaint 1 "
     [lang::message::lookup "" intranet-reporting.You_dont_have_permissions "You don't have the necessary permissions to view this page"]"
     return
@@ -532,12 +531,12 @@ if { "" != $print_hour_p } {
 }
 
 set where_clause [join $criteria " and\n	    "]
-if { ![empty_string_p $where_clause] } {
+if { $where_clause ne "" } {
     set where_clause " and $where_clause"
 }
 
 set where_clause_absences [join $criteria_absences " and\n	    "]
-if { ![empty_string_p $where_clause_absences ] } {
+if { $where_clause_absences ne "" } {
     set where_clause_absences " and $where_clause_absences"
 }
 
@@ -575,7 +574,7 @@ if { "" != $export_absences } {
 	    if { [info exists absence_hash($hash_key)] } {
 		# Add only when absence duration is less than one day
 		if { [lindex $absence_hash($hash_key) 0] < 1 } { 
-		    set absence_hash($hash_key) [list [expr [lindex $absence_hash($hash_key) 0] + $duration_days] "-1" $absence_date $active_employee_id $user_initials]
+		    set absence_hash($hash_key) [list [expr {[lindex $absence_hash($hash_key) 0] + $duration_days}] "-1" $absence_date $active_employee_id $user_initials]
 		    if { [lindex $absence_hash($hash_key) 0] >= 1 } {
 			set absence_hash($hash_key) [list 1 "-1"]
 		    }
@@ -1366,13 +1365,13 @@ switch $output_format {
             ns_log Notice "timesheet-customer-project-v2 :: uri_xslt: $uri_xslt"
 
 	    # Create tmp file for Reports Default XML
-	    set uri_report_default_xml [ns_tmpnam]
+	    set uri_report_default_xml [ad_tmpnam]
 	    set fo [open $uri_report_default_xml {RDWR CREAT}]
 	    puts $fo "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>[$root asXML]"
 	    close $fo
 	    
             # Create tmp file for Report Custom XML
-            set uri_report_custom_xml [ns_tmpnam]
+            set uri_report_custom_xml [ad_tmpnam]
             set fo [open $uri_report_custom_xml {RDWR CREAT}]
             puts $fo " "
             close $fo
@@ -1388,7 +1387,7 @@ switch $output_format {
     }
     template {
 	# Create tmp file for Reports Default XML 
-	set uri_report_default_xml [ns_tmpnam]
+	set uri_report_default_xml [ad_tmpnam]
 	set fo [open $uri_report_default_xml {RDWR CREAT}]
 	puts $fo "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>[$root asXML]"
 	close $fo		
@@ -1399,7 +1398,7 @@ switch $output_format {
 	    ns_log Notice "timesheet-customer-project-v2 :: uri_xslt: $uri_xslt"
 	    
 	    # Create tmp file for Report Custom XML 
-	    set uri_report_custom_xml [ns_tmpnam]
+	    set uri_report_custom_xml [ad_tmpnam]
 	    set fo [open $uri_report_custom_xml {RDWR CREAT}]
 	    puts $fo " "
 	    close $fo

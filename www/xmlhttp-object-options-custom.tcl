@@ -35,7 +35,7 @@ ad_page_contract {
 # -------------------------------------
 
 # ToDo: Check usefullness of [im_rest_authenticate]
-set current_user_id [ad_maybe_redirect_for_registration]
+set current_user_id [auth::require_login]
 
 # -------------------------------------
 # Body 

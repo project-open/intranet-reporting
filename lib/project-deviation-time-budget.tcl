@@ -37,7 +37,7 @@ set project_id_from_filter $project_id
 # its permissions.
 
 set menu_label "project-deviation-time-budget"
-set current_user_id [ad_maybe_redirect_for_registration]
+set current_user_id [auth::require_login]
 set read_p [db_string report_perms "
         select  im_object_permission_p(m.menu_id, :current_user_id, 'read')
         from    im_menus m
@@ -55,7 +55,7 @@ if {
 }
 
 
-if { ![string equal "t" $read_p] && 0 == $full_view_p } {
+if { "t" ne $read_p && 0 == $full_view_p } {
     ad_return_complaint 1 [lang::message::lookup "" intranet-reporting.You_dont_have_permissions "You don't have the necessary permissions to view this page"]
     ad_script_abort
 }
@@ -351,13 +351,13 @@ db_foreach hours $hours_sql {
     if { ![info exists projects($hours_project_id,$user_id)] } {
 	set projects($hours_project_id,$user_id) 0
     }
-    set projects($hours_project_id,$user_id) [expr $projects($hours_project_id,$user_id) + $logged_hours]
+    set projects($hours_project_id,$user_id) [expr {$projects($hours_project_id,$user_id) + $logged_hours}]
 
     foreach parent_id $project_parents($hours_project_id) {
 	if { ![info exists projects($parent_id,$user_id)] } {
 	    set projects($parent_id,$user_id) 0
 	}
-	set projects($parent_id,$user_id) [expr $projects($parent_id,$user_id) + $logged_hours]
+	set projects($parent_id,$user_id) [expr {$projects($parent_id,$user_id) + $logged_hours}]
     }
 
 }
@@ -649,7 +649,7 @@ db_multirow -extend {level_spacer open_gif} project_list project_list $sql  {
     for {set i 0} {$i < $tree_level} {incr i} { append level_spacer "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" }
 
     # Open/Close Logic
-    set open_p [expr [lsearch $opened_projects $child_id] >= 0]
+    set open_p [expr {[lsearch $opened_projects $child_id] >= 0}]
     if {$open_p} {
 	set opened $opened_projects
 	if {[info exists project_children($child_id)]} {
@@ -776,7 +776,7 @@ template::multirow foreach project_list {
 	db_foreach rec $sql {
 
 	    # Sum up hours for this project 
-	    set sum_hours [expr $sum_hours + $hours]
+	    set sum_hours [expr {$sum_hours + $hours}]
 
 	    set costs_staff_rate $hourly_cost
 	    
@@ -788,7 +788,7 @@ template::multirow foreach project_list {
 		append err_mess [db_string get_data "select project_name from im_projects where project_id = $project_id" -default "$project_id"]
 		append err_mess "</a><br><br>"
 	    } else {
-		set amount_costs_staff [expr $amount_costs_staff + [expr $costs_staff_rate * $hours]]		
+		set amount_costs_staff [expr {$amount_costs_staff + [expr {$costs_staff_rate * $hours}]}]		
 	    }
 	    
 	}
@@ -817,7 +817,7 @@ template::multirow foreach project_list {
 	template::multirow set project_list $i end_date [lc_time_fmt $child_end_date "%x" locale]
 	
 	# percent_completed (Fortschritt)
-	set percent_completed_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $percent_completed+0] $rounding_precision] $format_string $locale]
+	set percent_completed_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr {$percent_completed+0}] $rounding_precision] $format_string $locale]
 	template::multirow set project_list $i percent_completed $percent_completed_pretty
 	
 	# project_budget_hours
@@ -828,11 +828,11 @@ template::multirow foreach project_list {
 	
 	# deviation_target (project_budget_hours * percent_completed - hours_logged)
 	if { "0" == $percent_completed  } {
-	    set deviation_target [expr $project_budget_hours - $sum_hours]
+	    set deviation_target [expr {$project_budget_hours - $sum_hours}]
 	} else {
-	    set deviation_target [expr $project_budget_hours * $percent_completed/100 - $sum_hours]
+	    set deviation_target [expr {$project_budget_hours * $percent_completed/100 - $sum_hours}]
 	}
-	set deviation_target_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $deviation_target+0] $rounding_precision] $format_string $locale]
+	set deviation_target_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr {$deviation_target+0}] $rounding_precision] $format_string $locale]
 	template::multirow set project_list $i deviation_target $deviation_target_pretty
 	
 	# Projection_hours (hours_logged / project_budget_hours / percent_completed * project_budget_hours)
@@ -843,34 +843,34 @@ template::multirow foreach project_list {
 	    set delta_projection_hours_budget 0 
 	    template::multirow set project_list $i delta_projection_hours_budget [lang::message::lookup "" intranet-reporting.NotComputable  "Not computable"]
 	} else {
-	    set projection_hours [expr $sum_hours / ($percent_completed/100.0)] 	    
-	    template::multirow set project_list $i projection_hours [lc_numeric [im_numeric_add_trailing_zeros [expr $projection_hours+0] $rounding_precision] $format_string $locale]
-	    set delta_projection_hours_budget [expr $project_budget_hours - $projection_hours]
-	    set delta_projection_hours_budget_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $delta_projection_hours_budget+0] $rounding_precision] $format_string $locale]
+	    set projection_hours [expr {$sum_hours / ($percent_completed/100.0)}] 	    
+	    template::multirow set project_list $i projection_hours [lc_numeric [im_numeric_add_trailing_zeros [expr {$projection_hours+0}] $rounding_precision] $format_string $locale]
+	    set delta_projection_hours_budget [expr {$project_budget_hours - $projection_hours}]
+	    set delta_projection_hours_budget_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr {$delta_projection_hours_budget+0}] $rounding_precision] $format_string $locale]
 	    template::multirow set project_list $i delta_projection_hours_budget $delta_projection_hours_budget_pretty
 	}
 
 	# project_budget 
-	set project_budget_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $project_budget+0] $rounding_precision] $format_string $locale]
+	set project_budget_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr {$project_budget+0}] $rounding_precision] $format_string $locale]
 	template::multirow set project_list $i project_budget $project_budget_pretty
 
 	# Costs staff 
-	set amount_costs_staff_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $amount_costs_staff+0] $rounding_precision] $format_string $locale]
+	set amount_costs_staff_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr {$amount_costs_staff+0}] $rounding_precision] $format_string $locale]
 
 	# Provider Bills
-	set amount_provider_bills_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $provider_bills+0] $rounding_precision] $format_string $locale]
+	set amount_provider_bills_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr {$provider_bills+0}] $rounding_precision] $format_string $locale]
 
 	# Costs Material (billable)
-	set total_expenses_billable_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $total_expenses_billable+0] $rounding_precision] $format_string $locale]
+	set total_expenses_billable_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr {$total_expenses_billable+0}] $rounding_precision] $format_string $locale]
 	# ds_comment "Expenses (billable): $total_expenses_billable"
 	
-	set costs_matrix [expr $amount_invoicable_matrix + $provider_bills + $total_expenses_billable + $amount_costs_staff]
-	set costs_matrix_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $costs_matrix+0] $rounding_precision] $format_string $locale]
+	set costs_matrix [expr {$amount_invoicable_matrix + $provider_bills + $total_expenses_billable + $amount_costs_staff}]
+	set costs_matrix_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr {$costs_matrix+0}] $rounding_precision] $format_string $locale]
 	template::multirow set project_list $i costs_matrix $costs_matrix_pretty		
 	
 	# delta_budget_costs (project_budget * percent_completed - costs_matrix)
-	set delta_budget_costs [expr $project_budget * $percent_completed/100 - $costs_matrix]
-	set delta_budget_costs_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $delta_budget_costs+0] $rounding_precision] $format_string $locale]
+	set delta_budget_costs [expr {$project_budget * $percent_completed/100 - $costs_matrix}]
+	set delta_budget_costs_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr {$delta_budget_costs+0}] $rounding_precision] $format_string $locale]
 	template::multirow set project_list $i delta_budget_costs $delta_budget_costs_pretty
 	
 	# projection_costs (costs_matrix / project_budget / percent_completed * project_budget)
@@ -878,8 +878,8 @@ template::multirow foreach project_list {
 	    template::multirow set project_list $i projection_costs [lang::message::lookup "" intranet-reporting.NotComputable  "Not computable"]
 	    set projection_costs 0 
 	} else {
-	    set projection_costs [expr $costs_matrix / ($percent_completed/100.0)]
-	    set projection_costs_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $projection_costs+0] $rounding_precision] $format_string $locale]
+	    set projection_costs [expr {$costs_matrix / ($percent_completed/100.0)}]
+	    set projection_costs_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr {$projection_costs+0}] $rounding_precision] $format_string $locale]
 	    template::multirow set project_list $i projection_costs $projection_costs_pretty
 	}
 	
@@ -887,8 +887,8 @@ template::multirow foreach project_list {
 	if { 0 == $projection_costs } {
 	    set delta_budget_projection_pretty [lang::message::lookup "" intranet-reporting.NotComputable  "Not computable"]
 	} else {
-	    set delta_budget_projection [expr $project_budget - $projection_costs]
-	    set delta_budget_projection_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $delta_budget_projection+0] $rounding_precision] $format_string $locale]
+	    set delta_budget_projection [expr {$project_budget - $projection_costs}]
+	    set delta_budget_projection_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr {$delta_budget_projection+0}] $rounding_precision] $format_string $locale]
 	}
         template::multirow set project_list $i delta_budget_projection $delta_budget_projection_pretty
 	
@@ -913,9 +913,9 @@ if { "csv" == $output_format && 1 == $i } {
     ad_return_complaint 1  [lang::message::lookup "" intranet-core.NoRecordsFound "No records found"]
 }
 
-set total__amount_costs_staff		[lc_numeric [im_numeric_add_trailing_zeros [expr $total__amount_costs_staff+0] $rounding_precision] $format_string $locale]
-set total__target_benefit           [lc_numeric [im_numeric_add_trailing_zeros [expr $total__target_benefit+0] $rounding_precision] $format_string $locale]
-set total__amount_invoicable_matrix	[lc_numeric [im_numeric_add_trailing_zeros [expr $total__amount_invoicable_matrix+0] $rounding_precision] $format_string $locale]
+set total__amount_costs_staff		[lc_numeric [im_numeric_add_trailing_zeros [expr {$total__amount_costs_staff+0}] $rounding_precision] $format_string $locale]
+set total__target_benefit           [lc_numeric [im_numeric_add_trailing_zeros [expr {$total__target_benefit+0}] $rounding_precision] $format_string $locale]
+set total__amount_invoicable_matrix	[lc_numeric [im_numeric_add_trailing_zeros [expr {$total__amount_invoicable_matrix+0}] $rounding_precision] $format_string $locale]
 
 
 switch $output_format {

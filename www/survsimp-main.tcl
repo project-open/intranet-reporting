@@ -28,7 +28,7 @@ ad_page_contract {
 # because it identifies unquely the report's Menu and
 # its permissions.
 set menu_label "reporting-survsimp-main"
-set current_user_id [ad_maybe_redirect_for_registration]
+set current_user_id [auth::require_login]
 set read_p [db_string report_perms "
 	select	im_object_permission_p(m.menu_id, :current_user_id, 'read')
 	from	im_menus m
@@ -49,7 +49,7 @@ set number_format "999,999.99"
 
 # ------------------------------------------------------------
 
-if {![string equal "t" $read_p]} {
+if {"t" ne $read_p } {
     ad_return_complaint 1 "
     [lang::message::lookup "" intranet-reporting.You_dont_have_permissions "You don't have the necessary permissions to view this page"]"
     return
@@ -127,7 +127,7 @@ set criteria [list]
 if {0 != $survey_id && "" != $survey_id} { lappend criteria "ss.survey_id = :survey_id" }
 
 set where_clause [join $criteria " and\n            "]
-if { ![empty_string_p $where_clause] } {
+if { $where_clause ne "" } {
     set where_clause " and $where_clause"
 }
 

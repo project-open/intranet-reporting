@@ -19,7 +19,7 @@ ad_page_contract {
     { limit 1000 }
 }
 
-# set current_user_id [ad_maybe_redirect_for_registration]
+# set current_user_id [auth::require_login]
 set current_user_id [ad_conn user_id]
 set menu_label "reporting-user-contacts"
 set read_p [db_string report_perms "
@@ -28,7 +28,7 @@ set read_p [db_string report_perms "
 	where	m.label = :menu_label
 " -default 'f']
 
-if {![string equal "t" $read_p]} {
+if {"t" ne $read_p } {
     set message "You don't have the necessary permissions to view this page"
     ad_return_complaint 1 "<li>$message"
     ad_script_abort
@@ -43,7 +43,7 @@ set role_id 1300
 set object_id 0
 set notify_asignee 1
 
-set offset [expr $page * $limit]
+set offset [expr {$page * $limit}]
 
 # ------------------------------------------------------------
 # Page Title, Bread Crums and Help
@@ -378,7 +378,7 @@ db_foreach sql $report_sql {
 	# a "hash", depending on the value of "counter".
 	# You need explicite evaluation ("expre") in TCL
 	# to calculate arithmetic expressions. 
-	set class $rowclass([expr $counter % 2])
+	set class $rowclass([expr {$counter % 2}])
 
 	im_report_display_footer \
 	    -output_format $output_format \

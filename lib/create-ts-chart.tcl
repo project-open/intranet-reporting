@@ -6,11 +6,11 @@ template::head::add_javascript -src "/intranet-sencha/js/ext-all.js" -order 100
 # Cut 'select' part 
 set no_records_found_msg ""
 
-set position_from [expr [string first "FROM " $sql] -1]
+set position_from [expr {[string first "FROM " $sql] -1}]
 set sql_no_select [string range $sql $position_from end]
 
 # Cut 'order by' part 
-set position_order [expr [string first "ORDER BY " $sql_no_select] -1]
+set position_order [expr {[string first "ORDER BY " $sql_no_select] -1}]
 set sql_no_select_no_order [string range $sql_no_select 0 $position_order ]
 
 switch $chart_type {

@@ -4,7 +4,7 @@ ad_page_contract {
 
 }
 
-set user_id [ad_maybe_redirect_for_registration]
+set user_id [auth::require_login]
 set page_title "Magazine Editors Report"
 set context_bar [im_context_bar $page_title]
 set context ""
@@ -21,13 +21,13 @@ set row_class "rowtitle"
 # because it identifies unquely the report's Menu and
 # its permissions.
 set menu_label "reporting-other-magazine-editors"
-set current_user_id [ad_maybe_redirect_for_registration]
+set current_user_id [auth::require_login]
 set read_p [db_string report_perms "
         select  im_object_permission_p(m.menu_id, :current_user_id, 'read')
         from    im_menus m
         where   m.label = :menu_label
 " -default 'f']
-if {![string equal "t" $read_p]} {
+if {"t" ne $read_p } {
     ad_return_complaint 1 [lang::message::lookup "" intranet-reporting.You_dont_have_permissions "You don't have the necessary permissions to view this page"]
     ad_script_abort
 }

@@ -32,7 +32,7 @@ ad_page_contract {
 set menu_label "reporting-budget-main-projects"
 
 # Get the current user
-set current_user_id [ad_maybe_redirect_for_registration]
+set current_user_id [auth::require_login]
 
 # Determine whether the current_user has read permissions. 
 set read_p [db_string report_perms "
@@ -42,7 +42,7 @@ set read_p [db_string report_perms "
 " -default 'f']
 
 # Write out an error message if the current user doesn't have read permissions
-if {![string equal "t" $read_p]} {
+if {"t" ne $read_p } {
     set message "You don't have the necessary permissions to view this page"
     ad_return_complaint 1 "<li>$message"
     ad_script_abort
@@ -433,7 +433,7 @@ set class ""
 db_foreach sql $report_sql {
 
 	# Select either "roweven" or "rowodd"
-	set class $rowclass([expr $counter % 2])
+	set class $rowclass([expr {$counter % 2}])
 
 	# Restrict the length of the project_name to max. 40 characters.
 	set project_name [string_truncate -len 40 $project_name]
@@ -489,17 +489,17 @@ db_foreach sql $report_sql {
 
 	set eop_hours_pretty ""
 	if {"" != $eop_hours} {
-	    set eop_hours_pretty [im_report_format_number [expr round(10.0 * $eop_hours) / 10.0] $output_format $number_locale]
+	    set eop_hours_pretty [im_report_format_number [expr {round(10.0 * $eop_hours) / 10.0}] $output_format $number_locale]
 	}
 
 	set eop_costs_pretty ""
 	if {"" != $eop_costs} {
-	    set eop_costs_pretty [im_report_format_number [expr round(10.0 * $eop_costs) / 10.0] $output_format $number_locale]
+	    set eop_costs_pretty [im_report_format_number [expr {round(10.0 * $eop_costs) / 10.0}] $output_format $number_locale]
 	}
 
 	set percent_completed_pretty ""
 	if {"" != $percent_completed} {
-	    set percent_completed_pretty [im_report_format_number [expr round(10.0 * $percent_completed) / 10.0] $output_format $number_locale]
+	    set percent_completed_pretty [im_report_format_number [expr {round(10.0 * $percent_completed) / 10.0}] $output_format $number_locale]
 	}
 
 	set budget_hours_pretty [im_report_format_number $budget_hours $output_format $number_locale]

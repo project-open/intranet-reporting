@@ -1,8 +1,8 @@
 <master src="../../intranet-core/www/master">
-<property name="context">@context;noquote@</property>
-<property name="title">@page_title@</property>
+<property name="context">@context;literal@</property>
+<property name="doc(title)">@page_title;literal@</property>
 <property name="main_navbar_label">reporting</property>
-<property name="left_navbar">@left_navbar_html;noquote@</property>
+<property name="left_navbar">@left_navbar_html;literal@</property>
 
 
 <table width="100%">

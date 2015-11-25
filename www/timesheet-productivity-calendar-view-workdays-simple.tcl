@@ -28,7 +28,7 @@ ad_page_contract {
 # Label: Provides the security context for this report
 set menu_label "timesheet-productivity-calendar-view-workdays-simple"
 
-set current_user_id [ad_maybe_redirect_for_registration]
+set current_user_id [auth::require_login]
 
 set read_p [db_string report_perms "
 	select	im_object_permission_p(m.menu_id, :current_user_id, 'read')
@@ -36,7 +36,7 @@ set read_p [db_string report_perms "
 	where	m.label = :menu_label
 " -default 'f']
 
-if {![string equal "t" $read_p]} {
+if {"t" ne $read_p } {
     ad_return_complaint 1 "<li>
     [lang::message::lookup "" intranet-reporting.You_dont_have_permissions "You don't have the necessary permissions to view this page"]"
     return
@@ -62,7 +62,7 @@ set date_format "YYYY-MM-DD"
 
 set todays_date [db_string todays_date "select to_char(now(), :date_format) from dual" -default ""]
 
-if { [empty_string_p $report_year_month] } {
+if { $report_year_month eq "" } {
     set report_year_month "[string range $todays_date 0 3]-[string range $todays_date 5 6]"
 }    
 
@@ -93,7 +93,7 @@ set im_user_absence_type_training 5004
 # Conditional SQL Where-Clause
 #
  
-if {[empty_string_p $different_from_project_p]} {
+if {$different_from_project_p eq ""} {
    set mm_checked ""
    set mm_value  ""
 } else {
@@ -103,7 +103,7 @@ if {[empty_string_p $different_from_project_p]} {
 
 set criteria [list]
 
-if {"" != $project_id && 0 != $project_id && $different_from_project_p == ""} {	
+if {"" != $project_id && 0 != $project_id && $different_from_project_p eq ""} {	
     lappend criteria "
 		p.project_id in (
 		select 
@@ -118,7 +118,7 @@ if {"" != $project_id && 0 != $project_id && $different_from_project_p == ""} {
     "
 }
 
- if {"" != $project_id && 0 != $project_id && $different_from_project_p != ""} {
+ if {"" != $project_id && 0 != $project_id && $different_from_project_p ne ""} {
         lappend criteria "
 		p.project_id in (
 		select 
@@ -137,7 +137,7 @@ if {"" != $customer_id && 0 != $customer_id} {
 	 lappend criteria "p.company_id = :customer_id" 
 }
 
-if { ![empty_string_p $project_status_id] && $project_status_id > 0 } {
+if { $project_status_id ne "" && $project_status_id > 0 } {
     lappend criteria "p.project_status_id in ([join [im_sub_categories $project_status_id] ","])"
 }
 
@@ -166,7 +166,7 @@ if { $show_user_only_p } {
 # ad_return_complaint 1 $show_user_only_p
 
 set where_clause [join $criteria " and\n            "]
-if { ![empty_string_p $where_clause] } {
+if { $where_clause ne "" } {
     set where_clause " and $where_clause"
 }
 
@@ -311,7 +311,7 @@ order by
 set line_str " \"\" \"<b><a href=\$project_url\$top_parent_project_id>\${top_project_nr} - \${top_project_name}</a></b>\" \"<b><a href=\$project_url\$sub_project_id>\${sub_project_nr} - \${sub_project_name}</a></b>\" "
 append line_str $day_placeholders "\$number_hours_project_ctr" 
 
-set no_empty_columns [expr $duration+1]
+set no_empty_columns [expr {$duration+1}]
 
 set report_def 		[list group_by user_id header {"\#colspan=99 <a href=$user_url$user_id>$user_name</a>"} content]
 lappend report_def 	[list group_by project_id header $line_str content {}]
@@ -631,12 +631,12 @@ db_foreach sql $sql {
 		if { "" != [expr $$day_double_digit] } {
 			set thours_arr($day_double_digit) [expr $thours_arr($day_double_digit) + $$day_double_digit]
 
-   		        set number_hours_project_ctr [expr $number_hours_project_ctr + [expr $$day_double_digit]] 
-		        set number_hours_ctr_pretty [expr $number_hours_ctr_pretty + [expr $$day_double_digit]]
+   		        set number_hours_project_ctr [expr {$number_hours_project_ctr + [expr $$day_double_digit]}] 
+		        set number_hours_ctr_pretty [expr {$number_hours_ctr_pretty + [expr $$day_double_digit]}]
 
 			if { 0 == $month_arr($day_double_digit) } {
 				set month_arr($day_double_digit) 1
-			        set number_hours_ctr [expr $number_hours_ctr + $thours_arr($day_double_digit)] 
+			        set number_hours_ctr [expr {$number_hours_ctr + $thours_arr($day_double_digit)}] 
 			}
 
 		}

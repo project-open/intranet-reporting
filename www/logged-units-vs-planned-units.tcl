@@ -33,7 +33,7 @@ if { -1 == $project_status_id } {
 }
 
 set menu_label "logged_units_vs_planned_units"
-set current_user_id [ad_maybe_redirect_for_registration]
+set current_user_id [auth::require_login]
 set hours_per_day [parameter::get -package_id [apm_package_id_from_key intranet-timesheet2] -parameter "TimesheetHoursPerDay" -default 8]
 set read_p [db_string report_perms "
         select  im_object_permission_p(m.menu_id, :current_user_id, 'read')
@@ -42,7 +42,7 @@ set read_p [db_string report_perms "
 " -default 'f']
 
 set read_p t
-if {![string equal "t" $read_p]} {
+if {"t" ne $read_p } {
     ad_return_complaint 1 [lang::message::lookup "" intranet-reporting.You_dont_have_permissions "You don't have the necessary permissions to view this page"]
     ad_script_abort
 }
@@ -311,13 +311,13 @@ array set project_hours {}
 #    if { ![info exists projects($hours_project_id,$user_id)] } {
 #	set projects($hours_project_id,$user_id) 0
 #    }
-#    set projects($hours_project_id,$user_id) [expr $projects($hours_project_id,$user_id) + $logged_hours]
+#    set projects($hours_project_id,$user_id) [expr {$projects($hours_project_id,$user_id) + $logged_hours}]
 
 #    foreach parent_id $project_parents($hours_project_id) {
 #	if { ![info exists projects($parent_id,$user_id)] } {
 #	    set projects($parent_id,$user_id) 0
 #	}
-#	set projects($parent_id,$user_id) [expr $projects($parent_id,$user_id) + $logged_hours]
+#	set projects($parent_id,$user_id) [expr {$projects($parent_id,$user_id) + $logged_hours}]
 #    }
 #
 # }
@@ -329,7 +329,7 @@ array set project_hours {}
 
 set elements [list]
 
-if {[lsearch $display_fields "customer_name"] >= 0} {
+if {"customer_name" in $display_fields} {
     lappend elements customer_name
     lappend elements {
 	label "Customer"
@@ -340,7 +340,7 @@ if {[lsearch $display_fields "customer_name"] >= 0} {
 	}
     }
 }
-if {[lsearch $display_fields "project_nr"] >= 0} {
+if {"project_nr" in $display_fields} {
     lappend elements project_nr 
     lappend elements {
 	label "Project Nr"
@@ -364,7 +364,7 @@ lappend elements {
     }
 }
 
-if {[lsearch $display_fields "start_date"] >= 0} {
+if {"start_date" in $display_fields} {
     lappend elements child_start_date
     lappend elements {
 	label "Start"
@@ -372,7 +372,7 @@ if {[lsearch $display_fields "start_date"] >= 0} {
     }
 }
 
-if {[lsearch $display_fields "end_date"] >= 0} {
+if {"end_date" in $display_fields} {
     lappend elements child_end_date
     lappend elements {
 	label "End"
@@ -380,7 +380,7 @@ if {[lsearch $display_fields "end_date"] >= 0} {
     }
 }
 
-if {[lsearch $display_fields "reported_hours_cache"] >= 0} {
+if {"reported_hours_cache" in $display_fields} {
     lappend elements reported_hours_cache
     lappend elements {
 	label "Total Units<br>logged" 
@@ -389,7 +389,7 @@ if {[lsearch $display_fields "reported_hours_cache"] >= 0} {
     }
 }
 
-if {[lsearch $display_fields "sum_reported_units"] >= 0} {
+if {"sum_reported_units" in $display_fields} {
     lappend elements sum_reported_units
     lappend elements {
         label "Reported<br>Units"
@@ -398,7 +398,7 @@ if {[lsearch $display_fields "sum_reported_units"] >= 0} {
     }
 }
 
-if {[lsearch $display_fields "sum_planned_units"] >= 0} {
+if {"sum_planned_units" in $display_fields} {
     lappend elements sum_planned_units
     lappend elements {
         label "Planned<br>Units"
@@ -407,7 +407,7 @@ if {[lsearch $display_fields "sum_planned_units"] >= 0} {
     }
 }
 
-if {[lsearch $display_fields "sum_billable_units"] >= 0} {
+if {"sum_billable_units" in $display_fields} {
     lappend elements sum_billable_units
     lappend elements {
         label "Billable<br>Units"
@@ -591,7 +591,7 @@ db_multirow -extend {level_spacer open_gif} project_list project_list "
     for {set i 0} {$i < $tree_level} {incr i} { append level_spacer "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" }
 
     # Open/Close Logic
-    set open_p [expr [lsearch $opened_projects $child_id] >= 0]
+    set open_p [expr {[lsearch $opened_projects $child_id] >= 0}]
     if {$open_p} {
 	set opened $opened_projects
 	
@@ -634,7 +634,7 @@ template::multirow foreach project_list {
 
     # foreach user_id [array names users] {
     #	if { [info exists projects($child_id,$user_id)] } {
-    #	    set hours [expr $projects($child_id,$user_id)]
+    #	    set hours [expr {$projects($child_id,$user_id)}]
     #	} else {
     #	    set hours ""
     #	}
@@ -643,18 +643,18 @@ template::multirow foreach project_list {
 
     # Days to hours 
     if { "" != $sum_planned_days } {
-	set sum_planned_hours [expr $sum_planned_hours + [expr $sum_planned_days * $hours_per_day]]
+	set sum_planned_hours [expr {$sum_planned_hours + [expr {$sum_planned_days * $hours_per_day}]}]
     }
     if { "" != $sum_planned_weeks } {
-        set sum_planned_hours [expr $sum_planned_hours + [expr $sum_planned_weeks * 5 * $hours_per_day]]
+        set sum_planned_hours [expr {$sum_planned_hours + [expr {$sum_planned_weeks * 5 * $hours_per_day}]}]
     }
 
     # Weeks to hours 
     if { "" != $sum_billable_days } {
-        set sum_billable_hours [expr $sum_billable_hours + [expr $sum_billable_days * $hours_per_day]]
+        set sum_billable_hours [expr {$sum_billable_hours + [expr {$sum_billable_days * $hours_per_day}]}]
     }
     if { "" != $sum_billable_weeks } {
-        set sum_billable_hours [expr $sum_billable_hours + [expr $sum_billable_weeks * 5 * $hours_per_day]]
+        set sum_billable_hours [expr {$sum_billable_hours + [expr {$sum_billable_weeks * 5 * $hours_per_day}]}]
     }
 
     # Check for empty 
@@ -667,13 +667,13 @@ template::multirow foreach project_list {
 	set sum_billable_units $sum_billable_hours	
 	set sum_reported_units $reported_hours_cache
     } elseif {$uom_id == $uom_day_id} {
-	set sum_planned_units [expr $sum_planned_hours / $hours_per_day]
-	set sum_billable_units [expr $sum_billable_hours / $hours_per_day]
-	set sum_reported_units [expr $reported_hours_cache / $hours_per_day]
+	set sum_planned_units [expr {$sum_planned_hours / $hours_per_day}]
+	set sum_billable_units [expr {$sum_billable_hours / $hours_per_day}]
+	set sum_reported_units [expr {$reported_hours_cache / $hours_per_day}]
     } elseif { $uom_id == $uom_week_id} {
-	set sum_planned_units [expr [expr $sum_planned_hours / $hours_per_day] / 5]
-	set sum_billable_units [expr [expr $sum_billable_hours / $hours_per_day] /5]
-	set sum_reported_units [expr [expr $reported_hours_cache / $hours_per_day] /5]
+	set sum_planned_units [expr {[expr {$sum_planned_hours / $hours_per_day}] / 5}]
+	set sum_billable_units [expr {[expr {$sum_billable_hours / $hours_per_day}] /5}]
+	set sum_reported_units [expr {[expr {$reported_hours_cache / $hours_per_day}] /5}]
     } else {
 	    ad_return_complaint 1 "Unit of Measure '$uom_id' not supported by this report. Supported are: $uom_hour_id, $uom_day_id, $uom_week_id"
     }
@@ -681,17 +681,17 @@ template::multirow foreach project_list {
     if { "" == $sum_planned_units } { set sum_planned_units 0 }
     if { "" == $sum_reported_units } { set sum_reported_units 0 }
 
-    set balance_rep_plan [expr $sum_planned_units - $sum_reported_units]
-	set balance_rep_bill [expr $sum_billable_units - $sum_reported_units]
+    set balance_rep_plan [expr {$sum_planned_units - $sum_reported_units}]
+	set balance_rep_bill [expr {$sum_billable_units - $sum_reported_units}]
 
     # Formatting 
-    set sum_planned_units [lc_numeric [im_numeric_add_trailing_zeros [expr $sum_planned_units+0] $rounding_precision] $format_string $locale]
-    set sum_billable_units [lc_numeric [im_numeric_add_trailing_zeros [expr $sum_billable_units+0] $rounding_precision] $format_string $locale]
-    set sum_reported_units [lc_numeric [im_numeric_add_trailing_zeros [expr $sum_reported_units+0] $rounding_precision] $format_string $locale]
-    set balance_rep_plan [lc_numeric [im_numeric_add_trailing_zeros [expr $balance_rep_plan+0] $rounding_precision] $format_string $locale]
-    set balance_rep_bill [lc_numeric [im_numeric_add_trailing_zeros [expr $balance_rep_bill+0] $rounding_precision] $format_string $locale]
+    set sum_planned_units [lc_numeric [im_numeric_add_trailing_zeros [expr {$sum_planned_units+0}] $rounding_precision] $format_string $locale]
+    set sum_billable_units [lc_numeric [im_numeric_add_trailing_zeros [expr {$sum_billable_units+0}] $rounding_precision] $format_string $locale]
+    set sum_reported_units [lc_numeric [im_numeric_add_trailing_zeros [expr {$sum_reported_units+0}] $rounding_precision] $format_string $locale]
+    set balance_rep_plan [lc_numeric [im_numeric_add_trailing_zeros [expr {$balance_rep_plan+0}] $rounding_precision] $format_string $locale]
+    set balance_rep_bill [lc_numeric [im_numeric_add_trailing_zeros [expr {$balance_rep_bill+0}] $rounding_precision] $format_string $locale]
 
-    set reported_hours_cache [lc_numeric [im_numeric_add_trailing_zeros [expr $reported_hours_cache+0] $rounding_precision] $format_string $locale]
+    set reported_hours_cache [lc_numeric [im_numeric_add_trailing_zeros [expr {$reported_hours_cache+0}] $rounding_precision] $format_string $locale]
     
     incr i
 }

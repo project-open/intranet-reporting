@@ -29,7 +29,7 @@ ad_page_contract {
 # because it identifies unquely the report's Menu and
 # its permissions.
 set menu_label "reporting-timesheet-productivity"
-set current_user_id [ad_maybe_redirect_for_registration]
+set current_user_id [auth::require_login]
 set use_project_name_p [parameter::get_from_package_key -package_key intranet-reporting -parameter "UseProjectNameInsteadOfProjectNr" -default 0]
 
 set read_p [db_string report_perms "
@@ -38,7 +38,7 @@ set read_p [db_string report_perms "
 	where	m.label = :menu_label
 " -default 'f']
 
-if {![string equal "t" $read_p]} {
+if {"t" ne $read_p } {
     ad_return_complaint 1 "<li>
     [lang::message::lookup "" intranet-reporting.You_dont_have_permissions "You don't have the necessary permissions to view this page"]"
     return
@@ -109,18 +109,18 @@ if {[info exists user_id] && 0 != $user_id && "" != $user_id} {
     lappend abs_criteria "owner_id = :user_id"
 }
 
-if {[exists_and_not_null manager_id]} {
+if {([info exists manager_id] && $manager_id ne "")} {
     lappend criteria "h.user_id in (select employee_id from im_employees where supervisor_id = :manager_id)"
     lappend abs_criteria "owner_id in (select employee_id from im_employees where supervisor_id = :manager_id)"
 }
 
 set where_clause [join $criteria " and\n            "]
-if { ![empty_string_p $where_clause] } {
+if { $where_clause ne "" } {
     set where_clause " and $where_clause"
 }
 
 set abs_where_clause [join $abs_criteria " and\n            "]
-if { ![empty_string_p $abs_where_clause] } {
+if { $abs_where_clause ne "" } {
     set abs_where_clause " and $abs_where_clause"
 }
 
@@ -534,7 +534,7 @@ db_foreach sql $sql {
     }
 
     # Find out if these are absences. Then the company_id is 9999999
-    if {$company_id == "9999999"} {
+    if {$company_id == 9999999} {
 	set company_name_pretty "\#colspan=8 <b>$company_name</b>"
 	set project_name_pretty "\#colspan=7 <b>$project_name</b>"
     } else {
@@ -542,7 +542,7 @@ db_foreach sql $sql {
 	set project_name_pretty "\#colspan=7 <b><a href=$project_url$project_id>$project_name</a></b>"
     }
 
-    if {$previous_user_id == ""} {
+    if {$previous_user_id eq ""} {
 	set previous_user_id $user_id
 	set previous_user_name $user_name
     }
@@ -562,16 +562,16 @@ db_foreach sql $sql {
 	set previous_user_id $user_id
 	# Now display the additional row for the last user as well
 	set working_hours [db_string working_days "select count(*) * $hours_per_day as working_hours from (select * from im_absences_working_days_month(:previous_user_id,:month,:year) t(days int))ct" -default 0]
-	set workable_hours [expr $working_hours + $hours_company_absence_subtotal]
+	set workable_hours [expr {$working_hours + $hours_company_absence_subtotal}]
 	
-	set hours_diff [expr $hours_user_subtotal - $workable_hours]
+	set hours_diff [expr {$hours_user_subtotal - $workable_hours}]
 	im_report_render_row \
 	    -output_format $output_format \
 	    -row [list "$label_diff_worked_workable_hours" "" "" "" "" "" "" "" "<b>$hours_diff</b>"] \
 	    -row_class "rowodd" \
 	    -cell_class "rowodd"
 	
-	set compensation_hours [expr $hours_diff - $hours_user_no_assignment_subtotal]
+	set compensation_hours [expr {$hours_diff - $hours_user_no_assignment_subtotal}]
 	im_report_render_row \
 	    -output_format $output_format \
 	    -row [list "$label_compensation_hours" "" "" "" "" "" "" "" "<b>$compensation_hours</b>"] \
@@ -624,16 +624,16 @@ im_report_display_footer \
 if {[info exists hours_company_absence_subtotal]} {
     # Now display the additional row for the last user as well
     set working_hours [db_string working_days "select count(*) * $hours_per_day as working_hours from (select * from im_absences_working_days_month(:previous_user_id,:month,:year) t(days int))ct" -default 0]
-    set workable_hours [expr $working_hours + $hours_company_absence_subtotal]
+    set workable_hours [expr {$working_hours + $hours_company_absence_subtotal}]
     
-    set hours_diff [expr $hours_user_subtotal - $workable_hours]
+    set hours_diff [expr {$hours_user_subtotal - $workable_hours}]
     im_report_render_row \
 	-output_format $output_format \
 	-row [list "$label_diff_worked_workable_hours" "" "" "" "" "" "" "" "<b>$hours_diff</b>"] \
 	-row_class "rowodd" \
 	-cell_class "rowodd"
     
-    set compensation_hours [expr $hours_diff - $hours_user_no_assignment_subtotal]
+    set compensation_hours [expr {$hours_diff - $hours_user_no_assignment_subtotal}]
     im_report_render_row \
 	-output_format $output_format \
 	-row [list "$label_compensation_hours" "" "" "" "" "" "" "" "<b>$compensation_hours</b>"] \

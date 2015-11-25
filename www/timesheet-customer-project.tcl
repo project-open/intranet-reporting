@@ -35,7 +35,7 @@ ad_page_contract {
 # because it identifies unquely the report's Menu and
 # its permissions.
 set menu_label "reporting-timesheet-customer-project"
-set current_user_id [ad_maybe_redirect_for_registration]
+set current_user_id [auth::require_login]
 
 set use_project_name_p [parameter::get_from_package_key -package_key intranet-reporting -parameter "UseProjectNameInsteadOfProjectNr" -default 0]
 
@@ -74,7 +74,7 @@ set number_format "999,990.99"
 
 # ------------------------------------------------------------
 
-if {![string equal "t" $read_p]} {
+if {"t" ne $read_p } {
     ad_return_complaint 1 "
     [lang::message::lookup "" intranet-reporting.You_dont_have_permissions "You don't have the necessary permissions to view this page"]"
     return
@@ -208,7 +208,7 @@ if {0 != $project_id && "" != $project_id} {
 }
 
 set where_clause [join $criteria " and\n	    "]
-if { ![empty_string_p $where_clause] } {
+if { $where_clause ne "" } {
     set where_clause " and $where_clause"
 }
 
@@ -608,9 +608,9 @@ db_foreach sql $sql {
 	    -cell_class $class
 
 	im_report_update_counters -counters $counters
-	set hours_user_subtotal [expr round(100.0 * $hours_user_subtotal) / 100.0]
-	set hours_project_sub_subtotal [expr round(100.0 * $hours_project_sub_subtotal) / 100.0]
-	set hours_project_subtotal [expr round(100.0 * $hours_project_subtotal) / 100.0]
+	set hours_user_subtotal [expr {round(100.0 * $hours_user_subtotal) / 100.0}]
+	set hours_project_sub_subtotal [expr {round(100.0 * $hours_project_sub_subtotal) / 100.0}]
+	set hours_project_subtotal [expr {round(100.0 * $hours_project_subtotal) / 100.0}]
 
 	set last_value_list [im_report_render_header \
 	    -output_format $output_format \

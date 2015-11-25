@@ -25,14 +25,14 @@ ad_page_contract {
 # because it identifies unquely the report's Menu and
 # its permissions.
 set menu_label "reporting-program-eva"
-set current_user_id [ad_maybe_redirect_for_registration]
+set current_user_id [auth::require_login]
 set read_p [db_string report_perms "
 	select	im_object_permission_p(m.menu_id, :current_user_id, 'read')
 	from	im_menus m
 	where	m.label = :menu_label
 " -default 'f']
 
-if {![string equal "t" $read_p]} {
+if {"t" ne $read_p } {
     ad_return_complaint 1 "<li>
 [lang::message::lookup "" intranet-reporting.You_dont_have_permissions "You don't have the necessary permissions to view this page"]"
     return
@@ -139,7 +139,7 @@ if {0 != $program_id && "" != $program_id} {
 }
 
 set where_clause [join $criteria " and\n            "]
-if { ![empty_string_p $where_clause] } {
+if { $where_clause ne "" } {
     set where_clause " and $where_clause"
 }
 
@@ -238,12 +238,12 @@ set report_def [list \
     footer { 
 	"<br>&nbsp;<br>" 
 	"" 
-	"\#align=right [format \"%.2f\" [expr {double(round(100*[expr $program_budget_converted-$budget_sum]))/100}]]"
+	"\#align=right [format \"%.2f\" [expr {double(round(100*[expr {$program_budget_converted-$budget_sum}]))/100}]]"
 	""
 	""
 	""
 	"&nbsp;"
-	"\#align=right [format \"%.2f\" [expr {double(round(100*[expr $program_budget_hours-$budget_hours_sum]))/100}]]"
+	"\#align=right [format \"%.2f\" [expr {double(round(100*[expr {$program_budget_hours-$budget_hours_sum}]))/100}]]"
 	""
 	""
 	""
@@ -438,10 +438,10 @@ db_foreach sql $sql {
     }
 
     # Calculated variables
-    set project_cost [expr $cost_timesheet_logged_cache + $cost_bills_cache]
+    set project_cost [expr {$cost_timesheet_logged_cache + $cost_bills_cache}]
     set budget_overrun_percentage  "<i>[lang::message::lookup "" intranet-reporting.Undefined "Undefined"]</i>"
     if {0.0 != $percent_completed && 0.0 != $project_budget_converted} {
-	set percent_consumed [expr 100.0 * ($project_cost / $project_budget_converted)]
+	set percent_consumed [expr {100.0 * ($project_cost / $project_budget_converted)}]
 	set budget_overrun_percentage [expr (100.0 * $percent_consumed / $percent_completed) - 100.0]
 	regexp {^([0-9\-\+]+)} $budget_overrun_percentage match budget_overrun_percentage
 	if {$budget_overrun_percentage > 5.0} { set budget_overrun_percentage "<font color=red>$budget_overrun_percentage</font>" }
@@ -449,7 +449,7 @@ db_foreach sql $sql {
 
     set budget_hours_overrun_percentage "<i>[lang::message::lookup "" intranet-reporting.Undefined "Undefined"]</i>"
     if {0.0 != $percent_completed && 0.0 != $project_budget_hours} {
-	set percent_consumed [expr 100.0 * ($reported_hours_cache / $project_budget_hours)]
+	set percent_consumed [expr {100.0 * ($reported_hours_cache / $project_budget_hours)}]
 	set budget_hours_overrun_percentage [expr (100.0 * $percent_consumed / $percent_completed) - 100.0]
 	regexp {^([0-9\-\+]+)} $budget_hours_overrun_percentage match budget_hours_overrun_percentage
 	if {$budget_hours_overrun_percentage > 5.0} { set budget_hours_overrun_percentage "<font color=red>$budget_hours_overrun_percentage</font>" }

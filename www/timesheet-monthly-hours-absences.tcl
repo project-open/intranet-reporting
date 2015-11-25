@@ -71,7 +71,7 @@ ad_proc -private im_report_render_absences {
         }
         incr group_level
     }
-    set group_level [expr $group_level - 1]
+    set group_level [expr {$group_level - 1}]
 
     while {$group_level > 0} {
 	if {$debug} { ns_log Notice "render_footer: level=$group_level" }
@@ -86,7 +86,7 @@ ad_proc -private im_report_render_absences {
         # -------------------------------------------------------
         # Determine the new value for the current group_level
         set new_value ""
-        if {$group_var != ""} {
+        if {$group_var ne ""} {
             upvar $group_var $group_var
             if {![info exists $group_var]} {
                 ad_return_complaint 1 "Header: Level $group_level: Group var '$group_var' doesn't exist"
@@ -113,8 +113,8 @@ ad_proc -private im_report_render_absences {
 	    set position_day_str [string first "(day" [string tolower $field]]
             if {$debug} { ns_log Notice "intranet-reporting-procs::im_report_render_absences::position found: $position_day_str" }
 	    if { "-1" != $position_day_str } {
-		set calendar_day [string range $field [expr $position_day_str + 4] [expr $position_day_str + 5]] 
-		if {$debug} { ns_log Notice "intranet-reporting-procs::im_report_render_absences::calendar_day: $calendar_day" }
+		set calendar_day [string range $field [expr {$position_day_str + 4}] $position_day_str+5] 
+		if {$debug} { ns_log NOTICE "intranet-reporting-procs::im_report_render_absences::calendar_day: $calendar_day" }
 		set report_year [string range $report_year_month 0 3]
 		set report_month [string range $report_year_month 5 6 ]
 		set date_ansi_key "$report_year-$report_month-$calendar_day"
@@ -127,12 +127,12 @@ ad_proc -private im_report_render_absences {
 		    foreach absence_list_item $absence_arr($date_ansi_key) {
 			# Absences are stored as days/fractions of a day 
 			# Evaluate total absence in UoM: 'Hours'  
-			if { 1 < [expr [lindex $absence_list_item 0] + 0] } {
+			if { 1 < [expr {[lindex $absence_list_item 0] + 0}] } {
 			    # We assume that absences with a total (total_days) > 1 are always full day absences  
-			    set total_absence [expr $total_absence + $timesheet_hours_per_day]
+			    set total_absence [expr {$total_absence + $timesheet_hours_per_day}]
 			} else {
 			    # Single absences might be fraction of day  
-			    set total_absence [expr [expr $timesheet_hours_per_day + 0] * [expr [lindex $absence_list_item 0]]]
+			    set total_absence [expr {[expr {$timesheet_hours_per_day + 0}] * [expr [lindex $absence_list_item 0]]}]
 			}
 		    }
 		    
@@ -140,7 +140,7 @@ ad_proc -private im_report_render_absences {
 		    set employee_id [lindex $last_value_array_list 1]
 		    set employee_availability [db_string get_employee_availability "select availability from im_employees where employee_id = :employee_id" -default 100]
 		    if { "" == $employee_availability } { set employee_availability 100 }
-		    set total_absence [format "%.2f" [expr {double(round(100*[expr $total_absence * $employee_availability / 100])) / 100}]] 
+		    set total_absence [format "%.2f" [expr {double(round(100*[expr {$total_absence * $employee_availability / 100}])) / 100}]] 
 		    
 		    if { "html" == $output_format } {
 			set value "<a href='/intranet-timesheet2/absences?view_name=absence_list_home&user_selection=$new_value"
@@ -148,7 +148,7 @@ ad_proc -private im_report_render_absences {
 		    } else {
 			set value "$total_absence"
 		    }
-		    set total_sum_absences [expr $total_sum_absences + [expr $total_absence + 0]]  
+		    set total_sum_absences [expr {$total_sum_absences + [expr {$total_absence + 0}]}]  
 		} else {
 		    if {$debug} { ns_log Notice "intranet-reporting-procs::im_report_render_absences::did not found absence in array" }
                     set value "&nbsp;"
@@ -175,7 +175,7 @@ ad_proc -private im_report_render_absences {
 	# Store the result for display later
 	set footer_array($group_level) $footer_record
 
-	set group_level [expr $group_level - 1]
+	set group_level [expr {$group_level - 1}]
     }
     if {$debug} { ns_log Notice "render_footer: after group_by footers" }
     
@@ -234,7 +234,7 @@ ad_proc -private im_report_display_absences {
 	# -------------------------------------------------------
 	# Determine new value for the current group return_group_level
 	set new_value ""
-	if {$group_var != ""} {
+	if {$group_var ne ""} {
 	    upvar $group_var $group_var
 	    set cmd "set new_value \"\$$group_var\""
 	    eval $cmd
@@ -245,7 +245,7 @@ ad_proc -private im_report_display_absences {
 	# In this case we have found the first level in which the
 	# results differ. This is the level where we have to return.
 	if {$debug} { ns_log Notice "display_footer: level=$return_group_level, group_var=$group_var, new_record_value=$new_record_value, new_value=$new_value" }
-	if {![string equal $new_value $new_record_value]} {
+	if {$new_value ne $new_record_value } {
 	    # leave the while loop
 	    break
 	}
@@ -278,7 +278,7 @@ ad_proc -private im_report_display_absences {
         }
         incr max_group_level
     }
-    set max_group_level [expr $max_group_level - 2]
+    set max_group_level [expr {$max_group_level - 2}]
 
 
     if {$display_all_footers_p} { set return_group_level 1 }
@@ -289,7 +289,7 @@ ad_proc -private im_report_display_absences {
     # return_group_level.
     #
     if {$debug} { ns_log Notice "display_footer: max_group_level=$max_group_level, return_group_level=$return_group_level" }
-    for {set group_level $max_group_level} { $group_level >= $return_group_level} { set group_level [expr $group_level-1]} {
+    for {set group_level $max_group_level} { $group_level >= $return_group_level} { set group_level [expr {$group_level-1}]} {
 
 	# -------------------------------------------------------
 	# Extract the absence_line
@@ -329,7 +329,7 @@ ad_proc -private im_report_display_absences {
 # Label: Provides the security context for this report
 set menu_label "timesheet-monthly-hours-absences"
 
-set current_user_id [ad_maybe_redirect_for_registration]
+set current_user_id [auth::require_login]
 
 set read_p [db_string report_perms "
 	select	im_object_permission_p(m.menu_id, :current_user_id, 'read')
@@ -337,7 +337,7 @@ set read_p [db_string report_perms "
 	where	m.label = :menu_label
 " -default 'f']
 
-if {![string equal "t" $read_p]} {
+if {"t" ne $read_p } {
     ad_return_complaint 1 "<li>
     [lang::message::lookup "" intranet-reporting.You_dont_have_permissions "You don't have the necessary permissions to view this page"]"
     return
@@ -372,7 +372,7 @@ set context_bar [im_context_bar $page_title]
 set context ""
 set todays_date [db_string todays_date "select to_char(now(), :date_format) from dual" -default ""]
 
-if { [empty_string_p $report_year_month] } {
+if { $report_year_month eq "" } {
     set report_year_month "[string range $todays_date 0 3]-[string range $todays_date 5 6]"
 }    
 
@@ -403,7 +403,7 @@ set im_user_absence_type_training 5004
 # Conditional SQL Where-Clause
 #
  
-if {[empty_string_p $different_from_project_p]} {
+if {$different_from_project_p eq ""} {
    set mm_checked ""
    set mm_value  ""
 } else {
@@ -413,7 +413,7 @@ if {[empty_string_p $different_from_project_p]} {
 
 set criteria [list]
 
-if {"" != $project_id && 0 != $project_id && $different_from_project_p == ""} {	
+if {"" != $project_id && 0 != $project_id && $different_from_project_p eq ""} {	
     lappend criteria "
 		p.project_id in (
 		select 
@@ -428,7 +428,7 @@ if {"" != $project_id && 0 != $project_id && $different_from_project_p == ""} {
     "
 }
 
- if {"" != $project_id && 0 != $project_id && $different_from_project_p != ""} {
+ if {"" != $project_id && 0 != $project_id && $different_from_project_p ne ""} {
         lappend criteria "
 		p.project_id in (
 		select 
@@ -447,7 +447,7 @@ if {"" != $customer_id && 0 != $customer_id} {
 	 lappend criteria "p.company_id = :customer_id" 
 }
 
-if { ![empty_string_p $project_status_id] && $project_status_id > 0 } {
+if { $project_status_id ne "" && $project_status_id > 0 } {
     lappend criteria "p.project_status_id in ([join [im_sub_categories $project_status_id] ","])"
 }
 
@@ -462,7 +462,7 @@ if { !$view_hours_all_p } {
 
 # Put everything together
 set where_clause [join $criteria " and\n            "]
-if { ![empty_string_p $where_clause] } {
+if { $where_clause ne "" } {
     set where_clause " and $where_clause"
 }
 
@@ -501,7 +501,7 @@ if { "0" != $department_id &&  "" != $department_id } {
 }
 
 # Create "outer where" 
-if { ![empty_string_p $criteria_outer] } { 
+if { $criteria_outer ne "" } { 
    set outer_where [join $criteria_outer " and\n   "] 
 } 
 if {"" != $outer_where} { set outer_where "and $outer_where" }
@@ -655,7 +655,7 @@ set sql "
 set line_str " \"\" \"<b><a href=\$project_url\$top_parent_project_id>\${top_project_nr} - \${top_project_name}</a></b>\" \"<b><a href=\$project_url\$sub_project_id>\${sub_project_nr} - \${sub_project_name}</a></b>\" "
 append line_str $day_placeholders "\$number_hours_project_ctr" 
 
-set no_empty_columns [expr $duration+1]
+set no_empty_columns [expr {$duration+1}]
 
 # -----------------------------------------------
 # Define Report 
@@ -666,7 +666,7 @@ lappend report_def 	[list group_by project_id header $line_str content {}]
 
 # set footer 
 set day_columns ""
-for {set i 1} {$i < [expr $duration +1]} {incr i} {
+for {set i 1} {$i < [expr {$duration +1}]} {incr i} {
     if { 1 == [string length $i]} { set day_double_digit 0$i } else { set day_double_digit $i }    
     append day_columns "\"<strong>\$ts_hours_arr(day$day_double_digit)</strong>\" " 
 }
@@ -895,12 +895,12 @@ db_foreach sql $sql {
                     foreach absence_list_item $absence_arr($date_ansi_key) {
                         # Absences are stored as days/fractions of a day
                         # Evaluate total absence in UoM: 'Hours'
-                        if { 1 < [expr [lindex $absence_list_item 0] + 0] } {
+                        if { 1 < [expr {[lindex $absence_list_item 0] + 0}] } {
                             # We assume that absences with a total (total_days) > 1 are always full day absences
-                            set total_absence [expr $total_absence + $timesheet_hours_per_day]
+                            set total_absence [expr {$total_absence + $timesheet_hours_per_day}]
                         } else {
                             # Single absences might be fraction of day
-                            set total_absence [expr [expr $timesheet_hours_per_day + 0] * [expr [lindex $absence_list_item 0]]]
+                            set total_absence [expr {[expr {$timesheet_hours_per_day + 0}] * [expr [lindex $absence_list_item 0]]}]
                         }
                     }
 		    if {$debug} { ns_log Notice "timesheet-monthly-hours-absences::switch_user - Found total_absence: $total_absence" }
@@ -930,7 +930,7 @@ db_foreach sql $sql {
 		set number_hours_ctr_pretty [expr $number_hours_ctr_pretty + [expr $$day_double_digit]]
 		if { 0 == $month_arr($day_double_digit) } {
 		    set month_arr($day_double_digit) 1
-		    set number_hours_ctr [expr $number_hours_ctr + $ts_hours_arr($day_double_digit)]
+		    set number_hours_ctr [expr {$number_hours_ctr + $ts_hours_arr($day_double_digit)}]
 		}
 	    }
         }

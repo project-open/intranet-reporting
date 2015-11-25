@@ -19,7 +19,7 @@ ad_page_contract {
     {form_mode "display"}
 }
 
-set user_id [ad_maybe_redirect_for_registration]
+set user_id [auth::require_login]
 set page_title [lang::message::lookup "" intranet-reporting.Edit_Report "Edit Report"]
 set context [im_context_bar $page_title]
 if {![im_permission $user_id "add_reports"]} { 

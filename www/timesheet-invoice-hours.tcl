@@ -34,7 +34,7 @@ ad_page_contract {
 # Uses the same label as the timesheet report.
 set menu_label "reporting-timesheet-customer-project"
 
-set current_user_id [ad_maybe_redirect_for_registration]
+set current_user_id [auth::require_login]
 
 set read_p [db_string report_perms "
 	select	im_object_permission_p(m.menu_id, :current_user_id, 'read')
@@ -65,7 +65,7 @@ set date_signature_l10n [lang::message::lookup "" intranet-reporting.Date_Signat
 
 # ------------------------------------------------------------
 
-if {![string equal "t" $read_p]} {
+if {"t" ne $read_p } {
     ad_return_complaint 1 "
     [lang::message::lookup "" intranet-reporting.You_dont_have_permissions "You don't have the necessary permissions to view this page"]"
     return
@@ -141,7 +141,7 @@ if {0 != $project_id && "" != $project_id} {
 }
 
 set where_clause [join $criteria " and\n            "]
-if { ![empty_string_p $where_clause] } {
+if { $where_clause ne "" } {
     set where_clause " and $where_clause"
 }
 
@@ -533,8 +533,8 @@ switch $output_template {
                            <td id=time>$description</td>
                         </tr>
 		"
-		set sub_total [expr $sub_total + $hours]
-		set grand_total [expr $grand_total + $hours]
+		set sub_total [expr {$sub_total + $hours}]
+		set grand_total [expr {$grand_total + $hours}]
 
 	    }
 

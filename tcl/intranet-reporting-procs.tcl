@@ -124,7 +124,7 @@ ad_proc im_report_format_number {
     output medium.
 } {
     if {"" == $locale} { set locale [lang::user::locale] }
-    set amount_zeros [im_numeric_add_trailing_zeros [expr $amount+0] $rounding_precision]
+    set amount_zeros [im_numeric_add_trailing_zeros [expr {$amount+0}] $rounding_precision]
     set amount_pretty [lc_numeric $amount_zeros "" $locale]
     return $amount_pretty
 }
@@ -197,7 +197,7 @@ ad_proc im_report_render_cell {
 	set key [string tolower $key]
 	set cell $rest
 
-	if {[string equal $key "class"]} {
+	if {$key eq "class"} {
 	    set cell_class $value
 	} else {
 	    append td_fields "$key=$value "
@@ -283,7 +283,7 @@ ad_proc im_report_render_header {
 	# Determine last and new value for the current group group_level
 	set last_value ""
 	set new_value ""
-	if {$group_var != ""} {
+	if {$group_var ne ""} {
 	    if {[info exists last_value_array($group_level)]} {
 		set last_value $last_value_array($group_level)
 	    }
@@ -300,7 +300,7 @@ ad_proc im_report_render_header {
 	# -------------------------------------------------------
 	# Write out the header if last_value != new_value
 
-	if { ($content == "" || $new_value != $last_value) && ($group_level <= $level_of_detail) && [llength $header] > 0} {
+	if { ($content eq "" || $new_value != $last_value) && ($group_level <= $level_of_detail) && [llength $header] > 0} {
 	    switch $output_format {
 		html - printer { ns_write "<tr>\n" }
 		csv { }
@@ -380,7 +380,7 @@ ad_proc im_report_render_footer {
         }
         incr group_level
     }
-    set group_level [expr $group_level - 1]
+    set group_level [expr {$group_level - 1}]
 
     while {$group_level > 0} {
 	if {$debug} { ns_log Notice "render_footer: level=$group_level" }
@@ -395,7 +395,7 @@ ad_proc im_report_render_footer {
         # -------------------------------------------------------
         # Determine the new value for the current group_level
         set new_value ""
-        if {$group_var != ""} {
+        if {$group_var ne ""} {
             upvar $group_var $group_var
             if {![info exists $group_var]} {
                 ad_return_complaint 1 "Header: Level $group_level: Group var '$group_var' doesn't exist"
@@ -423,7 +423,7 @@ ad_proc im_report_render_footer {
 	# Store the result for display later
 	set footer_array($group_level) $footer_record
 
-	set group_level [expr $group_level - 1]
+	set group_level [expr {$group_level - 1}]
     }
     if {$debug} { ns_log Notice "render_footer: after group_by footers" }
 
@@ -487,7 +487,7 @@ ad_proc im_report_display_footer {
 	# -------------------------------------------------------
 	# Determine new value for the current group return_group_level
 	set new_value ""
-	if {$group_var != ""} {
+	if {$group_var ne ""} {
 	    upvar $group_var $group_var
 	    set cmd "set new_value \"\$$group_var\""
 	    eval $cmd
@@ -498,7 +498,7 @@ ad_proc im_report_display_footer {
 	# In this case we have found the first level in which the
 	# results differ. This is the level where we have to return.
 	if {$debug} { ns_log Notice "display_footer: level=$return_group_level, group_var=$group_var, new_record_value=$new_record_value, new_value=$new_value" }
-	if {![string equal $new_value $new_record_value]} {
+	if {$new_value ne $new_record_value } {
 	    # leave the while loop
 	    break
 	}
@@ -531,7 +531,7 @@ ad_proc im_report_display_footer {
         }
         incr max_group_level
     }
-    set max_group_level [expr $max_group_level - 2]
+    set max_group_level [expr {$max_group_level - 2}]
 
 
     if {$display_all_footers_p} { set return_group_level 1 }
@@ -542,7 +542,7 @@ ad_proc im_report_display_footer {
     # return_group_level.
     #
     if {$debug} { ns_log Notice "display_footer: max_group_level=$max_group_level, return_group_level=$return_group_level" }
-    for {set group_level $max_group_level} { $group_level >= $return_group_level} { set group_level [expr $group_level-1]} {
+    for {set group_level $max_group_level} { $group_level >= $return_group_level} { set group_level [expr {$group_level-1}]} {
 
 	# -------------------------------------------------------
 	# Extract the footer_line
@@ -600,10 +600,10 @@ ad_proc im_report_update_counters {
 	    set last_reset $counter_reset($var) 
 	}
 
-	set cmd "set reset_val \[expr $reset\]"
+	set cmd "set reset_val \[expr {$reset}\]"
 	set reset_val [uplevel 1 $cmd]
 
-	set cmd "set expr_val \[expr $expr\]"
+	set cmd "set expr_val \[expr {$expr}\]"
 	set expr_val [uplevel 1 $cmd]
 
 	if {$last_reset != $reset_val} {
@@ -620,7 +620,7 @@ ad_proc im_report_update_counters {
 	}
 
 	set last_count $counter_count($var)
-	set last_sum [expr $last_sum + $expr_val]
+	set last_sum [expr {$last_sum + $expr_val}]
 
 
 	incr last_count
@@ -634,7 +634,7 @@ ad_proc im_report_update_counters {
 
 	# Store the rounded result
 	upvar "${var}_rounded" "${var}_rounded"
-	set "${var}_rounded" [expr round(100.0 * $last_sum) / 100.0]
+	set "${var}_rounded" [expr {round(100.0 * $last_sum) / 100.0}]
     }
 }
 
@@ -747,12 +747,12 @@ ad_proc im_report_write_http_headers {
     append content_type "; charset=$http_encoding"
 
     # Set content disposition for CSV exports
-    if { $output_format == "csv" && $report_name != ""} {
+    if { $output_format eq "csv" && $report_name ne ""} {
 		set report_key [string tolower $report_name]
 		regsub -all {[^a-zA-z0-9_]} $report_key "_" report_key
 		regsub -all {_+} $report_key "_" report_key
 		set all_the_headers "HTTP/1.0 200 OK\nMIME-Version: 1.0\nContent-Type: $content_type\nContent-Disposition: attachment; filename=${report_key}.csv\r\n"
-    } elseif { $output_format == "txt" && $report_name != "" } {
+    } elseif { $output_format eq "txt" && $report_name ne "" } {
         set report_key [string tolower $report_name]
         regsub -all {[^a-zA-z0-9_]} $report_key "_" report_key
         regsub -all {_+} $report_key "_" report_key
@@ -845,10 +845,10 @@ ad_proc -public im_report_take_n_from_list { list n } {
     set result [list]
     for {set i 0} {$i < [llength $list]} {incr i} {
         set elem [lindex $list $i]
-        set left_rest [lrange $list 0 [expr $i-1]]
-        set right_rest [lrange $list [expr $i+1] end]
+        set left_rest [lrange $list 0 $i-1]
+        set right_rest [lrange $list $i+1 end]
         set rest [concat $left_rest $right_rest]
-        set rest_perms [im_report_take_n_from_list $rest [expr $n-1]]
+        set rest_perms [im_report_take_n_from_list $rest [expr {$n-1}]]
 
 	foreach rest_perm $rest_perms {
 	    lappend result $rest_perm
@@ -927,8 +927,8 @@ ad_proc -public im_reporting_tree_sortkey_pretty {
 	set factor 128
 	set dec 0
 	for {set i 0} {$i < [llength $bits_list]} {incr i} {
-	    set dec [expr $dec + $factor * [lindex $bits_list $i]]
-	    set factor [expr $factor / 2]
+	    set dec [expr {$dec + $factor * [lindex $bits_list $i]}]
+	    set factor [expr {$factor / 2}]
 	}
 	append result " ."
 	set tree_sortkey $rest

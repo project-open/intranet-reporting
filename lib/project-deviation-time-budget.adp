@@ -5,21 +5,21 @@
         <form action='project-deviation-time-budget' id='intranet-reporting-project-deviation-time-budget'>
         <%=[export_vars -form {opened_projects}]%>
 
-        <table border=0 cellspacing="1" cellpadding="1" width="100%">
-        <tr valign=top>
+        <table border="0" cellspacing="1" cellpadding="1" width="100%">
+        <tr valign="top">
 		<td>
-                <table border=0 cellspacing=1 cellpadding=1 width="420px">
+                <table border="0" cellspacing="1" cellpadding="1" width="420px">
                 <tr>
                   <td class=form-label><%=[lang::message::lookup "" intranet-core.Start_Date "Start Date"]%></td>
                   <td class=form-widget>
-                    <input type=textfield name="start_date" id="start_date" value=@start_date@>
+                    <input type="text"field name="start_date" id="start_date" value="@start_date@">
                     <input type="button" style="height:20px; width:20px; background: url('/resources/acs-templating/calendar.gif');" onclick ="return showCalendar('start_date', 'y-m-d');" >
                   </td>
                 </tr>
                 <tr>
                   <td class=form-label><%=[lang::message::lookup "" intranet-core.End_Date "End Date"]%></td>
                   <td class=form-widget>
-                    <input type=textfield name="end_date" id="end_date" value=@end_date@>
+                    <input type="text"field name="end_date" id="end_date" value="@end_date@">
                     <input type="button" style="height:20px; width:20px; background: url('/resources/acs-templating/calendar.gif');" onclick ="return showCalendar('end_date', 'y-m-d');" >
                   </td>
                 </tr>

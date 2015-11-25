@@ -24,7 +24,7 @@ ad_page_contract {
 # ------------------------------------------------------------
 # SECURITY
 
-set current_user_id [ad_maybe_redirect_for_registration]
+set current_user_id [auth::require_login]
 if { ![im_is_user_site_wide_or_intranet_admin $current_user_id] } {
     set message "You don't have the necessary permissions to view this page"
     ad_return_complaint 1 "<li>$message"
@@ -352,7 +352,7 @@ db_dml create_im_report_get_ts_costs_no_cache_im_costs_sql $im_report_get_ts_cos
 # Report SQL 
 
 set criteria [list]
-if { ![empty_string_p $project_status_id] && $project_status_id > 0 } {
+if { $project_status_id ne "" && $project_status_id > 0 } {
     lappend criteria "p.project_status_id in ([join [im_sub_categories $project_status_id] ","])"
 }
 if {"" != $start_date} {
@@ -360,7 +360,7 @@ if {"" != $start_date} {
 }
 
 set where_clause [join $criteria " and\n            "]
-if { ![empty_string_p $where_clause] } {
+if { $where_clause ne "" } {
     set where_clause " and $where_clause"
 }
 
@@ -456,7 +456,7 @@ db_foreach r $sql {
     if { "" == $diff } { set diff 0 }
     if { [info exists show_diff_only_p] && 0 == $diff } { continue }
 
-    set diff_total [expr $diff_total + $diff]
+    set diff_total [expr {$diff_total + $diff}]
     ns_write "<tr>\n
 		<td>$project_name</td>\n
 		<td>[expr {double(round(100*$costs_no_cache_im_costs))/100}]</td>\n

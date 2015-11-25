@@ -29,7 +29,7 @@ ad_page_contract {
 set menu_label "reporting-capacity-planning"
 
 # Get the current user
-set current_user_id [ad_maybe_redirect_for_registration]
+set current_user_id [auth::require_login]
 
 # Determine whether the current_user has read permissions. 
 set read_p [db_string report_perms "
@@ -39,7 +39,7 @@ set read_p [db_string report_perms "
 " -default 'f']
 
 # Write out an error message if the current user doesn't have read permissions
-if {![string equal "t" $read_p]} {
+if {"t" ne $read_p } {
     set message "You don't have the necessary permissions to view this page"
     ad_return_complaint 1 "<li>$message"
     ad_script_abort
@@ -299,7 +299,7 @@ set class ""
 db_foreach sql $report_sql {
 
 	# Select either "roweven" or "rowodd"
-	set class $rowclass([expr $counter % 2])
+	set class $rowclass([expr {$counter % 2}])
 
 	# Restrict the length of the project_name to max. 40 characters.
 	set project_name [string_truncate -len 40 $project_name]
@@ -316,9 +316,9 @@ db_foreach sql $report_sql {
 
 	# Calculated Variables
 	set estim_hours ""
-	catch { set estim_hours [expr round(10 * $logged_hours * 100 / $percent_completed) / 10] }
+	catch { set estim_hours [expr {round(10 * $logged_hours * 100 / $percent_completed) / 10}] }
 	set estim_costs ""
-	catch { set estim_costs [expr round(10 * $logged_costs * 100 / $percent_completed) / 10] }
+	catch { set estim_costs [expr {round(10 * $logged_costs * 100 / $percent_completed) / 10}] }
 
 	# Color=red if logged hours > budget hours
 	set logged_hours_color "black"

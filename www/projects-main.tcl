@@ -32,7 +32,7 @@ ad_page_contract {
 # because it identifies unquely the report's Menu and
 # its permissions.
 set menu_label "reporting-projects-main"
-set current_user_id [ad_maybe_redirect_for_registration]
+set current_user_id [auth::require_login]
 # Default User = Current User, to reduce performance overhead
 if {"" == $start_date && "" == $end_date && 0 == $project_id && 0 == $company_id && 0 == $member_id && 0 == $project_lead_id} { 
     set user_id $current_user_id 
@@ -56,7 +56,7 @@ set number_format "999,999.99"
 
 # ------------------------------------------------------------
 
-if {![string equal "t" $read_p]} {
+if {"t" ne $read_p } {
     ad_return_complaint 1 "
     [lang::message::lookup "" intranet-reporting.You_dont_have_permissions "You don't have the necessary permissions to view this page"]"
     return
@@ -148,7 +148,7 @@ if {0 != $project_lead_id && "" != $project_lead_id} { lappend criteria "p.proje
 if {0 != $project_id && "" != $project_id} { lappend criteria "p.project_id = :project_id" }
 
 set where_clause [join $criteria " and\n            "]
-if { ![empty_string_p $where_clause] } {
+if { $where_clause ne "" } {
     set where_clause " and $where_clause"
 }
 

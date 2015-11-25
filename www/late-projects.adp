@@ -1,6 +1,6 @@
 <master>
-<property name="title">@page_title@</property>
-<property name="context_bar">@context_bar;noquote@</property>
+<property name="doc(title)">@page_title;literal@</property>
+<property name="context_bar">@context_bar;literal@</property>
 <property name="main_navbar_label">reporting</property>
 
 <table width="100%"><tr>

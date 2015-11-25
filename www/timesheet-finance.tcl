@@ -26,13 +26,13 @@ ad_page_contract {
 # because it identifies unquely the report's Menu and
 # its permissions.
 set menu_label "reporting-timesheet-finance"
-set current_user_id [ad_maybe_redirect_for_registration]
+set current_user_id [auth::require_login]
 set read_p [db_string report_perms "
         select  im_object_permission_p(m.menu_id, :current_user_id, 'read')
         from    im_menus m
         where   m.label = :menu_label
 " -default 'f']
-if {![string equal "t" $read_p]} {
+if {"t" ne $read_p } {
     ad_return_complaint 1 [lang::message::lookup "" intranet-reporting.You_dont_have_permissions "You don't have the necessary permissions to view this page"]
     ad_script_abort
 }
@@ -299,13 +299,13 @@ db_foreach hours $hours_sql {
     if { ![info exists projects($hours_project_id,$user_id)] } {
 	set projects($hours_project_id,$user_id) 0
     }
-    set projects($hours_project_id,$user_id) [expr $projects($hours_project_id,$user_id) + $logged_hours]
+    set projects($hours_project_id,$user_id) [expr {$projects($hours_project_id,$user_id) + $logged_hours}]
 
     foreach parent_id $project_parents($hours_project_id) {
 	if { ![info exists projects($parent_id,$user_id)] } {
 	    set projects($parent_id,$user_id) 0
 	}
-	set projects($parent_id,$user_id) [expr $projects($parent_id,$user_id) + $logged_hours]
+	set projects($parent_id,$user_id) [expr {$projects($parent_id,$user_id) + $logged_hours}]
     }
 
 }
@@ -317,7 +317,7 @@ db_foreach hours $hours_sql {
 
 set elements [list]
 
-if {[lsearch $display_fields "customer_name"] >= 0} {
+if {"customer_name" in $display_fields} {
     lappend elements customer_name
     lappend elements {
 	label "Customer"
@@ -328,7 +328,7 @@ if {[lsearch $display_fields "customer_name"] >= 0} {
 	}
     }
 }
-if {[lsearch $display_fields "project_nr"] >= 0} {
+if {"project_nr" in $display_fields} {
     lappend elements project_nr 
     lappend elements {
 	label "Project Nr"
@@ -352,7 +352,7 @@ lappend elements {
     }
 }
 
-if {[lsearch $display_fields "start_date"] >= 0} {
+if {"start_date" in $display_fields} {
     lappend elements child_start_date
     lappend elements {
 	label "Start"
@@ -360,7 +360,7 @@ if {[lsearch $display_fields "start_date"] >= 0} {
     }
 }
 
-if {[lsearch $display_fields "end_date"] >= 0} {
+if {"end_date" in $display_fields} {
     lappend elements child_end_date
     lappend elements {
 	label "End"
@@ -368,7 +368,7 @@ if {[lsearch $display_fields "end_date"] >= 0} {
     }
 }
 
-if {[lsearch $display_fields "cost_invoices_cache"] >= 0} {
+if {"cost_invoices_cache" in $display_fields} {
     lappend elements cost_invoices_cache
     lappend elements {
 	label "Invoice"
@@ -376,56 +376,56 @@ if {[lsearch $display_fields "cost_invoices_cache"] >= 0} {
     }
 }
 
-if {[lsearch $display_fields "cost_delivery_notes_cache"] >= 0} {
+if {"cost_delivery_notes_cache" in $display_fields} {
     lappend elements cost_delivery_notes_cache
     lappend elements {
 	label "DelNote" 
 	html "align right"
     }
 }
-if {[lsearch $display_fields "cost_quotes_cache"] >= 0} {
+if {"cost_quotes_cache" in $display_fields} {
     lappend elements cost_quotes_cache
     lappend elements {
 	label "Quote" 
 	html "align right"
     }
 }
-if {[lsearch $display_fields "cost_bills_cache"] >= 0} {
+if {"cost_bills_cache" in $display_fields} {
     lappend elements cost_bills_cache
     lappend elements {
 	label "Bill" 
 	html "align right"
     }
 }
-if {[lsearch $display_fields "cost_expense_logged_cache"] >= 0} {
+if {"cost_expense_logged_cache" in $display_fields} {
     lappend elements cost_expense_logged_cache
     lappend elements {
 	label "Expense"
 	html "align right"
     }
 }
-if {[lsearch $display_fields "cost_timesheet_logged_cache"] >= 0} {
+if {"cost_timesheet_logged_cache" in $display_fields} {
 lappend elements cost_timesheet_logged_cache
     lappend elements {
 	label "TimeS" 
 	html "align right"
     }
 }
-if {[lsearch $display_fields "cost_purchase_orders_cache"] >= 0} {
+if {"cost_purchase_orders_cache" in $display_fields} {
     lappend elements cost_purchase_orders_cache
     lappend elements {
 	label "POs" 
 	html "align right"
     }
 }
-if {[lsearch $display_fields "direct_hours"] >= 0} {
+if {"direct_hours" in $display_fields} {
     lappend elements direct_hours
     lappend elements {
 	label "Direct<br>Hours" 
 	display_template { <b><div align=right>@project_list.direct_hours@</div></b> }
     }
 }
-if {[lsearch $display_fields "reported_hours_cache"] >= 0} {
+if {"reported_hours_cache" in $display_fields} {
     lappend elements reported_hours_cache
     lappend elements {
 	label "Total <br>Hours" 
@@ -501,7 +501,7 @@ db_multirow -extend {level_spacer open_gif} project_list project_list "
     for {set i 0} {$i < $tree_level} {incr i} { append level_spacer "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" }
 
     # Open/Close Logic
-    set open_p [expr [lsearch $opened_projects $child_id] >= 0]
+    set open_p [expr {[lsearch $opened_projects $child_id] >= 0}]
     if {$open_p} {
 	set opened $opened_projects
 	

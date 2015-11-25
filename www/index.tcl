@@ -29,7 +29,7 @@ ad_page_contract {
 # Defaults & Security
 # ------------------------------------------------------
 
-set current_user_id [ad_maybe_redirect_for_registration]
+set current_user_id [auth::require_login]
 set user_admin_p [im_is_user_site_wide_or_intranet_admin $current_user_id]
 set reports_exist_p [im_table_exists "im_reports"]
 
@@ -45,7 +45,7 @@ set read_p [util_memoize [list db_string report_perms "
         where   m.label = '$menu_label'
 " -default 'f']]
 
-if {![string equal "t" $read_p]} {
+if {"t" ne $read_p } {
     ad_return_complaint 1 "<li>[lang::message::lookup "" intranet-reporting.You_dont_have_permissions "You don't have the necessary permissions to view this page"]"
     return
 }

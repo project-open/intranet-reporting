@@ -74,14 +74,14 @@ set restrict_to_project_id ""
 # Permissions & Validation 
 # ------------------------------------------------------------
 
-set current_user_id [ad_maybe_redirect_for_registration]
+set current_user_id [auth::require_login]
 set read_p [db_string report_perms "
         	select  im_object_permission_p(m.menu_id, :current_user_id, 'read')
 	        from    im_menus m
         	where   m.label = :menu_label
 	" -default 'f']
 
-if {![string equal "t" $read_p]} {
+if {"t" ne $read_p } {
     ad_return_complaint 1 "<li>
 		[lang::message::lookup "" intranet-reporting.You_dont_have_permissions "You don't have the necessary permissions to view this page"]"
     return
@@ -141,7 +141,7 @@ if {"" == $form_vars} { set form_vars [ns_set create] }
 # Get the start_idx in case of pagination
 set start_idx [ns_set get $form_vars "task_start_idx"]
 if {"" == $start_idx} { set start_idx 0 }
-set end_idx [expr $start_idx + $max_entries_per_page - 1]
+set end_idx [expr {$start_idx + $max_entries_per_page - 1}]
 
 set bgcolor(0) " class=roweven"
 set bgcolor(1) " class=rowodd"
@@ -151,7 +151,7 @@ set timesheet_report_url "/intranet-timesheet2-tasks/report-timesheet"
 set current_url [im_url_with_query]
 
 if {![info exists current_page_url]} { set current_page_url [ad_conn url] }
-if {![exists_and_not_null return_url]} { set return_url $current_url }
+if {(![info exists return_url] || $return_url eq "")} { set return_url $current_url }
 
 # Get the "view" (=list of columns to show)
 set view_id [im_view_id_from_name $view_name]
@@ -213,7 +213,7 @@ foreach var $export_var_list {
 	ns_log Notice "im_timesheet_task_component: $var <- $value"
     } else {
 	set value [ns_set get $form_vars $var]
-	if {![string equal "" $value]} {
+	if {$value ne ""} {
 	    ns_set put $bind_vars $var $value
 	    ns_log Notice "im_timesheet_task_component: $var <- $value"
 	}
@@ -226,7 +226,7 @@ set len [ns_set size $bind_vars]
 for {set i 0} {$i < $len} {incr i} {
     set key [ns_set key $bind_vars $i]
     set value [ns_set value $bind_vars $i]
-    if {![string equal $value ""]} {
+    if {$value ne "" } {
 	lappend params "$key=[ns_urlencode $value]"
     }
 }
@@ -234,7 +234,7 @@ set pass_through_vars_html [join $params "&"]
 
 # ---------------------- Format Header ----------------------------------
 # Set up colspan to be the number of headers + 1 for the # column
-set colspan [expr [llength $column_headers] + 1]
+set colspan [expr {[llength $column_headers] + 1}]
 
 # Format the header names with links that modify the
 # sort order of the SQL query.
@@ -323,10 +323,10 @@ db_foreach main_project_sql $main_project_sql {
     }
 
     set extra_select [join $extra_selects ",\n\t"]
-    if { ![empty_string_p $extra_select] } { set extra_select ",\n\t$extra_select" }
+    if { $extra_select ne "" } { set extra_select ",\n\t$extra_select" }
 
     set extra_from [join $extra_froms ",\n\t"]
-    if { ![empty_string_p $extra_from] } { set extra_from ",\n\t$extra_from" }
+    if { $extra_from ne "" } { set extra_from ",\n\t$extra_from" }
 
     if { "" != $employee_cost_center_id && 0 != $employee_cost_center_id } {
 	lappend extra_wheres "t.task_id in (select object_id_one from acs_rels where object_id_two in (select employee_id from im_employees where department_id = :employee_cost_center_id))"
@@ -342,7 +342,7 @@ db_foreach main_project_sql $main_project_sql {
     }
 
     set extra_where [join $extra_wheres "and\n\t"]
-    if { ![empty_string_p $extra_where] } { set extra_where "and \n\t$extra_where" }
+    if { $extra_where ne "" } { set extra_where "and \n\t$extra_where" }
 
     # ------------------------------------------------------------------------------
 
@@ -686,7 +686,7 @@ db_foreach main_project_sql $main_project_sql {
 	
 	# We've got a task.
 	# Write out a line with task information
-	append table_body_html "<tr$bgcolor([expr $ctr % 2])>\n"
+	append table_body_html "<tr$bgcolor([expr {$ctr % 2}])>\n"
 	foreach column_var $column_vars {
 	    append table_body_html "\t<td valign=top>"
 	    set cmd "append table_body_html $column_var"
@@ -704,7 +704,7 @@ db_foreach main_project_sql $main_project_sql {
 
     # ----------------------------------------------------
     # Show a reasonable message when there are no result rows:
-    # if { [empty_string_p $table_body_html] } {
+    # if { $table_body_html eq "" } {
     #        set table_body_html "
     #        <tr class=table_list_page_plain>
     #                <td colspan=$colspan align=left>
@@ -725,21 +725,21 @@ set next_page_html ""
 
 if { [info exists ctr] } {
     # Deal with pagination
-    if {$ctr == $max_entries_per_page && $end_idx < [expr $total_in_limited - 1]} {
+    if {$ctr == $max_entries_per_page && $end_idx < [expr {$total_in_limited - 1}]} {
         # This means that there are rows that we decided not to return
         # Include a link to go to the next page
-        set next_start_idx [expr $end_idx + 1]
+        set next_start_idx [expr {$end_idx + 1}]
         set task_max_entries_per_page $max_entries_per_page
-        set next_page_url  "$current_page_url?[export_vars -url {project_id task_object_id task_max_entries_per_page order_by}]&task_start_idx=$next_start_idx&$pass_through_vars_html"
+        set next_page_url  "[export_vars -base $current_page_url {project_id task_object_id task_max_entries_per_page order_by}]&task_start_idx=$next_start_idx&$pass_through_vars_html"
         set next_page_html "($remaining_items more) <A href=\"$next_page_url\">&gt;&gt;</a>"
     }
 
     if { $start_idx > 0 } {
         # This means we didn't start with the first row - there is
         # at least 1 previous row. add a previous page link
-        set previous_start_idx [expr $start_idx - $max_entries_per_page]
+        set previous_start_idx [expr {$start_idx - $max_entries_per_page}]
         if { $previous_start_idx < 0 } { set previous_start_idx 0 }
-        set previous_page_html "<A href=$current_page_url?[export_vars -url {project_id}]&$pass_through_vars_html&order_by=$order_by&task_start_idx=$previous_start_idx>&lt;&lt;</a>"
+        set previous_page_html "<A href=[export_vars -base $current_page_url {project_id}]&$pass_through_vars_html&order_by=$order_by&task_start_idx=$previous_start_idx>&lt;&lt;</a>"
     }
 }
 

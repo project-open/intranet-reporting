@@ -4,9 +4,9 @@
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <master src="../../intranet-core/www/master">
-<property name="title">@page_title@</property>
+<property name="doc(title)">@page_title;literal@</property>
 <property name="main_navbar_label">reporting</property>
-<property name="left_navbar">@left_navbar_html;noquote@</property>
+<property name="left_navbar">@left_navbar_html;literal@</property>
 <br>
 <h1><%=[lang::message::lookup "" intranet-reporting.ListOfCurrentProjectTasks "List of Current Project Tasks"]%></h1> 
 <p>
