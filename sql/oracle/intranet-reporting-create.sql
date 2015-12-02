@@ -1,13 +1,13 @@
 -- /package/intranet-reporting/sql/oracle/intranet-reporting-create.sql
 --
--- Copyright (c) 2003-2005 Project/Open
+-- Copyright (c) 2003-2005 ]project-open[
 --
 -- All rights reserved. Please check
 -- http://www.project-open.com/license/ for details.
 --
 -- @author juanjoruizx@yahoo.es
 
--- Invoices module for Project/Open
+-- Invoices module for ]project-open[
 --
 -- Defines:
 --	im_reports		Report biz object container
@@ -16,7 +16,7 @@
 ---------------------------------------------------------
 -- Reports
 --
--- This data model supports the Project/Open reporting tool
+-- This data model supports the ]project-open[ reporting tool
 -- to generate and store all type of reports.
 --
 -- Every Report consists of a view that describes the
