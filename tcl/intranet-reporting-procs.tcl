@@ -123,8 +123,10 @@ ad_proc im_report_format_number {
     Write out the number in a suitably formatted way for the 
     output medium.
 } {
-    if {"" == $locale} { set locale [lang::user::locale] }
-    set amount_zeros [im_numeric_add_trailing_zeros [expr {$amount+0}] $rounding_precision]
+    if {"" eq $locale} { set locale [lang::user::locale] }
+#    if {"" eq $amount} { set amount 0 }
+    if {![string is double $amount]} { set amount 0 }
+    set amount_zeros [im_numeric_add_trailing_zeros $amount $rounding_precision]
     set amount_pretty [lc_numeric $amount_zeros "" $locale]
     return $amount_pretty
 }
