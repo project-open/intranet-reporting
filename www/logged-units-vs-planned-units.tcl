@@ -685,13 +685,12 @@ template::multirow foreach project_list {
 	set balance_rep_bill [expr {$sum_billable_units - $sum_reported_units}]
 
     # Formatting 
-    set sum_planned_units [lc_numeric [im_numeric_add_trailing_zeros [expr {$sum_planned_units+0}] $rounding_precision] $format_string $locale]
-    set sum_billable_units [lc_numeric [im_numeric_add_trailing_zeros [expr {$sum_billable_units+0}] $rounding_precision] $format_string $locale]
-    set sum_reported_units [lc_numeric [im_numeric_add_trailing_zeros [expr {$sum_reported_units+0}] $rounding_precision] $format_string $locale]
-    set balance_rep_plan [lc_numeric [im_numeric_add_trailing_zeros [expr {$balance_rep_plan+0}] $rounding_precision] $format_string $locale]
-    set balance_rep_bill [lc_numeric [im_numeric_add_trailing_zeros [expr {$balance_rep_bill+0}] $rounding_precision] $format_string $locale]
-
-    set reported_hours_cache [lc_numeric [im_numeric_add_trailing_zeros [expr {$reported_hours_cache+0}] $rounding_precision] $format_string $locale]
+    set sum_planned_units [lc_numeric [im_numeric_add_trailing_zeros [expr $sum_planned_units+0] $rounding_precision] $format_string $locale]
+    set sum_billable_units [lc_numeric [im_numeric_add_trailing_zeros [expr $sum_billable_units+0] $rounding_precision] $format_string $locale]
+    set sum_reported_units [lc_numeric [im_numeric_add_trailing_zeros [expr $sum_reported_units+0] $rounding_precision] $format_string $locale]
+    set balance_rep_plan [lc_numeric [im_numeric_add_trailing_zeros [expr $balance_rep_plan+0] $rounding_precision] $format_string $locale]
+    set balance_rep_bill [lc_numeric [im_numeric_add_trailing_zeros [expr $balance_rep_bill+0] $rounding_precision] $format_string $locale]
+    set reported_hours_cache [lc_numeric [im_numeric_add_trailing_zeros [expr $reported_hours_cache+0] $rounding_precision] $format_string $locale]
     
     incr i
 }
