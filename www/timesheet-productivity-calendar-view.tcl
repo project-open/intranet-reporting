@@ -377,7 +377,7 @@ switch $output_format {
                 <tr>
                   <td class=form-label>Project</td>
                   <td class=form-widget>
-                    [im_project_select project_id $project_id]
+                    [im_project_select -include_empty_p 1 project_id $project_id]
                   </td>
                 </tr>
                 <tr>
