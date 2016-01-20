@@ -634,7 +634,7 @@ db_foreach main_project_sql $main_project_sql {
 						where	group_id = [im_profile_skill_profile]
 					)
 			        "] ","]
-		    set member "<font color='red'>#intranet-reporting.assign# $skill_profiles</font>"
+		    set member "<font color='red'>[_ intranet-reporting.assign] $skill_profiles</font>"
 		} else {
 		    # Does not need assignment anymore
 		    set member [join [db_list members "
