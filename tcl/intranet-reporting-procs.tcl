@@ -748,6 +748,8 @@ ad_proc im_report_write_http_headers {
     set http_encoding [im_report_http_encoding -output_format $output_format]
     append content_type "; charset=$http_encoding"
 
+#    ad_return_complaint 1 "content_type=$content_type"
+
     # Set content disposition for CSV exports
     if { $output_format eq "csv" && $report_name ne ""} {
 		set report_key [string tolower $report_name]
@@ -760,11 +762,15 @@ ad_proc im_report_write_http_headers {
         regsub -all {_+} $report_key "_" report_key
         set all_the_headers "HTTP/1.0 200 OK\nMIME-Version: 1.0\nContent-Disposition: attachment; filename=${report_key}.txt\r\n"
     } else {
-		set all_the_headers "HTTP/1.0 200 OK\nMIME-Version: 1.0\nContent-Type: $content_type\r\n"
+	set all_the_headers "HTTP/1.0 200 OK\nConnection: keep-alive\nContent-Type: $content_type\r\n"
     }
     
     util_WriteWithExtraOutputHeaders $all_the_headers
-    ns_startcontent -type $content_type
+
+    # fraber 160224: NaviServer instead of AOLserver...
+    # http://www.openacs.org/forums/message-view?message_id=4880328
+    ReturnHeaders $content_type
+    #ns_startcontent -type $content_type
 }
 
 
