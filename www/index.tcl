@@ -40,9 +40,9 @@ set reports_exist_p [im_table_exists "im_reports"]
 set menu_label "reporting"
 
 set read_p [util_memoize [list db_string report_perms "
-        select  im_object_permission_p(m.menu_id, $current_user_id, 'read')
-        from    im_menus m
-        where   m.label = '$menu_label'
+	select  im_object_permission_p(m.menu_id, $current_user_id, 'read')
+	from    im_menus m
+	where   m.label = '$menu_label'
 " -default 'f']]
 
 if {"t" ne $read_p } {
@@ -104,37 +104,38 @@ set group_list [list]
 
 if {$reports_exist_p && $user_admin_p} {
     lappend elements_list \
-        edit {
-            label "<img src='/intranet/images/navbar_default/wrench.png' width=16 height=16>"
-            display_template {
-                @reports.edit_html;noquote@
-            }
-        }
+	edit {
+	    label "<img src='/intranet/images/navbar_default/wrench.png' width=16 height=16>"
+	    display_template {
+		@reports.edit_html;noquote@
+	    }
+	}
     lappend elements_list \
-        permission {
-            label "<img src='/intranet/images/lock-add.png' width=16 height=16>"
-            display_template {
-                @reports.permission_html;noquote@
-            }
-        }        
+	permission {
+	    label "<img src='/intranet/images/lock-add.png' width=16 height=16>"
+	    display_template {
+		@reports.permission_html;noquote@
+	    }
+	}	
 
     # ---------------------------------------------------
     # Add columns for each of the profiles
 
-    set group_list_sql {
-        select DISTINCT
-                g.group_name,
-                g.group_id,
-                p.profile_gif
-        from
-                acs_objects o,
-                groups g,
-                im_profiles p
-        where
-                g.group_id = o.object_id
-                and g.group_id = p.profile_id
-                and o.object_type = 'im_profile'
-    }
+    set group_list_sql "
+	select DISTINCT
+		g.group_name,
+		g.group_id,
+		p.profile_gif
+	from
+		acs_objects o,
+		groups g,
+		im_profiles p
+	where
+		g.group_id = o.object_id and
+		g.group_id = p.profile_id and
+		o.object_type = 'im_profile' and
+		g.group_id != [im_profile_po_admins]	
+    "
 
     db_foreach group_list $group_list_sql {
 	lappend group_list $group_id
@@ -142,7 +143,7 @@ if {$reports_exist_p && $user_admin_p} {
 	if { $user_admin_p } {
 	    set label_group_header "<div><span>$group_name</span></div><br>[im_gif -translate_p 1 $profile_gif $group_name]"
 	} else {
-            set label_group_header "[im_gif -translate_p 1 $profile_gif $group_name]"
+	    set label_group_header "[im_gif -translate_p 1 $profile_gif $group_name]"
 	}
 
 	lappend elements_list \
@@ -175,23 +176,23 @@ set top_menu_sortkey [db_string top_menu_sortkey "
 
 if { $user_admin_p } {
     list::create \
-        -name report_list \
-        -multirow reports \
-        -key menu_id \
-        -elements $elements_list \
-        -class "table-header-rotated-listbuilder" \
-        -filters {
-        	return_url
-        }
+	-name report_list \
+	-multirow reports \
+	-key menu_id \
+	-elements $elements_list \
+	-class "table-header-rotated-listbuilder" \
+	-filters {
+		return_url
+	}
 } else {
     list::create \
-        -name report_list \
-        -multirow reports \
-        -key menu_id \
-        -elements $elements_list \
-        -filters {
-                return_url
-        }
+	-name report_list \
+	-multirow reports \
+	-key menu_id \
+	-elements $elements_list \
+	-filters {
+		return_url
+	}
 }
 
 
@@ -200,14 +201,14 @@ db_multirow -extend {indent_spaces edit_html permission_html} reports get_report
 		r.report_id,
 		$main_sql_select
 		m.*,
-	        length(tree_sortkey) as indent_level,
-	        (9-length(tree_sortkey)) as colspan_level
+		length(tree_sortkey) as indent_level,
+		(9-length(tree_sortkey)) as colspan_level
 	from
-	        im_menus m
+		im_menus m
 		LEFT OUTER JOIN im_reports r ON (r.report_menu_id = m.menu_id)
 	where
 		(m.enabled_p = 't' OR m.enabled_p is null) and
-	        tree_sortkey like '$top_menu_sortkey%'
+		tree_sortkey like '$top_menu_sortkey%'
 		and 't' = im_object_permission_p(m.menu_id, :current_user_id, 'read')
 		and m.label != 'reporting'
 		$hide_rest_reports_sql
@@ -270,14 +271,14 @@ set left_menu_html ""
 
 # Left Navbar is the filter/select part of the left bar
 set left_navbar_html "
-        <div class='filter-block'>
-                <div class='filter-title'>
-                   [lang::message::lookup "" intranet-reporting.Admin_Reports "Admin Reports"]
-                </div>
+	<div class='filter-block'>
+		<div class='filter-title'>
+		   [lang::message::lookup "" intranet-reporting.Admin_Reports "Admin Reports"]
+		</div>
 		<ul>
 		<li><a href=\"[export_vars -base "/intranet-reporting/new" {{form_mode edit}}]\">[_ intranet-reporting.New_Report]</a>
 		</ul>
-        </div>
+	</div>
 	<hr/>
 "
 if {!$user_admin_p} { set left_navbar_html "" }
