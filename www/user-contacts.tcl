@@ -11,7 +11,7 @@ ad_page_contract {
 } {
     { level_of_detail:integer 3 }
     { company_id 0 }
-    { filter_company_type_id 0 }
+    { filter_company_type_id:integer 0 }
     { profile_id ""}
     { output_format "html" }
     { redirect_p "1" }
@@ -84,17 +84,19 @@ for {set i 0} {$i < 100} {incr i} {
 # ------------------------------------------------------------
 # Report SQL
 
-set filter_sql ""
+set company_filter_sql ""
+set user_filter_sql ""
+
 if {"" != $company_id && 0 != $company_id} {
-    set filter_sql "and c.company_id = :company_id\n"
+    set company_filter_sql "and c.company_id = :company_id\n"
 }
 
 if {"" != $filter_company_type_id && 0 != $filter_company_type_id} {
-    append filter_sql "and c.company_type_id = :filter_company_type_id\n"
+    append company_filter_sql "and c.company_type_id in ([join [im_sub_categories $filter_company_type_id] ","])\n"
 }
 
 if {"" != $profile_id && 0 != $profile_id} {
-    append filter_sql "and u.user_id in (select member_id from group_distinct_member_map where group_id = :profile_id)\n"
+    append user_filter_sql "and u.user_id in (select member_id from group_distinct_member_map where group_id = :profile_id)\n"
 }
 
 # DynField "spam_frequency_id" is not part of the default product...
@@ -117,9 +119,9 @@ from	(select
 		(	select	min(company_id) 
 			from	im_companies c, 
 				acs_rels r 
-			where	u.user_id = r.object_id_two and 
-				r.object_id_one = c.company_id and
-				c.company_type_id not in (select * from im_sub_categories([im_company_type_provider]))
+			where	u.user_id = r.object_id_two  
+				and r.object_id_one = c.company_id 
+				and c.company_type_id not in (select * from im_sub_categories([im_company_type_provider]))
 		) as company_id,
 		im_name_from_user_id(u.user_id) as user_name,
 		im_country_from_code(uc.ha_country_code) as ha_country,
@@ -131,15 +133,17 @@ from	(select
 		parties p,
 		persons pe,
 		users u
-		LEFT OUTER JOIN users_contact uc ON (u.user_id = uc.user_id)
+	 	LEFT OUTER JOIN users_contact uc ON (u.user_id = uc.user_id)
 	where
 		u.user_id = p.party_id and
 		u.user_id = pe.person_id
 		$nospam_sql
-		$filter_sql
+		$user_filter_sql
 	) t
 	LEFT OUTER JOIN im_companies c ON (t.company_id = c.company_id)
-where   1=1
+where   
+	1=1 
+	$company_filter_sql
 order by
 	company_type_id,
 	company_name,
@@ -156,7 +160,7 @@ OFFSET	:offset
 
 # Global Header Line
 set header0 [list \
-		 "<input type=checkbox name=_dummy onclick=\\\"acs_ListCheckAll('user',this.checked)\\\">" \
+		 "<!--<input type=checkbox name=_dummy onclick=\\\"acs_ListCheckAll('user',this.checked)\\\">-->" \
 		 [lang::message::lookup "" intranet-reporting.Company_short Comp]  \
 		 [lang::message::lookup "" intranet-reporting.Customer_oneletter "C"] \
 		 [lang::message::lookup "" intranet-reporting.Employee_oneletter "E"] \
@@ -196,7 +200,7 @@ set report_def [list \
 	    } \
 	    content [list \
 		    header {
-			"<input type=checkbox name=user_id_from_search value=$user_id id=user,$user_id>"
+			"<!--<input type=checkbox name=user_id_from_search value=$user_id id=user,$user_id>-->"
 			""
 			"$customer_p"
 			"$employee_p"
@@ -309,7 +313,6 @@ switch $output_format {
 		    [im_report_output_format_select output_format "" $output_format]
 		  </td>
 		</tr>
-
 		<tr>
 		  <td class=form-label></td>
 		  <td class=form-widget><input type=submit value='[_ intranet-core.Submit]'></td>
@@ -437,9 +440,10 @@ switch $output_format {
     html { 
         ns_write "
 	</table>
+	<!--
 	<tr><td colspan=99>
 	<input type=submit>
-	</td></tr>
+	</td></tr>-->
 	</form>
 	[im_footer]
 	"
