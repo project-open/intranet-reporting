@@ -25,7 +25,7 @@ ad_page_contract {
 
 
 # ------------------------------------------------------------
-# Security
+# Security & Defaults
 # ------------------------------------------------------------
 
 # What is the "label" of the Menu Item linking to this report?
@@ -52,32 +52,42 @@ if {"t" ne $read_p } {
 set locale [lang::user::locale]
 if {"" == $number_locale} { set number_locale $locale  }
 
+if {"" == $start_date} { set start_date [parameter::get_from_package_key -package_key "intranet-cost" -parameter DefaultStartDate -default "2000-01-01"] }
+if {"" == $end_date} { set end_date [parameter::get_from_package_key -package_key "intranet-cost" -parameter DefaultEndDate -default "2100-01-01"] }
 
 # ------------------------------------------------------------
 # Check Parameters
 # ------------------------------------------------------------
 
-# Check that start_date and end_date have correct format.
-# We are using a regular expression check here for convenience.
-
-if {![regexp {[0-9][0-9][0-9][0-9]\-[0-9][0-9]\-[0-9][0-9]} $start_date]} {
-    ad_return_complaint 1 "Start Date doesn't have the right format.<br>
-    Current value: '$start_date'<br>
-    Expected format: 'YYYY-MM-DD'"
-    ad_script_abort
+# Check that Start & End-Date have correct format
+if { "" != $start_date } {
+    if {[catch {
+        if { $start_date != [clock format [clock scan $start_date] -format %Y-%m-%d] } {
+            ad_return_complaint 1 "<strong>[_ intranet-core.Start_Date]</strong> [lang::message::lookup "" intranet-core.IsNotaValidDate "is not a valid date"].<br>
+            [lang::message::lookup "" intranet-core.Current_Value "Current value"]: '$start_date'<br>"
+        }
+    } err_msg]} {
+        ad_return_complaint 1 "<strong>[_ intranet-core.Start_Date]</strong> [lang::message::lookup "" intranet-core.DoesNotHaveRightFormat "doesn't have the right format"].<br>
+        [lang::message::lookup "" intranet-core.Current_Value "Current value"]: '$start_date'<br>
+        [lang::message::lookup "" intranet-core.Expected_Format "Expected Format"]: 'YYYY-MM-DD'"
+    }
 }
 
-if {![regexp {[0-9][0-9][0-9][0-9]\-[0-9][0-9]\-[0-9][0-9]} $end_date]} {
-    ad_return_complaint 1 "End Date doesn't have the right format.<br>
-    Current value: '$end_date'<br>
-    Expected format: 'YYYY-MM-DD'"
-    ad_script_abort
+if { "" != $end_date } {
+    if {[catch {
+        if { $end_date != [clock format [clock scan $end_date] -format %Y-%m-%d] } {
+            ad_return_complaint 1 "<strong>[_ intranet-core.End_Date]</strong> [lang::message::lookup "" intranet-core.IsNotaValidDate "is not a valid date"].<br>
+            [lang::message::lookup "" intranet-core.Current_Value "Current value"]: '$end_date'<br>"
+        }
+    } err_msg]} {
+        ad_return_complaint 1 "<strong>[_ intranet-core.End_Date]</strong> [lang::message::lookup "" intranet-core.DoesNotHaveRightFormat "doesn't have the right format"].<br>
+        [lang::message::lookup "" intranet-core.Current_Value "Current value"]: '$end_date'<br>
+        [lang::message::lookup "" intranet-core.Expected_Format "Expected Format"]: 'YYYY-MM-DD'"
+    }
 }
 
 # Maxlevel is 3. 
 if {$level_of_detail > 3} { set level_of_detail 3 }
-
-
 
 # ------------------------------------------------------------
 # Page Title, Bread Crums and Help
@@ -210,9 +220,11 @@ set report_sql "
 			im_projects p,
 			im_companies cust
 		where
-			p.company_id = cust.company_id and
-			p.parent_id is NULL and
-			(p.project_budget is not NULL OR p.project_budget_hours is not NULL)
+			p.company_id = cust.company_id
+			and p.parent_id is NULL 
+			and (p.project_budget is not NULL OR p.project_budget_hours is not NULL)
+			and p.end_date >= :start_date::timestamptz
+			and p.start_date < :end_date::timestamptz
 		) p
 	order by
 		lower(customer_name),
