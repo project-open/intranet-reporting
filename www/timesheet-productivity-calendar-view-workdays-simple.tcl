@@ -1,4 +1,4 @@
-# /packages/intranet-reporting/www/timesheet-productivity-calendar-view.tcl
+# /packages/intranet-reporting/www/timesheet-productivity-calendar-view-workdays-simple.tcl
 #
 # Copyright (C) 2003 - 2012 ]project-open[
 #
@@ -223,12 +223,6 @@ set sql "
 		sub_project_id,
 		CASE WHEN t.sub_project_id = t.top_parent_project_id THEN NULL ELSE t.sub_project_name END as sub_project_name,
                 CASE WHEN t.sub_project_id = t.top_parent_project_id THEN NULL ELSE t.sub_project_nr END as sub_project_nr,
-                -- (select count(*) from (select * from im_absences_working_days_month(user_id,$report_month,$report_year) t(days int))ct) as work_days,
-                -- (select count(distinct absence_query.days) from (select * from im_absences_month_absence_type (user_id, $report_month, $report_year, $im_user_absence_type_vacation) AS (days date)) absence_query) as vacation_days,
-                -- (select count(distinct absence_query.days) from (select * from im_absences_month_absence_type (user_id, $report_month, $report_year, $im_user_absence_type_training) AS (days date)) absence_query) as training_days,
-                -- (select count(distinct absence_query.days) from (select * from im_absences_month_absence_type (user_id, $report_month, $report_year, $im_user_absence_type_travel) AS (days date)) absence_query) as travel_days,
-                -- (select count(distinct absence_query.days) from (select * from im_absences_month_absence_type (user_id, $report_month, $report_year, $im_user_absence_type_sick) AS (days date)) absence_query) as sick_days,
-                -- (select count(distinct absence_query.days) from (select * from im_absences_month_absence_type (user_id, $report_month, $report_year, $im_user_absence_type_personal) AS (days date)) absence_query) as personal_days,
 	        $outer_sql
 	from
         	(select
@@ -553,8 +547,7 @@ switch $output_format {
 <td valign='top' width='600px'>
 	<ul>
     	<li>Up to two project levels are shown (Main Project/Sub Project), levels underneath are accumulated</strong></li>
-    	<li>Report shows only content for days where the logged hours pass a threshold as defined in filter: <strong>'Daily hours'</strong></li>
-        <li>Hours logged on sub-projects are accumulated</li>
+	<li>Report does not show absences</li>
 	</ul>
 </td>
 </tr>
