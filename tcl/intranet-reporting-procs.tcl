@@ -602,10 +602,10 @@ ad_proc im_report_update_counters {
 	    set last_reset $counter_reset($var) 
 	}
 
-	set cmd "set reset_val \[expr {$reset}\]"
+	set cmd "set reset_val \[expr $reset\]"
 	set reset_val [uplevel 1 $cmd]
 
-	set cmd "set expr_val \[expr {$expr}\]"
+	set cmd "set expr_val \[expr $expr\]"
 	set expr_val [uplevel 1 $cmd]
 
 	if {$last_reset != $reset_val} {
