@@ -382,7 +382,7 @@ ad_proc im_report_render_footer {
         }
         incr group_level
     }
-    set group_level [expr {$group_level - 1}]
+    set group_level [expr $group_level - 1]
 
     while {$group_level > 0} {
 	if {$debug} { ns_log Notice "render_footer: level=$group_level" }
@@ -425,7 +425,7 @@ ad_proc im_report_render_footer {
 	# Store the result for display later
 	set footer_array($group_level) $footer_record
 
-	set group_level [expr {$group_level - 1}]
+	set group_level [expr $group_level - 1]
     }
     if {$debug} { ns_log Notice "render_footer: after group_by footers" }
 
@@ -533,7 +533,7 @@ ad_proc im_report_display_footer {
         }
         incr max_group_level
     }
-    set max_group_level [expr {$max_group_level - 2}]
+    set max_group_level [expr $max_group_level - 2]
 
 
     if {$display_all_footers_p} { set return_group_level 1 }
@@ -544,7 +544,7 @@ ad_proc im_report_display_footer {
     # return_group_level.
     #
     if {$debug} { ns_log Notice "display_footer: max_group_level=$max_group_level, return_group_level=$return_group_level" }
-    for {set group_level $max_group_level} { $group_level >= $return_group_level} { set group_level [expr {$group_level-1}]} {
+    for {set group_level $max_group_level} { $group_level >= $return_group_level} { set group_level [expr $group_level - 1]} {
 
 	# -------------------------------------------------------
 	# Extract the footer_line
@@ -622,7 +622,7 @@ ad_proc im_report_update_counters {
 	}
 
 	set last_count $counter_count($var)
-	set last_sum [expr {$last_sum + $expr_val}]
+	set last_sum [expr $last_sum + $expr_val]
 
 
 	incr last_count
@@ -636,7 +636,7 @@ ad_proc im_report_update_counters {
 
 	# Store the rounded result
 	upvar "${var}_rounded" "${var}_rounded"
-	set "${var}_rounded" [expr {round(100.0 * $last_sum) / 100.0}]
+	set "${var}_rounded" [expr round(100.0 * $last_sum) / 100.0]
     }
 }
 
@@ -856,7 +856,7 @@ ad_proc -public im_report_take_n_from_list { list n } {
         set left_rest [lrange $list 0 $i-1]
         set right_rest [lrange $list $i+1 end]
         set rest [concat $left_rest $right_rest]
-        set rest_perms [im_report_take_n_from_list $rest [expr {$n-1}]]
+        set rest_perms [im_report_take_n_from_list $rest [expr $n - 1]]
 
 	foreach rest_perm $rest_perms {
 	    lappend result $rest_perm
@@ -935,8 +935,8 @@ ad_proc -public im_reporting_tree_sortkey_pretty {
 	set factor 128
 	set dec 0
 	for {set i 0} {$i < [llength $bits_list]} {incr i} {
-	    set dec [expr {$dec + $factor * [lindex $bits_list $i]}]
-	    set factor [expr {$factor / 2}]
+	    set dec [expr $dec + $factor * [lindex $bits_list $i]]
+	    set factor [expr $factor / 2]
 	}
 	append result " ."
 	set tree_sortkey $rest
