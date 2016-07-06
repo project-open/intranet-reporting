@@ -222,19 +222,19 @@ set report_def [list \
 		$company_nr 
 		$project_nr 
 		"" "" "" "" "" "" "" "" "" ""
-		"<small>$hours_project_intl_subtotal</small>" 
-		"<small>$hours_project_extl_subtotal</small>" 
+		"<small>[expr round(100.0 * $hours_project_intl_subtotal) / 100.0]</small>" 
+		"<small>[expr round(100.0 * $hours_project_extl_subtotal) / 100.0]</small>" 
 		"" 
-		"<small>$hours_project_subtotal</small>" 
+		"<small>[expr round(100.0 * $hours_project_subtotal) / 100.0]</small>" 
 	    } \
 	] \
 	footer {
 	    $user_name 
 	    "" "" "" "" "" "" "" "" "" "" "" ""
-	    "<i>$hours_company_intl_subtotal</i>" 
-	    "<i>$hours_company_extl_subtotal</i>" 
+	    "<i>[expr round(100.0 * $hours_company_intl_subtotal) / 100.0]</i>" 
+	    "<i>[expr round(100.0 * $hours_company_extl_subtotal) / 100.0]</i>" 
 	    "" 
-	    "<i>$hours_company_subtotal</i>" 
+	    "<i>[expr round($hours_company_subtotal * 100.0) / 100.0]</i>" 
 	} \
     ] \
     footer {
@@ -249,10 +249,10 @@ set report_def [list \
         "<b>$total_cost_pretty $currency</b>"
         $hourly_cost
 	""
-	"<b>$hours_user_intl_subtotal</b>" 
-	"<b>$hours_user_extl_subtotal</b>" 
+	"<b>[expr round(100.0 * $hours_user_intl_subtotal) / 100.0]</b>" 
+	"<b>[expr round(100.0 * $hours_user_extl_subtotal) / 100.0]</b>" 
 	"" 
-	"<b>$hours_user_subtotal</b>" 
+	"<b>[expr round(100.0 * $hours_user_subtotal) / 100.0]</b>" 
     } \
 ]
 
