@@ -38,6 +38,8 @@
   <msg key="Attribute_ticket_type_id">Type</msg>
   <msg key="Available_Reports">Available Reports</msg>
   <msg key="Budged_Check_for_Main_Projects">Budged Check for Main Projects</msg>
+  <msg key="Conf_Items_as_CSV">Conf Items as CSV</msg>
+  <msg key="Configuration_Database">Configuration Database</msg>
   <msg key="Customer">Customer</msg>
   <msg key="Customer_finance_order_status">Customer finance order status</msg>
   <msg key="Customer_Type">Customer Type</msg>
@@ -58,6 +60,7 @@
   <msg key="Finance_Monthly_Summary">Finance Monthly Summary</msg>
   <msg key="Finance_Payment_Balance">Finance Payment Balance</msg>
   <msg key="Finance_Projects_and_their_Documents">Finance Projects &amp; Documents</msg>
+  <msg key="Finance_Provider_Costs_per_Month">Finance Provider Costs per Month</msg>
   <msg key="Finance_VAT_Report">Finance VAT Report</msg>
   <msg key="Financial_Cube">Financial Cube</msg>
   <msg key="Financial_Cube_for">Financial Cube for</msg>
@@ -68,6 +71,8 @@
   <msg key="Gantt_Diagram">Gantt Diagram</msg>
   <msg key="Gantt_Resources">Gantt Resources</msg>
   <msg key="Groups">Groups</msg>
+  <msg key="Helpdesk_All_Tickets_Raw_Data_Without_Discussions">Helpdesk All Tickets Raw Data Without Discussions</msg>
+  <msg key="Helpdesk_Tickets_Closed_Per_Day">Helpdesk Tickets Closed Per Day</msg>
   <msg key="Indicator_Code">Indicator Code</msg>
   <msg key="Indicator_High_Critical">High Critical</msg>
   <msg key="Indicator_High_Warning">High Warning</msg>
@@ -92,7 +97,7 @@
   <msg key="New_Report">New Report</msg>
   <msg key="No_customer">Undefined Customer</msg>
   <msg key="No_Date_Dimension">No Date Dimension</msg>
-  <msg key="No_left_dimension">No 'Left' Dimension Specified</msg>
+  <msg key="No_left_dimension">No &#39;Left&#39; Dimension Specified</msg>
   <msg key="No_left_dimension_message">You need to specify at least one variable for the left dimension.</msg>
   <msg key="No_project">Undefined Project</msg>
   <msg key="Number_Format">Number Format</msg>
@@ -116,7 +121,7 @@
   <msg key="Project_Deviation_Time_Budget_Hours_Logged_Cmt">Hours logged</msg>
   <msg key="Project_Deviation_Time_Budget_Percent_Completed_Cmt">Percent completed</msg>
   <msg key="Project_Deviation_Time_Budget_Project_Budget_Cmt"> Budget (hours) - Projection Hours</msg>
-  <msg key="Project_Deviation_Time_Budget_Project_Budget_Hours_Cmt">Total of &quot;Planned Units&quot; across all sub-projects and task of main project </msg>
+  <msg key="Project_Deviation_Time_Budget_Project_Budget_Hours_Cmt">Total of &#34;Planned Units&#34; across all sub-projects and task of main project </msg>
   <msg key="Project_Deviation_Time_Budget_Project_manager_Cmt">Project Manager</msg>
   <msg key="Project_Deviation_Time_Budget_Project_name_Cmt">Project Name</msg>
   <msg key="Project_Deviation_Time_Budget_Projection_Costs_Cmt">Costs / Budget (monetary) / %completed *  Budget (monetary)</msg>
@@ -168,7 +173,7 @@
   <msg key="Start_Date">Start Date</msg>
   <msg key="Status">Status</msg>
   <msg key="Ticket_Cube">Ticket Cube</msg>
-  <msg key="Ticket_Cube_Help">This Pivot Table ('cube') is a kind of report that shows a number of characteristics of helpdesk tickets. This cube effectively replaces a dozen of specific reports and allows you to 'drill down' into results.</msg>
+  <msg key="Ticket_Cube_Help">This Pivot Table (&#39;cube&#39;) is a kind of report that shows a number of characteristics of helpdesk tickets. This cube effectively replaces a dozen of specific reports and allows you to &#39;drill down&#39; into results.</msg>
   <msg key="Ticket_Status">Ticket Status</msg>
   <msg key="Ticket_Type">Ticket Type</msg>
   <msg key="Tickets">Tickets</msg>
@@ -179,12 +184,15 @@
   <msg key="Timesheet_Customers_and_Projects">Timesheet Customers &amp; Projects</msg>
   <msg key="Timesheet_Data-Warehouse_Cube">Timesheet Data-Warehouse Cube</msg>
   <msg key="Timesheet_Data_Warehouse_Cube">Timesheet Data-Warehouse Cube</msg>
+  <msg key="Timesheet_Days_per_Month">Timesheet Days per Month</msg>
   <msg key="Timesheet_Finance_Report">Timesheet Finance Report</msg>
   <msg key="Timesheet_Productivity">Timesheet Productivity</msg>
   <msg key="Timesheet_Productivity_Report_Calendar_View">Timesheet Productivity Report (Calendar View)</msg>
   <msg key="Timesheet_Project_Hierarchy_&amp;_Finance">Timesheet Project Hierarchy &amp; Finance</msg>
   <msg key="Timesheet_Project_Hierarchy___Finance">Timesheet Project Hierarchy &amp; Finance</msg>
+  <msg key="Timesheet_Unsubmitted_Hours">Timesheet Unsubmitted Hours</msg>
   <msg key="Timesheet_Weekly_Report">Timesheet Weekly Report</msg>
+  <msg key="Timesheet_Workflow___Unconfirmed_Hours">Timesheet Workflow - Unconfirmed Hours</msg>
   <msg key="Top1">Top 1</msg>
   <msg key="Top2">Top 2</msg>
   <msg key="Top_Dimension">Top Dimension</msg>
@@ -199,5 +207,5 @@
   <msg key="Year_and_Week">Year and Week</msg>
   <msg key="Year_Quarter_and_Mont">Year Quarter and Mont</msg>
   <msg key="Year_Quarter_Month_and_Day">Year, Quarter, Month and Day</msg>
-  <msg key="You_dont_have_permissions">You don't have the necessary permissions to view this page.</msg>
+  <msg key="You_dont_have_permissions">You don&#39;t have the necessary permissions to view this page.</msg>
 </message_catalog>
