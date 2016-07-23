@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <message_catalog package_key="intranet-reporting" locale="en_US" charset="ISO-8859-1">
 
-  <msg key="Ad_hoc_Fraber_Test_group_id">Group ID</msg>
-  <msg key="Ad_hoc_Fraber_Test_group_name">Group Name</msg>
-  <msg key="Ad_hoc_Fraber_Test_join_policy">Join Policy</msg>
-  <msg key="Ad_hoc_Informe_Por_Areas_indra_cnt">Escalado INDRA</msg>
-  <msg key="Ad_hoc_Informe_Por_Areas_lourdes_cnt">Escalado Lourdes</msg>
-  <msg key="Ad_hoc_Informe_Por_Areas_resuelto_sacespri_cnt">SACE SPRI</msg>
-  <msg key="Ad_hoc_Informe_Por_Areas_tecnico_cnt">Escalado Técnico SPRI</msg>
-  <msg key="Ad_hoc_Informe_Por_Areas_ticket_origin">Ticket Origin</msg>
-  <msg key="Ad_hoc_Informe_Por_Areas_ticket_request_area">Request Area</msg>
   <msg key="Add_new_Report">Add a new Report</msg>
   <msg key="Admin_Reports">Admin Reports</msg>
   <msg key="Aggregate">Aggregate</msg>
@@ -67,7 +58,7 @@
   <msg key="Format">Format</msg>
   <msg key="Forum">Forum</msg>
   <msg key="Forum_AdHoc_Report_01">Forum AdHoc Report_01</msg>
-  <msg key="Fraber_Test">Fraber Test</msg>
+  <msg key="Freelance_Skills">Freelance Skills</msg>
   <msg key="Gantt_Diagram">Gantt Diagram</msg>
   <msg key="Gantt_Resources">Gantt Resources</msg>
   <msg key="Groups">Groups</msg>
@@ -112,6 +103,7 @@
   <msg key="Program_and_Portfolio">Program and Portfolio</msg>
   <msg key="Program_Earned_Value_Analysis">Earned Value Analysis</msg>
   <msg key="Program_EVA">EVA</msg>
+  <msg key="Project_Cube">Project Data-Warehouse Cube</msg>
   <msg key="Project_Deviation_Time_Budget_Client_Cmt">Client</msg>
   <msg key="Project_Deviation_Time_Budget_Delta_Budget_Costs_Cmt">Budget (monetary) * % completed - Costs</msg>
   <msg key="Project_Deviation_Time_Budget_Delta_Budget_Projection_Cmt"> Budget (monetary) - Projection Costs</msg>
@@ -135,6 +127,9 @@
   <msg key="Project_Report_04">Project Report 04</msg>
   <msg key="Project_Report_05">Project Report 05</msg>
   <msg key="Project_Risks">Project Risks</msg>
+  <msg key="Project_Wall_New_Objects">Project Wall - New Objects</msg>
+  <msg key="Project_Wall_New_Project_Task">Project Wall - New Project Task</msg>
+  <msg key="Project_Wall_System">Project Wall (System)</msg>
   <msg key="Quarter_and_Year">Quarter and Year (compare quarters)</msg>
   <msg key="Recent_Registrations">Recent Registrations</msg>
   <msg key="Report_Code">Report Code</msg>
@@ -158,11 +153,19 @@
   <msg key="Resource_Planning_Report">Resource Planning Report</msg>
   <msg key="REST_Category_Type">REST Category Type</msg>
   <msg key="REST_Group_Memberships">REST Group Memberships</msg>
+  <msg key="REST_Horizontal_Scaling_im_hours">REST Horizontal Scaling im_hours</msg>
+  <msg key="REST_Inter_Project_Task_Dependencies">REST Inter-Project Task Dependencies</msg>
+  <msg key="REST_Intra_Project_Task_Dependencies">REST Intra-Project Task Dependencies</msg>
+  <msg key="REST_Main_Project_Tasks_with_Hours">REST Main Project Tasks with Hours</msg>
+  <msg key="REST_Main_Projects_with_Hours">REST Main Projects with Hours</msg>
   <msg key="REST_My_Hours">REST My Hours</msg>
   <msg key="REST_My_Timesheet_Projects">REST My Timesheet Projects</msg>
   <msg key="REST_My_Timesheet_Projects_and_Hours">REST My Timesheet Projects and Hours</msg>
   <msg key="REST_Object_Permissions">REST Object Permissions</msg>
+  <msg key="REST_Open_Ticket_Age_per_Queue_and_Type">REST Open Ticket Age per Queue and Type</msg>
+  <msg key="REST_Portfolio_Planner_Projects_Update_Cases">REST Portfolio Planner Project Update Cases</msg>
   <msg key="REST_System_Reports">REST System Reports (not for end users)</msg>
+  <msg key="REST_Ticket_Aging_Histogram">REST Ticket Aging Histogram</msg>
   <msg key="Sales">Sales</msg>
   <msg key="Show">Show</msg>
   <msg key="Show_all_project_tasks">Show all project tasks</msg>
