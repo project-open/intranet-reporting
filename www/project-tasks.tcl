@@ -614,12 +614,12 @@ db_foreach main_project_sql $main_project_sql {
 	}
 
 	# In theory we can find any of the sub-types of project
-	# here: Ticket and Timesheet Task.
+	# here: Ticket and Gantt Task.
 	
 	set member ""
 	switch $project_type_id {
 	    100 {
-		# Timesheet Task
+		# Gantt Task
 		set object_url [export_vars -base "/intranet-timesheet2-tasks/new" {{task_id $child_project_id} return_url}]
 		if {$percentage_non_skill_profiles < $percentage_skill_profiles} {
 		    # still needs assignments
