@@ -26,6 +26,7 @@ ad_page_contract {
     { cost_center_id:integer 0}
     { invoice_id:integer 0}
     { invoiced_status "" }
+    { preconf "" }
 }
 
 # ------------------------------------------------------------
@@ -36,8 +37,20 @@ ad_page_contract {
 # its permissions.
 set menu_label "reporting-timesheet-customer-project"
 set current_user_id [auth::require_login]
-
 set use_project_name_p [parameter::get_from_package_key -package_key intranet-reporting -parameter "UseProjectNameInsteadOfProjectNr" -default 0]
+
+
+# Special configurations for special purposes
+switch $preconf  {
+    my_hours {
+	# Show "my" hours - so the report is used for the user himself
+	set level_of_detail 5
+	set user_id $current_user_id
+	set start_date [db_string my_start "select to_char(now() - '3 month'::interval, 'YYYY-MM-01') from dual"]
+	set end_date [db_string my_end "select to_char(now() + '1 month'::interval, 'YYYY-MM-01') from dual"]
+    }
+}
+
 
 # Default User = Current User, to reduce performance overhead
 if {"" == $start_date && "" == $end_date && 0 == $project_id && 0 == $company_id && 0 == $user_id} { 
