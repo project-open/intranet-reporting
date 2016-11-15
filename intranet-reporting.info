@@ -11,6 +11,7 @@
     <version name="5.0.2.0.0" url="http://www.project-open.net/download/apm/intranet-reporting-5.0.2.0.0.apm">
         <owner url="mailto:frank.bergmann@project-open.com">Frank Bergmann</owner>
         <vendor url="http://www.project-open.com/">]project-open[</vendor>
+        <release-date>2016-11-15</release-date>
 
         <provides url="intranet-reporting" version="3.2.0"/>
         <requires url="intranet-exchange-rate" version="3.2.0"/>
