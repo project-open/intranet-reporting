@@ -69,7 +69,9 @@ set class "roweven"
 set currency_format [im_l10n_sql_currency_format]
 set date_format [im_l10n_sql_date_format]
 set levels {3 "All Details"} 
-set limits {1 1 10 10 100 100 1000 1000 10000 10000 100000 100000}
+# set limits {1 1 10 10 100 100 1000 1000 10000 10000 100000 100000}
+set limits {1 1 10 10 100 100 1000 1000 5000 5000 10000 10000 100000 100000}
+
 
 set company_url "/intranet/companies/view?company_id="
 set user_url "/intranet/users/view?user_id="
