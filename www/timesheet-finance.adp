@@ -8,7 +8,7 @@
 
 
 <form>
-<%= [export_vars -form {opened_projects project_id}] %>
+<%= [export_vars -form {opened_projects}] %>
 
 <table border="0" cellspacing="1" cellpadding="1">
 <tr valign="top"><td>
@@ -29,13 +29,25 @@
 	<tr>
 	  <td class=form-label>Customer</td>
 	  <td class=form-widget>
-	    <%= [im_company_select customer_id $customer_id] %>
+	    <%= [im_company_select -include_empty_name "All" customer_id $customer_id] %>
+	  </td>
+	</tr>
+	<tr>
+	  <td class=form-label>Project</td>
+	  <td class=form-widget>
+	    <%= [im_project_select -include_empty_p 1 -include_empty_name "All" project_id $project_id] %>
+	  </td>
+	</tr>
+	<tr>
+	  <td class=form-label>Department</td>
+	  <td class=form-widget>
+	    <%= [im_cost_center_select department_id $department_id] %>
 	  </td>
 	</tr>
 	<tr>
 	  <td class=form-label>User</td>
 	  <td class=form-widget>
-	    <%= [im_employee_select_multiple employee_id $employee_id 6 multiple] %>
+	    <%= [im_employee_select_multiple -limit_to_cc_id $department_id employee_id $employee_id 6 multiple] %>
 	  </td>
 	</tr>
 	<tr>

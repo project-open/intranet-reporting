@@ -14,6 +14,7 @@ ad_page_contract {
     { output_format "html" }
     { project_id:integer 0}
     { customer_id:integer 0}
+    { department_id:integer 0}
     { employee_id:multiple 0}
     { opened_projects:multiple "" }
     { display_fields:multiple "cost_invoices_cache cost_quotes_cache cost_bills_cache cost_expense_logged_cache cost_timesheet_logged_cache direct_hours reported_hours_cache" }
