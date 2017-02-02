@@ -155,8 +155,8 @@ set sql "
 		child.project_name,
 		child.project_status_id,
 		child.project_type_id,
-		child.percent_completed,
-		trunc((coalesce(child.project_budget, child.cost_quotes_cache, 0.0) * im_exchange_rate(child.start_date::date, child.project_budget_currency, :default_currency)) :: numeric, 2) as project_budget_converted,
+		coalesce(child.percent_completed, 0.0) as percent_completed,
+		trunc(coalesce(child.project_budget, child.cost_quotes_cache, 0.0)::numeric, 2) as project_budget_converted,
 		coalesce(child.project_budget_hours, 0.0) as project_budget_hours,
 		coalesce(child.cost_timesheet_logged_cache, 0.0) as cost_timesheet_logged_cache,
 		coalesce(child.reported_hours_cache, 0.0) as reported_hours_cache,
@@ -164,7 +164,7 @@ set sql "
 		coalesce(child.cost_purchase_orders_cache, 0.0) as cost_purchase_orders_cache,
 		im_category_from_id(child.project_status_id) as project_status,
 		im_category_from_id(child.project_type_id) as project_type,
-		to_char(child.percent_completed, :perc_format) as percent_completed_rounded,
+		to_char(coalesce(child.percent_completed, 0.0), :perc_format) as percent_completed_rounded,
 		--
 		program.project_id as program_id,
 		program.project_nr as program_project_nr,
@@ -172,13 +172,13 @@ set sql "
 		program.project_status_id as program_status_id,
 		program.project_type_id as program_type_id,
 		program.project_id as program_project_id,
-		trunc((coalesce(program.project_budget, program.cost_quotes_cache, 0.0) * im_exchange_rate(program.start_date::date, program.project_budget_currency, :default_currency)) :: numeric, 2) as program_budget_converted,
+		trunc(coalesce(program.project_budget, program.cost_quotes_cache, 0.0)::numeric, 2) as program_budget_converted,
 		coalesce(program.project_budget_hours, 0.0) as program_budget_hours,
 		coalesce(program.cost_timesheet_logged_cache, 0.0) as program_cost_timesheet_logged_cache,
 		coalesce(program.reported_hours_cache, 0.0) as program_reported_hours_cache,
 		coalesce(program.cost_bills_cache, 0.0) as program_cost_bills_cache,
 		coalesce(program.cost_purchase_orders_cache, 0.0) as program_cost_purchase_orders_cache,
-		to_char(program.percent_completed, :perc_format) as program_completed_rounded,
+		to_char(coalesce(program.percent_completed, 0.0), :perc_format) as program_completed_rounded,
 		--
 		1 as one
 	from
