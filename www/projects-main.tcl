@@ -175,7 +175,6 @@ set project_vars {
     $company_project_nr
     "<a href=$user_url$company_contact_id>$company_contact_name</a>"
     $project_budget_pretty
-    $project_budget_currency
     $project_budget_hours_pretty
     $percent_completed_pretty
     $reported_hours_cache_pretty
