@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <message_catalog package_key="intranet-reporting" locale="de_DE" charset="ISO-8859-1">
 
+  <msg key="Ad_hoc_Fraber_Test_join_policy">Aufnahmebedingungen</msg>
+  <msg key="Ad_hoc_Informe_Por_Areas_indra_cnt">Escalado INDRA</msg>
+  <msg key="Ad_hoc_Informe_Por_Areas_lourdes_cnt">Escalado Lourdes</msg>
+  <msg key="Ad_hoc_Informe_Por_Areas_resuelto_sacespri_cnt">SACE SPRI</msg>
+  <msg key="Ad_hoc_Informe_Por_Areas_tecnico_cnt">Escalado Técnico SPRI</msg>
+  <msg key="Ad_hoc_Informe_Por_Areas_ticket_origin">Ursprung Anfrage</msg>
+  <msg key="Ad_hoc_Informe_Por_Areas_ticket_request_area">Anfrage Gebiet</msg>
   <msg key="Add_new_Report">Neuen Bericht hinzufügen</msg>
   <msg key="Admin_Reports">Admin Berichte</msg>
   <msg key="Aggregate">Aggregat</msg>
@@ -58,6 +65,8 @@
   <msg key="Format">Format</msg>
   <msg key="Forum">Forum</msg>
   <msg key="Forum_AdHoc_Report_01">Forum AdHoc Report_01</msg>
+  <msg key="Fraber_Test">Fraber Test</msg>
+  <msg key="Freelance_Skills">Fähigkeiten</msg>
   <msg key="Gantt_Diagram">Gantt-Diagramm</msg>
   <msg key="Gantt_Resources">Gantt Resourcen</msg>
   <msg key="Groups">Gruppen</msg>
@@ -102,6 +111,7 @@
   <msg key="Program_and_Portfolio">Programme und Portfolios</msg>
   <msg key="Program_Earned_Value_Analysis">Earned Value Analysis</msg>
   <msg key="Program_EVA">Leistungswertanalyse</msg>
+  <msg key="Project_Cube">Projekte Data-Warehouse Würfel</msg>
   <msg key="Project_Deviation_Time_Budget_Client_Cmt">Kunde</msg>
   <msg key="Project_Deviation_Time_Budget_Delta_Budget_Costs_Cmt">Abweichung: Budget * % fertig - Kosten</msg>
   <msg key="Project_Deviation_Time_Budget_Delta_Budget_Projection_Cmt">Abweichung: Budget - Kosten</msg>
@@ -125,6 +135,9 @@
   <msg key="Project_Report_04">Project Report 04</msg>
   <msg key="Project_Report_05">Project Report 05</msg>
   <msg key="Project_Risks">Projektrisiken</msg>
+  <msg key="Project_Wall_New_Objects">Project Wall - Neue Objekte</msg>
+  <msg key="Project_Wall_New_Project_Task">Project Wall - Neue Aufgabe</msg>
+  <msg key="Project_Wall_System">Project Wall (System)</msg>
   <msg key="Quarter_and_Year">Quartal und Jahr (Vergleich Quartale)</msg>
   <msg key="Recent_Registrations">Neu registrierte Benutzer</msg>
   <msg key="Report_Code">Code</msg>
@@ -148,11 +161,19 @@
   <msg key="Resource_Planning_Report">Resourcenplanung - Basisbericht</msg>
   <msg key="REST_Category_Type">REST - Categorietyp</msg>
   <msg key="REST_Group_Memberships">REST - Group Memberships</msg>
+  <msg key="REST_Horizontal_Scaling_im_hours">REST Horizontal Scaling im_hours</msg>
+  <msg key="REST_Inter_Project_Task_Dependencies">REST Inter-Project Task Dependencies</msg>
+  <msg key="REST_Intra_Project_Task_Dependencies">REST Intra-Project Task Dependencies</msg>
+  <msg key="REST_Main_Project_Tasks_with_Hours">REST Main Project Tasks with Hours</msg>
+  <msg key="REST_Main_Projects_with_Hours">REST Main Projects with Hours</msg>
   <msg key="REST_My_Hours">REST - My Hours</msg>
   <msg key="REST_My_Timesheet_Projects">REST - My Timesheet Projects</msg>
   <msg key="REST_My_Timesheet_Projects_and_Hours">REST - My Timesheet Projects and Hours</msg>
   <msg key="REST_Object_Permissions">REST - Object Permissions</msg>
+  <msg key="REST_Open_Ticket_Age_per_Queue_and_Type">REST Open Ticket Age per Queue and Type</msg>
+  <msg key="REST_Portfolio_Planner_Projects_Update_Cases">REST Portfolio Planner Project Update Cases</msg>
   <msg key="REST_System_Reports">REST Systemberichte (nicht für normale Benutzer)</msg>
+  <msg key="REST_Ticket_Aging_Histogram">REST Ticket Aging Histogram</msg>
   <msg key="Sales">Verkauf</msg>
   <msg key="Show">Zeigen</msg>
   <msg key="Show_all_project_tasks">Alle Projektaufgaben</msg>

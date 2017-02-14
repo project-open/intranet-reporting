@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <message_catalog package_key="intranet-reporting" locale="es_ES" charset="ISO-8859-1">
 
-  <msg key="Ad_hoc_Fraber_Test_group_id">ID de grupo</msg>
-  <msg key="Ad_hoc_Fraber_Test_group_name">Nombre de grupo</msg>
-  <msg key="Ad_hoc_Fraber_Test_join_policy">Política de ingreso</msg>
-  <msg key="Ad_hoc_Informe_Por_Areas_indra_cnt">Escalado INDRA</msg>
-  <msg key="Ad_hoc_Informe_Por_Areas_lourdes_cnt">Escalado Lourdes</msg>
-  <msg key="Ad_hoc_Informe_Por_Areas_resuelto_sacespri_cnt">SACE SPRI</msg>
-  <msg key="Ad_hoc_Informe_Por_Areas_tecnico_cnt">Escalado Técnico SPRI</msg>
-  <msg key="Ad_hoc_Informe_Por_Areas_ticket_origin">Ticket Origin</msg>
-  <msg key="Ad_hoc_Informe_Por_Areas_ticket_request_area">Request Area</msg>
   <msg key="Add_new_Report">Añadir nuevo Informe</msg>
   <msg key="Admin_Reports">Gestión de informes</msg>
   <msg key="Aggregate">Aggregado</msg>
@@ -61,7 +52,6 @@
   <msg key="Format">Formato</msg>
   <msg key="Forum">Foro</msg>
   <msg key="Forum_AdHoc_Report_01">Modelo de informe AdHoc Foro 01</msg>
-  <msg key="Fraber_Test">Fraber Test</msg>
   <msg key="Gantt_Diagram">Diagrama Gantt</msg>
   <msg key="Gantt_Resources">Recursos Gantt</msg>
   <msg key="Groups">Grupos</msg>
@@ -82,8 +72,8 @@
   <msg key="New_Report">Nuevo informe</msg>
   <msg key="No_customer">Cliente no definido</msg>
   <msg key="No_Date_Dimension">No Dimensión de Fecha</msg>
-  <msg key="No_left_dimension">No se ha especificado ninguna dimensión 'izquierda'</msg>
-  <msg key="No_left_dimension_message">Debe especificar, como mínimo, una variable para la dimensión'izquierda'.</msg>
+  <msg key="No_left_dimension">No se ha especificado ninguna dimensión &#39;izquierda&#39;</msg>
+  <msg key="No_left_dimension_message">Debe especificar, como mínimo, una variable para la dimensión&#39;izquierda&#39;.</msg>
   <msg key="No_project">Proyecto no definido</msg>
   <msg key="Number_Format">Formato de Número</msg>
   <msg key="Number_of_Tickets">Número de Tickets</msg>

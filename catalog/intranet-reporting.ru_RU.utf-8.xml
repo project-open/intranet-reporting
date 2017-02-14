@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <message_catalog package_key="intranet-reporting" locale="ru_RU" charset="utf-8">
 
-  <msg key="Ad_hoc_Fraber_Test_group_id">ИД группы</msg>
-  <msg key="Ad_hoc_Fraber_Test_group_name">Имя группы</msg>
-  <msg key="Ad_hoc_Fraber_Test_join_policy">Политика вступления</msg>
   <msg key="Add_new_Report">Добавить новый отчет</msg>
   <msg key="Admin_Reports">Администрирование</msg>
   <msg key="Available_Reports">Доступные отчеты</msg>

@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <message_catalog package_key="intranet-reporting" locale="it_IT" charset="ISO-8859-1">
 
-  <msg key="Ad_hoc_Fraber_Test_group_id">ID gruppo</msg>
-  <msg key="Ad_hoc_Fraber_Test_group_name">Nome del gruppo</msg>
-  <msg key="Ad_hoc_Fraber_Test_join_policy">Politica di join</msg>
   <msg key="Add_new_Report">Nuovo report</msg>
   <msg key="Admin_Reports">Gestione report</msg>
   <msg key="Available_Reports">Report disponibili</msg>
@@ -21,7 +18,6 @@
   <msg key="Finance_VAT_Report">Report IVA</msg>
   <msg key="Forum">Forum</msg>
   <msg key="Forum_AdHoc_Report_01">Report_01 ad hoc forum</msg>
-  <msg key="Fraber_Test">Test Fraber</msg>
   <msg key="Gantt_Diagram">Diagramma di Gantt</msg>
   <msg key="Gantt_Resources">Risorse Gantt</msg>
   <msg key="Groups">Gruppi</msg>
@@ -31,7 +27,7 @@
   <msg key="Manage_Reports">Gestione report</msg>
   <msg key="New_Report">Nuovo report</msg>
   <msg key="No_customer">Cliente non definito</msg>
-  <msg key="No_left_dimension">Dimensione 'sinistra' non specificata</msg>
+  <msg key="No_left_dimension">Dimensione &#39;sinistra&#39; non specificata</msg>
   <msg key="No_left_dimension_message">Specificare almeno una variabile per la dimensione sinistra.</msg>
   <msg key="No_project">Progetto non definito</msg>
   <msg key="Object_Creation_Audit_Cube">Oggetto creazione «cubo» auditing</msg>

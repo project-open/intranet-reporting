@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <message_catalog package_key="intranet-reporting" locale="nl_NL" charset="ISO-8859-1">
 
-  <msg key="Ad_hoc_Fraber_Test_group_id">Groep.id</msg>
-  <msg key="Ad_hoc_Fraber_Test_group_name">Groep naam</msg>
-  <msg key="Ad_hoc_Fraber_Test_join_policy">Toegangsbeleid</msg>
   <msg key="Add_new_Report">Toevoegen nieuw rapport</msg>
   <msg key="Admin_Reports">Admin rapporten</msg>
   <msg key="Available_Reports">Beschikbare rapporten</msg>

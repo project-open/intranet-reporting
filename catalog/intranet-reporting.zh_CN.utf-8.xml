@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <message_catalog package_key="intranet-reporting" locale="zh_CN" charset="utf-8">
 
-  <msg key="Ad_hoc_Fraber_Test_group_id">组 ID</msg>
-  <msg key="Ad_hoc_Fraber_Test_group_name">组名字</msg>
-  <msg key="Ad_hoc_Fraber_Test_join_policy">加入政策</msg>
   <msg key="Add_new_Report">添加新报表</msg>
   <msg key="Admin_Reports">管理报表</msg>
   <msg key="Available_Reports">可用报表</msg>
@@ -21,7 +18,6 @@
   <msg key="Finance_VAT_Report">财务增值税报表</msg>
   <msg key="Forum">论坛</msg>
   <msg key="Forum_AdHoc_Report_01">论坛 AdHoc Report_01  </msg>
-  <msg key="Fraber_Test">Fraber 测试</msg>
   <msg key="Gantt_Diagram">甘特图</msg>
   <msg key="Gantt_Resources">甘特资源</msg>
   <msg key="Groups">组</msg>
