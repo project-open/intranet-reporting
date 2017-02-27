@@ -268,6 +268,7 @@ where
 	and main_p.tree_sortkey = tree_root_key(p.tree_sortkey)
 	and h.day >= to_timestamp(:start_date, 'YYYY-MM-DD')
 	and h.day < to_timestamp(:end_date, 'YYYY-MM-DD')
+	and h.day::date <= now()::date
 	and main_p.company_id = c.company_id
 	$where_clause
 order by
