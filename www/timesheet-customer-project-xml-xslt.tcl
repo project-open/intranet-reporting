@@ -77,7 +77,7 @@ proc im_reporting_render_odt_template {
 
     # Unzip the odt into the temorary directory
     if {[catch {
-	exec unzip -d $odt_tmp_path $odt_zip
+	im_exec unzip -d $odt_tmp_path $odt_zip
     } err_msg]} {
 	ad_return_complaint 1  [lang::message::lookup "" intranet-reporting.UnableToUnzip "Unable to unzip ODT template. Please verify if you have choosen a file of type: ODT"]
         return
@@ -308,7 +308,7 @@ proc im_reporting_render_odt_template {
 
     # The zip -j command replaces the specified file in the OO zipfile
     ns_log Notice "intranet-reporting-procs.tcl: before zipping"
-    exec zip -j $odt_zip $odt_content
+    im_exec zip -j $odt_zip $odt_content
     return $odt_zip
 }
 
@@ -1377,7 +1377,7 @@ switch $output_format {
             close $fo
 
             # Perform transition
-            exec java -jar $path_saxon -s:$uri_report_default_xml -xsl:$uri_xslt -o:$uri_report_custom_xml 
+            im_exec java -jar $path_saxon -s:$uri_report_default_xml -xsl:$uri_xslt -o:$uri_report_custom_xml 
 	    ns_returnfile 200 text/xml $uri_report_custom_xml
 
 	} else {
@@ -1402,7 +1402,7 @@ switch $output_format {
 	    set fo [open $uri_report_custom_xml {RDWR CREAT}]
 	    puts $fo " "
 	    close $fo
-	    exec java -jar $path_saxon -s:$uri_report_default_xml -xsl:$uri_xslt -o:${uri_report_custom_xml}
+	    im_exec java -jar $path_saxon -s:$uri_report_default_xml -xsl:$uri_xslt -o:${uri_report_custom_xml}
 	} else {
 	    # In case no transition file has been assigned we continue working with the default XML file 
 	    set uri_report_custom_xml $uri_report_default_xml
