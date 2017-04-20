@@ -20,6 +20,7 @@ ad_page_contract {
     { different_from_project_p "" }
     { cost_center_id 0 }
     { department_id 0 }
+    { include_absences_p 1 }
 }
 
 # ------------------------------------------------------------
@@ -688,6 +689,10 @@ set footer0 {"" "" "" "" "" "" "" "" "" ""}
 # Write out HTTP header, considering CSV/MS-Excel formatting
 im_report_write_http_headers -output_format $output_format -report_name "timesheet-monthly-hours-absences"
 
+# Pre-setting Radio button
+set include_absences_p_yes ""; set include_absences_p_no ""
+if { $include_absences_p } { set include_absences_p_yes "checked" } else { set include_absences_p_no "checked" }
+
 # Add the HTML select box to the head of the page
 switch $output_format {
     html {
@@ -764,6 +769,13 @@ switch $output_format {
                 </tr>
 		--> 
                 <tr>
+                  <td class=form-label>Include absences:</td>
+                  <td class=form-widget>
+                    <input name=\"include_absences_p\" value=\"1\" type=\"radio\" $include_absences_p_yes>Yes</input>
+                    <input name=\"include_absences_p\" value=\"0\" type=\"radio\" $include_absences_p_no>No</input>
+                  </td>
+                </tr>
+                <tr>
                   <td class=form-label>Format</td>
                   <td class=form-widget>
                     [im_report_output_format_select output_format "" $output_format]
@@ -836,14 +848,16 @@ db_foreach sql $sql {
         set number_days_ctr 0
         set number_hours_ctr 0
 
-	im_report_display_absences \
-	    -output_format $output_format \
-	    -group_def $report_def \
-	    -footer_array_list $absence_array_list \
-	    -last_value_array_list $last_value_list \
-	    -level_of_detail $level_of_detail \
-	    -row_class $class \
-	    -cell_class $class
+        if { $include_absences_p } {
+	    im_report_display_absences \
+		-output_format $output_format \
+		-group_def $report_def \
+		-footer_array_list $absence_array_list \
+		-last_value_array_list $last_value_list \
+		-level_of_detail $level_of_detail \
+		-row_class $class \
+		-cell_class $class
+	}
 
 	im_report_display_footer \
 	    -output_format $output_format \
@@ -869,48 +883,52 @@ db_foreach sql $sql {
 	    
 	    array unset absence_arr 
 
-	    # Get absences for this user 
-	    if {$debug} { ns_log Notice "timesheet-monthly-hours-absences::get-absences: new_value: $new_value, report_month: $report_month, report_year: $report_year," }
-	    set column_sql "select * from im_absences_month_absence_duration_type (:user_id, :report_month, :report_year, null) AS (days date, total_days numeric, absence_type_id integer)"
-	    db_foreach col $column_sql {
-		if {$debug} { ns_log Notice "timesheet-monthly-hours-absences::switch_user - setting absence_arr($days)" }
-		set duration_absence_type_list [list $total_days [im_category_from_id $absence_type_id]]
-		if { [info exists absence_arr($days)] } {
-		    set absence_arr($days) [lappend absence_arr($days) $duration_absence_type_list]
-		} else {
-		    set absence_arr($days) "{$duration_absence_type_list}"
+	    if { $include_absences_p } {
+		# Get absences for this user 
+		if {$debug} { ns_log Notice "timesheet-monthly-hours-absences::get-absences: new_value: $new_value, report_month: $report_month, report_year: $report_year," }
+		set column_sql "select * from im_absences_month_absence_duration_type (:user_id, :report_month, :report_year, null) AS (days date, total_days numeric, absence_type_id integer)"
+		db_foreach col $column_sql {
+		    if {$debug} { ns_log Notice "timesheet-monthly-hours-absences::switch_user - setting absence_arr($days)" }
+		    set duration_absence_type_list [list $total_days [im_category_from_id $absence_type_id]]
+		    if { [info exists absence_arr($days)] } {
+			set absence_arr($days) [lappend absence_arr($days) $duration_absence_type_list]
+		    } else {
+			set absence_arr($days) "{$duration_absence_type_list}"
+		    }
+		    if {$debug} { ns_log Notice "timesheet-monthly-hours-absences::new absence_arr($days): $absence_arr($days)" }
 		}
-		if {$debug} { ns_log Notice "timesheet-monthly-hours-absences::new absence_arr($days): $absence_arr($days)" }
-	    }
-
-	    # Preset ts_hours_arr with absences 
-	    for { set i 1 } { $i < $duration + 1 } { incr i } {
-		if { 1 == [string length $i]} { set day_double_digit 0$i } else { set day_double_digit $i }
-		set date_ansi_key "$report_year-$report_month-$day_double_digit"
-                if { [info exists absence_arr($date_ansi_key)] } {
-                    ns_log Notice "timesheet-monthly-hours-absences::switch_user - new User: $user_id - found absence for key: $date_ansi_key"
-                    # Evaluate absence amount
-                    # absence_arr($date_ansi_key) is list of lists
-                    set total_absence 0
-                    foreach absence_list_item $absence_arr($date_ansi_key) {
-                        # Absences are stored as days/fractions of a day
-                        # Evaluate total absence in UoM: 'Hours'
-                        if { 1 < [expr {[lindex $absence_list_item 0] + 0}] } {
-                            # We assume that absences with a total (total_days) > 1 are always full day absences
-                            set total_absence [expr {$total_absence + $timesheet_hours_per_day}]
-                        } else {
-                            # Single absences might be fraction of day
-                            set total_absence [expr {[expr {$timesheet_hours_per_day + 0}] * [expr [lindex $absence_list_item 0]]}]
-                        }
-                    }
-		    if {$debug} { ns_log Notice "timesheet-monthly-hours-absences::switch_user - Found total_absence: $total_absence" }
-		    set ts_hours_arr(day$day_double_digit) $total_absence
-		    if {$debug} { ns_log Notice "timesheet-monthly-hours-absences::switch_user - Setting ts_hours_arr(day$day_double_digit) to: $total_absence"	}
-		    set number_hours_ctr_pretty [expr $number_hours_ctr_pretty + $total_absence]
+		
+		# Preset ts_hours_arr with absences 
+		for { set i 1 } { $i < $duration + 1 } { incr i } {
+		    if { 1 == [string length $i]} { set day_double_digit 0$i } else { set day_double_digit $i }
+		    set date_ansi_key "$report_year-$report_month-$day_double_digit"
+		    if { [info exists absence_arr($date_ansi_key)] } {
+			ns_log Notice "timesheet-monthly-hours-absences::switch_user - new User: $user_id - found absence for key: $date_ansi_key"
+			# Evaluate absence amount
+			# absence_arr($date_ansi_key) is list of lists
+			set total_absence 0
+			foreach absence_list_item $absence_arr($date_ansi_key) {
+			    # Absences are stored as days/fractions of a day
+			    # Evaluate total absence in UoM: 'Hours'
+			    if { 1 < [expr {[lindex $absence_list_item 0] + 0}] } {
+				# We assume that absences with a total (total_days) > 1 are always full day absences
+				set total_absence [expr {$total_absence + $timesheet_hours_per_day}]
+			    } else {
+				# Single absences might be fraction of day
+				set total_absence [expr {[expr {$timesheet_hours_per_day + 0}] * [expr [lindex $absence_list_item 0]]}]
+			    }
+			}
+			if {$debug} { ns_log Notice "timesheet-monthly-hours-absences::switch_user - Found total_absence: $total_absence" }
+			set ts_hours_arr(day$day_double_digit) $total_absence
+			if {$debug} { ns_log Notice "timesheet-monthly-hours-absences::switch_user - Setting ts_hours_arr(day$day_double_digit) to: $total_absence" }
+			set number_hours_ctr_pretty [expr $number_hours_ctr_pretty + $total_absence]
+		    }
 		}
+		# Convert to list in order pass on as parameter 
+		set absences_list [array get absence_arr]
+	    } else {
+		set absences_list [list]
 	    }
-	    # Convert to list in order pass on as parameter 
-	    set absences_list [array get absence_arr]
 	}	
 
         # Formating and row totals
@@ -947,16 +965,18 @@ db_foreach sql $sql {
         ]
 	
 
-        set absence_array_list [im_report_render_absences \
-	    -output_format $output_format \
-	    -group_def $report_def \
-	    -last_value_array_list $last_value_list \
-	    -report_year_month $report_year_month \
-	    -level_of_detail $level_of_detail \
-	    -row_class $class \
-	    -cell_class $class \
-	    -absences_list $absences_list
-        ]
+	if { $include_absences_p } {
+	    set absence_array_list [im_report_render_absences \
+	        -output_format $output_format \
+	        -group_def $report_def \
+	        -last_value_array_list $last_value_list \
+	        -report_year_month $report_year_month \
+	        -level_of_detail $level_of_detail \
+	        -row_class $class \
+	        -cell_class $class \
+	        -absences_list $absences_list
+            ]
+	}
 
         set footer_array_list [im_report_render_footer \
 	    -output_format $output_format \
@@ -968,16 +988,17 @@ db_foreach sql $sql {
         ]
 }
 
-
-im_report_display_absences \
-       -output_format $output_format \
-       -group_def $report_def \
-       -footer_array_list $absence_array_list \
-       -last_value_array_list $last_value_list \
-       -level_of_detail $level_of_detail \
-       -display_all_footers_p 1\
-       -row_class $class \
-       -cell_class $class
+if { $include_absences_p } {
+    im_report_display_absences \
+	-output_format $output_format \
+	-group_def $report_def \
+	-footer_array_list $absence_array_list \
+	-last_value_array_list $last_value_list \
+	-level_of_detail $level_of_detail \
+	-display_all_footers_p 1\
+	-row_class $class \
+	-cell_class $class
+}
 
 im_report_display_footer \
     -output_format $output_format \
