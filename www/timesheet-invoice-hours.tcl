@@ -346,7 +346,7 @@ switch $output_template {
 		 <head>
 		  <meta http-equiv='content-type' content='text/html;charset=UTF-8'>
 		  <title>$timesheet_customer_l10n</title>
-		  <link rel='stylesheet' type='text/css' href='$system_url/intranet-reporting/timesheet-invoice-hours.css'>
+		  <link rel='stylesheet' type='text/css' href='/intranet-reporting/timesheet-invoice-hours.css'>
 		 </head>
 		 <body>
 		  <div id=header>
