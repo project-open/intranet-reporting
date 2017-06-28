@@ -354,7 +354,7 @@ switch $output_template {
 		  </div>
 		  <div id=main>
 			<div id=title>$timesheet_customer_l10n</div>
-			<div id=subtitle>[lang::message::lookup "" intranet-incoices.Period "Period"]: $hours_start_date - $hours_end_date</div>
+			<div id=subtitle>[lang::message::lookup "" intranet-invoices.Period "Period"]: $hours_start_date - $hours_end_date</div>
                         <table id=headertable cellpadding=0 border=0 rules=all>
                          <tbody>
                           <tr>
