@@ -179,11 +179,11 @@ set report_sql "
 		eop_hours,
 		eop_costs,
 		real_total,
-
-		CASE WHEN project_budget < 0.1 THEN null
-		     ELSE round(1000 * (eop_costs - project_budget) / project_budget) / 10.0
-		END as percent_overrun
-
+		coalesce (
+			CASE WHEN 	project_budget < 0.1 THEN null
+         		ELSE 		round(1000 * (eop_costs - project_budget) / project_budget) / 10.0
+    			END 
+		, 0) as percent_overrun
 	from	(select
 			p.*,
 			im_name_from_user_id(p.project_lead_id) as project_lead_name,
