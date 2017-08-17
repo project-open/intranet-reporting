@@ -40,6 +40,7 @@
   <msg key="Delete_Indicator">Delete Indicator</msg>
   <msg key="Delete_Result_History">Delete Result History</msg>
   <msg key="Description">Descriptioin</msg>
+  <msg key="Duplicate_dimension">Duplicate dimension</msg>
   <msg key="Edit_Indicator">Edit Indicator</msg>
   <msg key="Edit_Report">Edit Report</msg>
   <msg key="End_Date">End Date</msg>
@@ -231,4 +232,5 @@
   <msg key="Year_Quarter_and_Mont">Year Quarter and Mont</msg>
   <msg key="Year_Quarter_Month_and_Day">Year, Quarter, Month and Day</msg>
   <msg key="You_dont_have_permissions">You don&#39;t have the necessary permissions to view this page.</msg>
+  <msg key="You_have_specified_a_dimension_multiple">You have specified a dimension multiple times</msg>
 </message_catalog>
