@@ -47,6 +47,7 @@
   <msg key="Delete_Indicator">Indikator löschen</msg>
   <msg key="Delete_Result_History">Historie löschen</msg>
   <msg key="Description">Beschreibung</msg>
+  <msg key="Duplicate_dimension">Doppelte Dimension</msg>
   <msg key="Edit_Indicator">Indikator bearbeiten</msg>
   <msg key="Edit_Report">Bericht bearbeiten</msg>
   <msg key="End_Date">Ende</msg>
@@ -223,4 +224,6 @@
   <msg key="Year_Quarter_and_Mont">Jahr, Quartal und Monat</msg>
   <msg key="Year_Quarter_Month_and_Day">Jahr, Quartal, Monat und Tag</msg>
   <msg key="You_dont_have_permissions">Sie haben nicht die notwendigen Rechte, um diese Seite anzusehen.</msg>
+  <msg key="You_have_specified_a_dimension_multiple">Sie haben eine Dimension mehrfach spezifiziert
+</msg>
 </message_catalog>
