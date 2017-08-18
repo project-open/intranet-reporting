@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<message_catalog package_key="intranet-reporting" locale="pl_PL" charset="utf-8">
+
+  <msg key="Admin_Reports">Raporty Administratora</msg>
+  <msg key="Available_Reports">Dostępne Raporty</msg>
+  <msg key="Finance">Finanse</msg>
+  <msg key="Finance_Budged_Check_for_Main_Projects">Sprawdź Budżet Finansowy na Główne Projekty</msg>
+  <msg key="Forum">Forum</msg>
+  <msg key="Groups">Groupy</msg>
+  <msg key="Indicators">Zagadnienie</msg>
+  <msg key="New_Report">Nowy Raport</msg>
+  <msg key="Other">Inne</msg>
+  <msg key="Program_and_Portfolio">Program i Portfolio</msg>
+  <msg key="Project_Management">Zarządzanie Projektem</msg>
+  <msg key="Project_Risks">Ryzyko Projektowe</msg>
+  <msg key="Recent_Registrations">Ostatnie Rejestracje</msg>
+  <msg key="Resource_Planning_based_on_Planned_Hours">Planowanie Zasobów w Oparciu o Zaplanowane Godziny</msg>
+  <msg key="Resource_Planning_Report">Raport Planowania Zasobów</msg>
+  <msg key="REST_Category_Type">Typ Kategorii REST</msg>
+  <msg key="REST_Group_Memberships">Grupy Użytkowników REST</msg>
+  <msg key="REST_My_Hours">Moje Godziny REST</msg>
+  <msg key="REST_My_Timesheet_Projects">Moja Ewidencja Czasu Pracy w Projektach REST</msg>
+  <msg key="REST_My_Timesheet_Projects_and_Hours">Ewidencja Czasu Pracy Projektów i Godzin REST</msg>
+  <msg key="REST_Object_Permissions">Uprawnienia Obiektu REST</msg>
+  <msg key="REST_System_Reports">Raporty Systemowe REST</msg>
+  <msg key="Sales">Sprzedaż</msg>
+  <msg key="Show_all_project_tasks">Pokaż Wszystkie Zadania Projektowe</msg>
+  <msg key="Simple_Survey_Results">Wyniki Prostych Ankiet</msg>
+  <msg key="Simple_Surveys">Proste Ankiety</msg>
+  <msg key="SubTotalDepartment">Dział</msg>
+  <msg key="Tickets">Zgłoszenia</msg>
+  <msg key="Timesheet">Ewidencja Czasu Pracy</msg>
+  <msg key="Timesheet___Monthly_View_including_Absences">Czas Pracy - Miesięczny Raport Zawierający Nieobecności</msg>
+  <msg key="Timesheet_Customers_and_Projects">Grafik Projektów i Klientów</msg>
+  <msg key="Timesheet_Productivity">Grafik Produktywności</msg>
+  <msg key="Timesheet_Weekly_Report">Tygodniowy Raport Ewidencji Czasu Pracy</msg>
+  <msg key="Users___Contact_Information">Użytkownicy i Informacje Kontaktowe</msg>
+</message_catalog>
