@@ -95,6 +95,7 @@
   <msg key="Left2">Left 2</msg>
   <msg key="Left3">Left 3</msg>
   <msg key="Left_Dimension">Left Dimension</msg>
+  <msg key="LevelOfDetails">Level of Details</msg>
   <msg key="List_of_Active_Projects">List of Active Projects</msg>
   <msg key="List_of_All_Project_Budgets">List of All Project Budgets</msg>
   <msg key="List_of_All_Project_Names">List of All Project Names</msg>
@@ -115,6 +116,7 @@
   <msg key="Object_type_im_company">Company</msg>
   <msg key="Object_type_im_ticket">Ticket</msg>
   <msg key="Other">Other</msg>
+  <msg key="Period">Period</msg>
   <msg key="Price_Data-Warehouse_Cube">Price Data-Warehouse Cube</msg>
   <msg key="Price_Data_Warehouse_Cube">Price Data-Warehouse Cube</msg>
   <msg key="Program_and_Portfolio">Program and Portfolio</msg>
@@ -225,6 +227,7 @@
   <msg key="Translation_Tasks_AdHoc_Report_01">Translation Tasks AdHoc Report 01</msg>
   <msg key="Translation_Units_Sold_by_UoM_and_Language">Translation - Units Sold By UoM And Language</msg>
   <msg key="Users___Contact_Information">Users &amp; Contact Information</msg>
+  <msg key="UsersDepartment">User&#39;s Department</msg>
   <msg key="Year">Year</msg>
   <msg key="Year_and_Month">Year and Month</msg>
   <msg key="Year_and_Quarter">Year and Quarter</msg>
