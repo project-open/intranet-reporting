@@ -40,7 +40,7 @@ if {$level_of_detail > 3} { set level_of_detail 3 }
 
 set return_url [im_url_with_query]
 set role_id 1300
-set object_id 0
+set object_id $current_user_id
 set notify_asignee 1
 
 set offset [expr {$page * $limit}]
@@ -162,7 +162,7 @@ OFFSET	:offset
 
 # Global Header Line
 set header0 [list \
-		 "<!--<input type=checkbox name=_dummy onclick=\\\"acs_ListCheckAll('user',this.checked)\\\">-->" \
+		 "<input type=checkbox name=_dummy onclick=\\\"acs_ListCheckAll('user',this.checked)\\\">" \
 		 [lang::message::lookup "" intranet-reporting.Company_short Comp]  \
 		 [lang::message::lookup "" intranet-reporting.Customer_oneletter "C"] \
 		 [lang::message::lookup "" intranet-reporting.Employee_oneletter "E"] \
@@ -202,7 +202,7 @@ set report_def [list \
 	    } \
 	    content [list \
 		    header {
-			"<!--<input type=checkbox name=user_id_from_search value=$user_id id=user,$user_id>-->"
+			"<input type=checkbox name=user_id_from_search value=$user_id id=user,$user_id>"
 			""
 			"$customer_p"
 			"$employee_p"
@@ -333,7 +333,7 @@ switch $output_format {
 	</table>
 	
 	<!-- Here starts the main report table -->
-	<form action='/intranet/member-add-2' method=POST>
+	<form action='/intranet/member-add-2' method=GET>
 	[export_vars -form {return_url role_id object_id notify_asignee}]
 	<table border=0 cellspacing=1 cellpadding=1>
         "
@@ -441,11 +441,8 @@ im_report_render_row \
 switch $output_format {
     html { 
         ns_write "
+	<tr><td colspan=99><input type=submit></td></tr>
 	</table>
-	<!--
-	<tr><td colspan=99>
-	<input type=submit>
-	</td></tr>-->
 	</form>
 	[im_footer]
 	"
