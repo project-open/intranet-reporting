@@ -36,13 +36,10 @@ if {"t" ne $read_p } {
 
 # Maxlevel is 3. 
 if {$level_of_detail > 3} { set level_of_detail 3 }
-
-
 set return_url [im_url_with_query]
 set role_id 1300
 set object_id $current_user_id
 set notify_asignee 1
-
 set offset [expr {$page * $limit}]
 
 # ------------------------------------------------------------
@@ -76,6 +73,8 @@ set limits {1 1 10 10 100 100 1000 1000 5000 5000 10000 10000 100000 100000}
 set company_url "/intranet/companies/view?company_id="
 set user_url "/intranet/users/view?user_id="
 set this_url "/intranet-reporting/user-contacts?"
+
+set today_julian [dt_ansi_to_julian_single_arg [db_string now "select now()::date"]]
 
 set pages [list]
 for {set i 0} {$i < 100} {incr i} { 
@@ -162,7 +161,7 @@ OFFSET	:offset
 
 # Global Header Line
 set header0 [list \
-		 "<input type=checkbox name=_dummy onclick=\\\"acs_ListCheckAll('user',this.checked)\\\">" \
+		 "<input type=checkbox name=_dummy onclick=\\\"acs_ListCheckAll('user',this.checked)\\\" checked>" \
 		 [lang::message::lookup "" intranet-reporting.Company_short Comp]  \
 		 [lang::message::lookup "" intranet-reporting.Customer_oneletter "C"] \
 		 [lang::message::lookup "" intranet-reporting.Employee_oneletter "E"] \
@@ -202,7 +201,7 @@ set report_def [list \
 	    } \
 	    content [list \
 		    header {
-			"<input type=checkbox name=user_id_from_search value=$user_id id=user,$user_id>"
+			"<input type=checkbox name=user_id_from_search value=$user_id id=user,$user_id $checked>"
 			""
 			"$customer_p"
 			"$employee_p"
@@ -333,7 +332,7 @@ switch $output_format {
 	</table>
 	
 	<!-- Here starts the main report table -->
-	<form action='/intranet/member-add-2' method=GET>
+	<form action='/intranet/member-add-2' method=POST>
 	[export_vars -form {return_url role_id object_id notify_asignee}]
 	<table border=0 cellspacing=1 cellpadding=1>
         "
@@ -378,6 +377,15 @@ db_foreach sql $report_sql {
 	if {"" != $wa_state} { lappend wa_list $wa_state }
 	if {"" != $wa_country} { lappend wa_list $wa_country }
 	set wa [join $wa_list ", "]
+
+        # Did we sent this guy an email already?
+        set checked "checked"
+    if {[info exists spam_frequency_id] && [info exists last_email_sent] && "" ne $spam_frequency_id && "" ne $last_email_sent} {
+	set last_email_julian [dt_ansi_to_julian_single_arg [lindex $last_email_sent 0]]
+	set spam_frequency_days [util_memoize [list db_string days_freq "select aux_int1 from im_categories where category_id = $spam_frequency_id" -default 99999]]
+	if {$today_julian < [expr $last_email_julian + $spam_frequency_days]} { set checked "" }
+    }
+
 
 	# Select either "roweven" or "rowodd" from
 	# a "hash", depending on the value of "counter".
