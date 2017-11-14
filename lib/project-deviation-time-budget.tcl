@@ -533,7 +533,7 @@ set provider_bill_select "
                                 p_child.tree_sortkey between p_parent.tree_sortkey and tree_right(p_parent.tree_sortkey)
                                 and p_parent.project_id = child.project_id
                         )
-                and cost_type_id = 3704
+                and cost_type_id in ([join [im_sub_categories 3704] ","])
                 and effective_date BETWEEN :start_date AND :end_date
         ) as provider_bills
 "
@@ -597,7 +597,7 @@ set sql "
 			where 
 				c.effective_date >= to_date(:start_date::text, 'YYYY-MM-DD') 
                                 and c.effective_date <= to_date(:end_date::text, 'YYYY-MM-DD')
-                                and c.cost_type_id = 3720
+                                and c.cost_type_id in ([join [im_sub_categories 3720] ","])
 				and c.cost_id = e.expense_id
 				and e.billable_p = 't'	
                         group by 
@@ -613,7 +613,7 @@ set sql "
 			where 
 				c.effective_date >= to_date(:start_date::text, 'YYYY-MM-DD') 
                                 and c.effective_date <= to_date(:end_date::text, 'YYYY-MM-DD')
-                                and c.cost_type_id = 3720
+                                and c.cost_type_id in ([join [im_sub_categories 3720] ","])
 				and c.cost_id = e.expense_id
 				and e.billable_p = 'f'	
                         group by 

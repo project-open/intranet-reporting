@@ -77,7 +77,7 @@ set sql "
 		(	select	to_char(min(effective_date), $date_format) 
 			from	im_costs c,
 				im_projects s
-			where	c.cost_type_id = [im_cost_type_invoice]
+			where	c.cost_type_id in ([join [im_sub_categories [im_cost_type_invoice]] ","])
 				and c.project_id = s.project_id
 				and p.tree_sortkey = tree_root_key(s.tree_sortkey)
 		) as first_invoice,

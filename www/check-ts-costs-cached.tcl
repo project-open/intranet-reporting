@@ -119,7 +119,7 @@ if { "POST" == [ad_conn method] && [info exists btn] } {
                                  and tree_right(p_parent.tree_sortkey)
                                  and p_parent.project_id = :p_id
             )
-            and c.cost_type_id = 3718
+            and c.cost_type_id in ([join [im_sub_categories 3718] ","])
             and c.cost_id not in (
                 select cost_id from im_hours where project_id in (  
                          select      p_child.project_id
@@ -268,7 +268,7 @@ set im_report_get_ts_costs_im_costs_sql "
                         select      amount
                         from        im_costs
                         where       project_id = p_project_id
-				    and cost_type_id = [im_cost_type_timesheet]
+				    and cost_type_id in ([join [im_sub_categories [im_cost_type_timesheet]] ","])
                 LOOP
                         v_sum_ts_cost := r.amount;
                         IF v_sum_ts_cost is null THEN
