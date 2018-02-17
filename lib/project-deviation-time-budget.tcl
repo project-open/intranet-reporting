@@ -112,7 +112,7 @@ if { 0 == $project_status_id_from_search } {
 # Get employee(s)
 # ----
 set where_employees "1=1"
-if { 0 != $user_id_from_search  } { append where "\n and employee_id = $user_id_from_search" } 
+if { 0 != $user_id_from_search  } { append where "\n and employee_id = :user_id_from_search" } 
 set sql "select employee_id from im_employees where $where_employees"
 set employee_id [db_list emp_list $sql] 
 
@@ -715,7 +715,7 @@ set total__profit_and_loss_two_var 0
 set err_mess ""
 
 set inner_hours_where ""
-if { 0 != $user_id_from_search } { set inner_hours_where "and ho.user_id = $user_id_from_search" }
+if { 0 != $user_id_from_search } { set inner_hours_where "and ho.user_id = :user_id_from_search" }
 
 
 template::multirow foreach project_list {
