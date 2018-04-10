@@ -54,7 +54,9 @@
   <msg key="Export_Project_Task_Relationships">Export Project-Task Relationships</msg>
   <msg key="Export_Projects">Export Projects</msg>
   <msg key="Export_Tasks">Export Tasks</msg>
+  <msg key="Export_Tickets">Export Tickets</msg>
   <msg key="Finance">Finance</msg>
+  <msg key="Finance___Cash_Flow">Finance - Cash Flow</msg>
   <msg key="Finance_Budged_Check_for_Main_Projects">Finance - Budged Check for Main Projects</msg>
   <msg key="Finance_Cube">Finance Cube</msg>
   <msg key="Finance_Data-Warehouse_Cube">Finance Data-Warehouse Cube</msg>
@@ -183,6 +185,7 @@
   <msg key="REST_Object_Permissions">REST Object Permissions</msg>
   <msg key="REST_Open_Ticket_Age_per_Queue_and_Type">REST Open Ticket Age per Queue and Type</msg>
   <msg key="REST_Portfolio_Planner_Projects_Update_Cases">REST Portfolio Planner Project Update Cases</msg>
+  <msg key="REST_Project_Member_Assignments_and_Absences">REST - Project Member Assignments and Absences</msg>
   <msg key="REST_System_Reports">REST System Reports (not for end users)</msg>
   <msg key="REST_Ticket_Aging_Histogram">REST Ticket Aging Histogram</msg>
   <msg key="Sales">Sales</msg>

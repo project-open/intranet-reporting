@@ -61,7 +61,9 @@
   <msg key="Export_Project_Task_Relationships">Projekt-Aufgaben Beziehungen exportieren</msg>
   <msg key="Export_Projects">Projekte exportieren</msg>
   <msg key="Export_Tasks">Gantt-Aufgaben exportieren</msg>
+  <msg key="Export_Tickets">Export Tickets</msg>
   <msg key="Finance">Finanzen</msg>
+  <msg key="Finance___Cash_Flow">Finanzen - Cash Flow</msg>
   <msg key="Finance_Budged_Check_for_Main_Projects">Finanzen - Budgetkontrolle für Hauptprojekte</msg>
   <msg key="Finance_Cube">Finanzen - Data-Warehouse Würfel</msg>
   <msg key="Finance_Data-Warehouse_Cube">Finanzen - Data-Warehouse Würfel</msg>
@@ -191,6 +193,7 @@
   <msg key="REST_Object_Permissions">REST - Object Permissions</msg>
   <msg key="REST_Open_Ticket_Age_per_Queue_and_Type">REST - Offene Tickets nach Alter, Warteschlange und Typ</msg>
   <msg key="REST_Portfolio_Planner_Projects_Update_Cases">REST - Portfolio Planner Projekt Update Fälle</msg>
+  <msg key="REST_Project_Member_Assignments_and_Absences">REST - Project Member Assignments and Absences</msg>
   <msg key="REST_System_Reports">REST-Systemberichte (nicht für normale Benutzer)</msg>
   <msg key="REST_Ticket_Aging_Histogram">REST - Ticket Aging Histogram</msg>
   <msg key="Sales">Verkauf</msg>
