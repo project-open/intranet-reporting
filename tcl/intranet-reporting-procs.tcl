@@ -182,14 +182,15 @@ ad_proc im_report_render_cell {
     -cell_class
     {-encoding ""}
     {-output_format "html"}
+    {-no_write_p 0}
 } {
     Renders one cell via ns_write directly
     into a report HTTP session
 } {
     set td_fields ""
-    # ns_log Notice "intranet-reporting-procs::im_report_render_cell: $cell" 
-    # Remove leading spaces
-    regexp {^[ ]*(.*)} $cell match cell
+    set post_csv ""
+
+    regexp {^[ ]*(.*)} $cell match cell; # Remove leading spaces
 
     while {[regexp {^\#([^=]*)\=([^ ]*)} $cell match key value rest]} {
 	set match_len [string length $match]
@@ -199,12 +200,45 @@ ad_proc im_report_render_cell {
 	set key [string tolower $key]
 	set cell $rest
 
-	if {$key eq "class"} {
-	    set cell_class $value
-	} else {
-	    append td_fields "$key=$value "
+	switch $key {
+	    class { 
+		# Overwrite the default class
+		set cell_class $value 
+	    }
+	    colspan {
+		# for CSV add emtpy cells with colspan=N
+		if {"html" eq $output_format} {
+		    append td_fields "$key=$value "
+		} else {
+		    for {set i 0} {$i < $value} {incr i} {
+			append post_csv "\"\";"
+		    }
+		}
+	    }
+	    default {
+		append td_fields "$key=$value "
+	    }
 	}
     }
+    
+    if {"html" ne $output_format} {
+	# Extract some reasonable information from CSV from HTML cell
+	if {[regexp {<input(.+)>$} $cell match input]} {
+	    if {[regexp {value=\"([^\"]+)\"} $input match value]} { 
+                set cell $value 
+		set input ""
+            }
+	    if {[regexp {value=\'([^\']+)\'} $input match value]} { 
+                set cell $value 
+		set input ""
+            }
+	    if {[regexp {value=([^ ]+)} $input match value]} { 
+		set cell $value 
+	    }
+	}
+    }
+
+#    ad_return_complaint 1 [ns_quotehtml $cell]
 
     # Check for cell values starting with "-". This gives a Syntax Error at runtime!!
     if {"-" == [string range $cell 0 0]} { set cell " $cell" }
@@ -213,9 +247,13 @@ ad_proc im_report_render_cell {
     set quoted_cell [im_report_quote_cell -encoding $encoding -output_format $output_format $cell]
 
     switch $output_format {
-	html - printer { ns_write "<td $td_fields>$quoted_cell</td>\n" }
-	csv { ns_write "\"$quoted_cell\";" }
-   }
+	html - printer { set result "<td $td_fields>$quoted_cell</td>\n" }
+	csv { set result "\"$quoted_cell\";$post_csv" }
+	default { set result "" }
+    }
+
+    if {!$no_write_p} { ns_write $result }
+    return $result
 }
 
 ad_proc im_report_render_row {
