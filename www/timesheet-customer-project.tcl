@@ -280,100 +280,7 @@ order by
 	h.day
 "
 
-# Depending on priviliges, table has either 7 or 8 columns
-# Chrome is less tolerant, so we have tu build clean HTML code, therfore two report_def's
-
-if { [im_permission $current_user_id "fi_view_internal_rates"] } {
-    
-    set report_def [list \
-	group_by company_id \
-	header {
-		"\#colspan=8 <a href=$base_url&company_id=$company_id&level_of_detail=4 
-		target=_blank><img src=/intranet/images/plus_9.gif border=0></a> 
-		<b><a href=$company_url$company_id>$company_name</a></b>"
-	} \
-	content [list  \
-		group_by company_project_id \
-		header {
-			$company_nr 
-			"\#colspan=7 <a href=$base_url&project_id=$project_id&level_of_detail=4 
-			target=_blank><img src=/intranet/images/plus_9.gif border=0></a>
-			<b><a href=$project_url$project_id>$project_name</a></b>"
-		} \
-		content [list \
-			group_by company_project_sub_id \
-			header {
-				$company_nr 
-				$project_nr 
-				"\#colspan=6 <a href=$base_url&project_id=$sub_project_id&level_of_detail=5
-				target=_blank><img src=/intranet/images/plus_9.gif border=0></a>
-				<b><a href=$project_url$sub_project_id>$sub_project_name</a></b>"
-			} \
-			content [list \
-				group_by company_project_sub_user_id \
-				header {
-					$company_nr 
-					$project_nr 
-					$sub_project_nr 
-					"\#colspan=5 <a href=$base_url&project_id=$sub_project_id&user_id=$user_id&level_of_detail=5
-					target=_blank><img src=/intranet/images/plus_9.gif border=0></a>
-					<b><a href=$user_url$user_id>$user_name</a></b>"
-				} \
-				content [list \
-					header {
-						$company_nr
-						$project_nr
-						$sub_project_nr
-						$user_initials
-						"<nobr>$date_pretty</nobr>"
-						$hours_link
-						$billing_rate
-						"<nobr>$note</nobr>"
-					} \
-					content {} \
-				] \
-				footer {
-					$company_nr 
-					$project_nr 
-					$sub_project_nr 
-					$user_initials
-					""
-					"<i>$hours_user_subtotal</i>"
-					""
-					""
-				} \
-			] \
-			footer {
-				$company_nr
-				$project_nr
-				$sub_project_nr
-				""
-				""
-				"<i>$hours_project_sub_subtotal</i>"
-				""
-				""
-			} \
-		] \
-		footer {
-			$company_nr
-			$project_nr
-			""
-			""
-			""
-			"<b>$hours_project_subtotal</b>"
-			""
-			""
-		} \
-	] \
-	footer {"" "" "" "" "" "" "" ""} \
-    ]
-
-    set header0 {"Customer" "Project" "Subproject" "User" "Date" Hours Rate Note}
-    set footer0 {"" "" "" "" "" "" "" ""}
-
-} else {
-
-    set report_def [list \
+set report_def [list \
 	group_by company_id \
 	header {
 		"\#colspan=7 <a href=$base_url&company_id=$company_id&level_of_detail=4 
@@ -449,14 +356,11 @@ if { [im_permission $current_user_id "fi_view_internal_rates"] } {
 			""
 		} \
 	] \
-	footer {"" "" "" "" "" "" "" } \
-    ]
+	footer {"" "" "" "" "" "" ""} \
+]
 
-    set header0 { "Customer" "Project" "Subproject" "User" "Date" Hours Note }
-    set footer0 { "" "" "" "" "" "" "" }
-
-}
-
+set header0 {"Customer" "Project" "Subproject" "User" "Date" Hours Note}
+set footer0 {"" "" "" "" "" "" ""}
 
 set hours_user_counter [list \
 	pretty_name Hours \
