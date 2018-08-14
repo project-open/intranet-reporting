@@ -212,7 +212,7 @@ BEGIN
 	);
 
 	return v_report_id;
-END;$BODY$ language 'plpgsql';
+END;$body$ language 'plpgsql';
 
 
 create or replace function im_report__delete(integer)
@@ -329,7 +329,7 @@ BEGIN
 	where menu_id = v_menu_id;
 
 	return v_report_id;
-END;$BODY$ language 'plpgsql';
+END;$body$ language 'plpgsql';
 
 
 
