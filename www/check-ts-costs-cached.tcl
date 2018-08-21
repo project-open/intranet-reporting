@@ -395,7 +395,7 @@ set sql "
 
 ad_return_top_of_page "
 	[im_header]
-	[im_navbar]
+	[im_navbar reporting]
         <form method='POST'>
 	<table cellspacing=0 cellpadding=5 border=0>
         <tr valign=top>

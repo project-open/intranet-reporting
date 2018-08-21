@@ -533,7 +533,7 @@ switch $output_format {
     html {
 	ns_write "
 	[im_header]
-	[im_navbar]
+	[im_navbar reporting]
 	<table cellspacing=0 cellpadding=0 border=0>
 	<tr valign=top>
 	<td>

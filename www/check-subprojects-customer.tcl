@@ -198,7 +198,7 @@ set counters [list]
 #
 ad_return_top_of_page "
 	[im_header]
-	[im_navbar]
+	[im_navbar reporting]
 	<table cellspacing=0 cellpadding=0 border=0>
 	<tr valign=top>
 	  <td width='30%'>

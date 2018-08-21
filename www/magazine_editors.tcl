@@ -144,7 +144,7 @@ set counters [list]
 
 ad_return_top_of_page "
 [im_header]
-[im_navbar]
+[im_navbar reporting]
 <H1>$page_title</H1>
 <table border=0 cellspacing=1 cellpadding=1>\n"
 
