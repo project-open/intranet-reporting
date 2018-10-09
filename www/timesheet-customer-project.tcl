@@ -23,7 +23,8 @@ ad_page_contract {
     { task_id:integer 0}
     { company_id:integer 0}
     { user_id:integer 0}
-    { cost_center_id:integer 0}
+    { user_cost_center_id:integer 0}
+    { project_cost_center_id:integer 0}
     { invoice_id:integer 0}
     { invoiced_status "" }
     { preconf "" }
@@ -172,18 +173,27 @@ if {0 != $user_id && "" != $user_id} {
     lappend criteria "h.user_id = :user_id"
 }
 
-if {0 != $cost_center_id && "" != $cost_center_id} {
-    set cc_code [db_string cc_code "select cost_center_code from im_cost_centers where cost_center_id = :cost_center_id" -default "Co"]
-    set cc_code_len [string length $cc_code]
-
+if {0 != $user_cost_center_id && "" != $user_cost_center_id} {
+    set user_cc_code [db_string user_cc_code "select cost_center_code from im_cost_centers where cost_center_id = :user_cost_center_id" -default "Co"]
+    set user_cc_code_len [string length $user_cc_code]
     lappend criteria "h.user_id in (
 		select	e.employee_id
 		from	im_employees e
 		where	e.department_id in (
 			select	cost_center_id
 			from	im_cost_centers
-			where	substring(cost_center_code, 1, :cc_code_len) = :cc_code
+			where	substring(cost_center_code, 1, :user_cc_code_len) = :user_cc_code
 		)
+    )"
+}
+
+if {0 != $project_cost_center_id && "" != $project_cost_center_id} {
+    set project_cc_code [db_string project_cc_code "select cost_center_code from im_cost_centers where cost_center_id = :project_cost_center_id" -default "Co"]
+    set project_cc_code_len [string length $project_cc_code]
+    lappend criteria "main_p.project_cost_center_id in (
+			select	cost_center_id
+			from	im_cost_centers
+			where	substring(cost_center_code, 1, :project_cc_code_len) = :project_cc_code
     )"
 }
 
@@ -500,9 +510,15 @@ switch $output_format {
 	if {$view_hours_all_p} {
 	    ns_write "
 		<tr>
+		  <td class=form-label>[lang::message::lookup "" intranet-reporting.ProjectDepartment "Project's Department"]</td>
+		  <td class=form-widget>
+		    [im_cost_center_select -include_empty 1 -include_empty_name [lang::message::lookup "" intranet-core.All "All"] -department_only_p 0 project_cost_center_id $project_cost_center_id]
+		  </td>
+		</tr>
+		<tr>
 		  <td class=form-label>[lang::message::lookup "" intranet-reporting.UsersDepartment "User's Department"]</td>
 		  <td class=form-widget>
-		    [im_cost_center_select -include_empty 1 -include_empty_name [lang::message::lookup "" intranet-core.All "All"] -department_only_p 1 cost_center_id $cost_center_id]
+		    [im_cost_center_select -include_empty 1 -include_empty_name [lang::message::lookup "" intranet-core.All "All"] -department_only_p 1 user_cost_center_id $user_cost_center_id]
 		  </td>
 		</tr>
 		<tr>
