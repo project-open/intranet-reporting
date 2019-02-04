@@ -400,6 +400,7 @@ set im_user_absence_type_travel 5003
 set im_user_absence_type_bankholiday 5005
 set im_user_absence_type_training 5004
 
+
 # ------------------------------------------------------------
 # Conditional SQL Where-Clause
 #
@@ -452,7 +453,7 @@ if { $project_status_id ne "" && $project_status_id > 0 } {
     lappend criteria "p.project_status_id in ([join [im_sub_categories $project_status_id] ","])"
 }
 
-if {[info exists user_id] && 0 != $user_id && "" != $user_id && !$view_hours_all_p} {
+if {[info exists user_id] && 0 ne $user_id && "" ne $user_id && !$view_hours_all_p} {
     lappend criteria "h.user_id = :user_id"
 }
 
@@ -475,7 +476,7 @@ set outer_where ""
 set criteria_outer [list]
 
 # Check for filter "Employee"  
-if { "" != $user_id && $view_hours_all_p} { lappend criteria_outer "user_id = :user_id" }
+if {"" ne $user_id && 0 ne $user_id && $view_hours_all_p} { lappend criteria_outer "user_id = :user_id" }
 
 # Check for filter "Cost Center"  
 if { "0" != $cost_center_id &&  "" != $cost_center_id } {
