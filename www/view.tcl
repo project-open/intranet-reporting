@@ -27,29 +27,6 @@ ad_page_contract {
     { password "" }
 }
 
-ad_proc im_reporting_rest_error {
-    -format:required
-    -error_message:required
-} {
-    Writes out an error message for the specified format
-} {
-    switch $format {
-	xml {
-	    # Return a reasonable XML message indicating bad report issue
-	    im_rest_error -http_status 403 -message $error_message
-	}
-	json {
-	    # Return a reasonable XML message indicating permission issues
-	    set result "{\"success\": false,\n\"message\": \"$error_message\"\n}"
-            doc_return 200 "text/plain" $result
-	}
-	default {
-	    ad_return_complaint 1 "<li>$error_message"
-	}
-    }
-    ad_script_abort
-}
-
 
 # ---------------------------------------------------------------
 # Defaults
@@ -231,12 +208,37 @@ if {$no_template_p} {
 
 
 # ---------------------------------------------------------------
+# Check for URL parameters to pass to filter form
+# This is necessary because reports may have any
+# type of %...% variables in the URL
+# ---------------------------------------------------------------
+
+set query_set [ns_parsequery [ns_conn query]]
+set form_set [ns_getform]
+array set query_hash [ns_set array [ns_set merge $query_set $form_set]]
+
+set export_vars [list]
+foreach var [array names query_hash] {
+    if {$var in {"" "format" "submit"}} { continue }
+    if {![regexp {^[a-zA-Z0-9_]+$} $var]} { continue }
+
+    # Add the variable to be exported by the filter form
+    lappend export_vars $var
+
+    # Get the value in a save way and write to local variable
+    set value ""
+    if {[info exists query_hash($var)]} { set value $query_hash($var) }
+    set $var $value
+}
+
+
+# ---------------------------------------------------------------
 # Format the Filter
 # ---------------------------------------------------------------
 
 set filter_html "
 	<form method=get name=filter action='/intranet-reporting/view'>
-	[export_vars -form {report_id}]
+	[export_vars -form $export_vars]
 	<table border=0 cellpadding=0 cellspacing=1>
 	<tr>
 	    <td class=form-label>[lang::message::lookup "" intranet-reporting.Format "Format"]</td>

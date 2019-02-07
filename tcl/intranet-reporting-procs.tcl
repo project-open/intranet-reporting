@@ -1034,3 +1034,28 @@ ad_proc -public im_reporting_form_update_ajax {
 
     template::head::add_javascript -src "/intranet-reporting/js/ajax_update_select_box.js?$par_str" -order "999"
 }
+
+
+
+ad_proc im_reporting_rest_error {
+    -format:required
+    -error_message:required
+} {
+    Writes out an error message for the specified format
+} {
+    switch $format {
+	xml {
+	    # Return a reasonable XML message indicating bad report issue
+	    im_rest_error -http_status 403 -message $error_message
+	}
+	json {
+	    # Return a reasonable XML message indicating permission issues
+	    set result "{\"success\": false,\n\"message\": \"$error_message\"\n}"
+            doc_return 200 "text/plain" $result
+	}
+	default {
+	    ad_return_complaint 1 "<li>$error_message"
+	}
+    }
+    ad_script_abort
+}
