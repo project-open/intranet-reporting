@@ -156,7 +156,7 @@ ad_proc im_report_quote_cell {
 
 	    # Remove any <..> tags from the cell that are used
 	    # for HTML formatting
-	    regsub -all {\<[^\>]*\>} $cell "" cell
+	    regsub -all {\<[^\>]*\>} $cell " " cell
 
 	    # Remove "&nbsp;" spaces
 	    regsub -all {\&nbsp\;} $cell " " cell
@@ -164,10 +164,16 @@ ad_proc im_report_quote_cell {
 	    # Quote all double quotes by doubling them
 	    regsub -all {\"} $cell "\"\"" cell
 
+	    # Remove duplicated spaces
+	    regsub -all {\s+} $cell " " cell
+
 	    # Convert to target encoding scheme 
 	    if {"" != $encoding} {
 		set cell [encoding convertto $encoding $cell]
 	    }
+
+	    # convert &lt; etc. to "<"
+	    set cell [ad_unquotehtml $cell]
 
 	    # Remove leading and trailing spaces
 	    set cell [string trim $cell]
@@ -210,7 +216,7 @@ ad_proc im_report_render_cell {
 		if {"html" eq $output_format} {
 		    append td_fields "$key=$value "
 		} else {
-		    for {set i 0} {$i < $value} {incr i} {
+		    for {set i 1} {$i < $value} {incr i} {
 			append post_csv "\"\";"
 		    }
 		}
