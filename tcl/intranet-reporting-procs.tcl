@@ -254,6 +254,7 @@ ad_proc im_report_render_cell {
 
     switch $output_format {
 	html - printer { set result "<td $td_fields>$quoted_cell</td>\n" }
+	html_header { set result "<th><p><div style='float: left; position: relative; -moz-transform: rotate(270deg); -o-transform: rotate(270deg); -webkit-transform: rotate(315deg);'>$quoted_cell</div></p></th>\n" }
 	csv { set result "\"$quoted_cell\";$post_csv" }
 	default { set result "" }
     }
@@ -275,6 +276,7 @@ ad_proc im_report_render_row {
 } {
     switch $output_format {
         html - printer { ns_write "<tr class=$row_class>\n" }
+        html_header { ns_write "<thead><tr class=$row_class>\n" }
         csv { }
     }
 
@@ -289,6 +291,7 @@ ad_proc im_report_render_row {
 
     switch $output_format {
         html - printer { ns_write "</tr>\n" }
+        html_header { ns_write "</tr></thead>\n" }
         csv { ns_write "\n" }
     }
 }
