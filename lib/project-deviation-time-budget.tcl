@@ -518,7 +518,7 @@ lappend elements {
 set company_name_saved ""
 
 set provider_bill_select "
-        (select
+        coalesce((select
                 trunc(sum(amount),2)
         from
                 im_costs
@@ -535,7 +535,7 @@ set provider_bill_select "
                         )
                 and cost_type_id in ([join [im_sub_categories 3704] ","])
                 and effective_date BETWEEN :start_date AND :end_date
-        ) as provider_bills
+        ), 0) as provider_bills
 "
 
 set sql "
@@ -819,7 +819,7 @@ template::multirow foreach project_list {
 	# percent_completed (Fortschritt)
 	set percent_completed_pretty [lc_numeric [im_numeric_add_trailing_zeros [expr $percent_completed+0] $rounding_precision] $format_string $locale]
 	template::multirow set project_list $i percent_completed $percent_completed_pretty
-	
+
 	# project_budget_hours
 	template::multirow set project_list $i project_budget_hours $project_budget_hours
 
