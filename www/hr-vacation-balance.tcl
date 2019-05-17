@@ -241,7 +241,8 @@ set vacation_left_subtotal 0.00
 set vacation_left_total 0.00
 set vacation_left_subtotal_pretty 0.00
 set vacation_left_total_pretty 0.00
-
+set users_total 0
+set users_per_dept_subtotal 0
 
 
 # ------------------------------------------------------------
