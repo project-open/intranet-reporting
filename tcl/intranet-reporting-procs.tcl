@@ -189,6 +189,7 @@ ad_proc im_report_render_cell {
     {-encoding ""}
     {-output_format "html"}
     {-no_write_p 0}
+    {-table_header_p 0}
 } {
     Renders one cell via ns_write directly
     into a report HTTP session
@@ -253,8 +254,13 @@ ad_proc im_report_render_cell {
     set quoted_cell [im_report_quote_cell -encoding $encoding -output_format $output_format $cell]
 
     switch $output_format {
-	html - printer { set result "<td $td_fields>$quoted_cell</td>\n" }
-	html_header { set result "<th><p><div style='float: left; position: relative; -moz-transform: rotate(270deg); -o-transform: rotate(270deg); -webkit-transform: rotate(315deg);'>$quoted_cell</div></p></th>\n" }
+	html - printer { 
+	    if {$table_header_p} {
+		set result "<th $td_fields>$quoted_cell</th>\n" 
+	    } else {
+		set result "<td $td_fields>$quoted_cell</td>\n" 
+	    }
+	}
 	csv { set result "\"$quoted_cell\";$post_csv" }
 	default { set result "" }
     }
@@ -270,13 +276,19 @@ ad_proc im_report_render_row {
     {-encoding ""}
     {-output_format "html"}
     {-upvar_level 0}
+    {-table_header_p 0}
 } {
     Renders one line of a report via ns_write directly
     into a report HTTP session
 } {
     switch $output_format {
-        html - printer { ns_write "<tr class=$row_class>\n" }
-        html_header { ns_write "<thead><tr class=$row_class>\n" }
+        html - printer { 
+	    if {$table_header_p} {
+		ns_write "<thead><tr class=$row_class>\n" 
+	    } else {
+		ns_write "<tr class=$row_class>\n" 
+	    }
+	}
         csv { }
     }
 
@@ -286,12 +298,17 @@ ad_proc im_report_render_row {
 	    set cmd "set value \"$field\""
 	    set value [uplevel $upvar_level $cmd]
 	}
-	im_report_render_cell -encoding $encoding -output_format $output_format -cell $value -cell_class $cell_class
+	im_report_render_cell -table_header_p $table_header_p -encoding $encoding -output_format $output_format -cell $value -cell_class $cell_class
     }
 
     switch $output_format {
-        html - printer { ns_write "</tr>\n" }
-        html_header { ns_write "</tr></thead>\n" }
+        html - printer { 
+	    if {$table_header_p} {
+		ns_write "</tr></thead>\n"
+	    } else {
+		ns_write "</tr>\n" 
+	    }
+	}
         csv { ns_write "\n" }
     }
 }
