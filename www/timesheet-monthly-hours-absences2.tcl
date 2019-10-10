@@ -13,7 +13,6 @@ ad_page_contract {
     { level_of_detail 3 }
     { output_format "html" }
     { report_user_id 0 }
-    { report_project_status_id 76 }
     { daily_hours 0 }
     { different_from_project_p "" }
     { report_cost_center_id 0 }
@@ -106,10 +105,6 @@ if {$different_from_project_p eq ""} {
 }
 
 set criteria [list]
-
-if {$report_project_status_id ne "" && $report_project_status_id > 0 } {
-    lappend criteria "p.report_project_status_id in ([join [im_sub_categories $report_project_status_id] ","])"
-}
 
 if {0 ne $report_user_id && "" ne $report_user_id} {
     lappend criteria "u.user_id = :report_user_id"
@@ -248,17 +243,34 @@ set project_vars {
 }
 
 
-# Add rows for days
-for {set d 1} {$d <= $report_year_month_days_in_month} {incr d} {
-    lappend header0 "Day $d"
-    lappend project_vars "\$hours_$d"
-}
-
 set user_header {
 	"\#colspan=44 <a href=$this_url&user_id=$user_id&level_of_detail=3
 	target=_blank><img src=/intranet/images/plus_9.gif width=9 height=9 border=0></a> 
 	<b><a href=$user_url$user_id>$user_name</a></b>"
 }
+
+set user_footer {
+    "" 
+    ""
+}
+
+
+# Add rows for days
+set counters [list]
+for {set d 1} {$d <= $report_year_month_days_in_month} {incr d} {
+    lappend header0 "Day $d"
+    lappend project_vars "\$hours_$d"
+
+    set counter [list \
+    	pretty_name "Hours day_$d" \
+	var hours_${d}_subtotal \
+	reset \$user_id \
+	expr "\$hours_${d}+0" \
+    ]
+    lappend counters $counter
+    lappend user_footer "<b>\$hours_${d}_subtotal</b>"
+}
+
 
 # Disable project headers for CSV output
 # in order to create one homogenous exportable  lst
@@ -275,7 +287,7 @@ set report_def [list \
 	header $project_vars \
 	content {} \
     ] \
-    footer {} \
+    footer $user_footer \
 ]
 
 # Global Footer Line
@@ -322,12 +334,6 @@ switch $output_format {
 		  </td>
 		</tr>
                 <tr>
-                  <td class=form-label>Project Status</td>
-                  <td class=form-widget>
- 			[im_category_select -include_empty_p 1 "Intranet Project Status" report_project_status_id ""]
-                  </td>
-                </tr>
-                <tr>
                   <td class=form-label>Format</td>
                   <td class=form-widget>
                     [im_report_output_format_select output_format "" $output_format]
@@ -370,8 +376,6 @@ set absence_array_list [list]
 
 set last_value_list [list]
 set class "rowodd"
-
-set counters [list]
 
  
 #------------------------
