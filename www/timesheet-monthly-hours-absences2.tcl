@@ -171,7 +171,7 @@ UNION
 	select	t.user_id,
 		null as project_id,
 		t.im_day_enumerator as day,
-		8.0 * t.availability / 100.0 * t.duration_days * 100.0 / t.day_percentages as hours
+		8.0 * t.availability / 100.0 * t.duration_days * 100.0 / (0.000000001 + t.day_percentages) as hours
 	from	(
 		select	u.user_id,
 			ua.absence_id, 
