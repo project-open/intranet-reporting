@@ -92,6 +92,9 @@ if {!$view_hours_all_p} {
     set report_user_id $current_user_id
 }
 
+set absence_l10n [lang::message::lookup "" intranet-timesheet2.Absence "Absence"]
+
+
 # ------------------------------------------------------------
 # Conditional SQL Where-Clause
 #
@@ -135,6 +138,7 @@ set inner_sql "
 	select	u.user_id,
 		p.project_id as object_id,
 		:project_url as object_url,
+		p.project_name as object_name,
 		h.day::date as day,
 		h.hours
 	from	users u,
@@ -155,6 +159,7 @@ UNION
 	select	u.user_id,
 		main_p.project_id as object_id,
 		:project_url as object_url,
+		main_p.project_name as object_name,
 		h.day::date as day,
 		h.hours
 	from	users u,
@@ -171,8 +176,9 @@ UNION
 	select	t.user_id,
 		t.absence_id as object_id,
 		:absence_url as object_url,
+		:absence_l10n || ': ' || t.absence_name as object_name,
 		t.im_day_enumerator as day,
-		8.0 * t.availability / 100.0 * t.duration_days * 100.0 / (0.000000001 + t.day_percentages) as hours
+		8.0 * t.availability / 100.0 * t.duration_days * 100.0 / (0.000000001 + abs(t.day_percentages)) as hours
 	from	(
 		select	u.user_id,
 			ua.absence_id, 
@@ -206,13 +212,14 @@ set sql "
 	select	t.user_id,
 		t.object_id,
 		t.object_url,
-		im_name_from_user_id(user_id) as user_name,
-		acs_object__name(object_id) as object_name
+		t.object_name,
+		im_name_from_user_id(user_id) as user_name
 		$hours_per_day_aggregate
 	from
 		(select	t.user_id,
 			t.object_id,
-			t.object_url
+			t.object_url,
+			t.object_name
 			$hours_per_day_case
 		from	($inner_sql) t
 		where	to_char(t.day, 'YYYY-MM') = :report_year_month
@@ -220,6 +227,7 @@ set sql "
 	group by
 		t.user_id,
 		t.object_url,
+		t.object_name,
 		t.object_id
 	order by
 		acs_object__name(user_id),
@@ -244,7 +252,7 @@ set header0 {
 # Main content line
 set project_vars {
 	""
-	"<a href='$object_url$object_id'>$object_name</a>"
+	"<nobr><a href='$object_url$object_id'>$object_name</a></nobr>"
 }
 
 
