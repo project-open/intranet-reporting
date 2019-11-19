@@ -81,6 +81,7 @@ set first_day_next_month [string range [db_string get_number_days_month "SELECT 
 set report_year_month_days_in_month [db_string get_number_days_month "SELECT date_part('day','$first_day_of_month'::date + '1 month'::interval - '1 day'::interval)" -default 0]
 
 set project_url "/intranet/projects/view?project_id="
+set absence_url "/intranet-timesheet2/absences/new?form_mode=display&absence_id="
 set user_url "/intranet/users/view?user_id="
 set this_url "[export_vars -base "/intranet-reporting/timesheet-monthly-hours-absences2" {} ]?"
 
@@ -90,7 +91,6 @@ set this_url "[export_vars -base "/intranet-reporting/timesheet-monthly-hours-ab
 if {!$view_hours_all_p} {
     set report_user_id $current_user_id
 }
-
 
 # ------------------------------------------------------------
 # Conditional SQL Where-Clause
@@ -133,7 +133,8 @@ if {$where_clause ne ""} { set where_clause " and $where_clause" }
 set inner_sql "
     	-- Hours on the 2nd level Work packages and below
 	select	u.user_id,
-		p.project_id,
+		p.project_id as object_id,
+		:project_url as object_url,
 		h.day::date as day,
 		h.hours
 	from	users u,
@@ -145,15 +146,15 @@ set inner_sql "
 		p.parent_id = main_p.project_id and
 		task.tree_sortkey between p.tree_sortkey and tree_right(p.tree_sortkey) and
 		h.user_id = u.user_id and
-		h.project_id = task.project_id and
-		to_char(h.day, 'YYYY-MM') = :report_year_month
+		h.project_id = task.project_id
 		$where_clause
 
 UNION
 
     	-- Hours logged on the main project only (no on anything below)
 	select	u.user_id,
-		main_p.project_id,
+		main_p.project_id as object_id,
+		:project_url as object_url,
 		h.day::date as day,
 		h.hours
 	from	users u,
@@ -161,15 +162,15 @@ UNION
 		im_hours h
 	where	main_p.parent_id is null and
 		h.project_id = main_p.project_id and
-		h.user_id = u.user_id and
-		to_char(h.day, 'YYYY-MM') = :report_year_month
+		h.user_id = u.user_id
 		$where_clause
 
 UNION
 
     	-- Hours due to absences
 	select	t.user_id,
-		null as project_id,
+		t.absence_id as object_id,
+		:absence_url as object_url,
 		t.im_day_enumerator as day,
 		8.0 * t.availability / 100.0 * t.duration_days * 100.0 / (0.000000001 + t.day_percentages) as hours
 	from	(
@@ -189,7 +190,6 @@ UNION
 			$where_clause
 
 		) t
-	
 "
 # ad_return_complaint 1 [im_ad_hoc_query -format html $inner_sql]
 
@@ -204,22 +204,27 @@ for {set d 1} {$d <= $report_year_month_days_in_month} {incr d} {
 
 set sql "
 	select	t.user_id,
-		t.project_id,
+		t.object_id,
+		t.object_url,
 		im_name_from_user_id(user_id) as user_name,
-		acs_object__name(project_id) as project_name
+		acs_object__name(object_id) as object_name
 		$hours_per_day_aggregate
 	from
 		(select	t.user_id,
-			t.project_id
+			t.object_id,
+			t.object_url
 			$hours_per_day_case
 		from	($inner_sql) t
+		where	to_char(t.day, 'YYYY-MM') = :report_year_month
 		) t
 	group by
 		t.user_id,
-		t.project_id
+		t.object_url,
+		t.object_id
 	order by
 		acs_object__name(user_id),
-		coalesce(project_id, 999999999999999)
+		object_url,
+		coalesce(object_id, 999999999999999)
 
 "
 # ad_return_complaint 1 [im_ad_hoc_query -format html $sql]
@@ -239,7 +244,7 @@ set header0 {
 # Main content line
 set project_vars {
 	""
-	"<a href='$project_url$project_id'>$project_name</a>"
+	"<a href='$object_url$object_id'>$object_name</a>"
 }
 
 
@@ -283,7 +288,7 @@ set report_def [list \
     group_by user_id \
     header $user_header \
     content [list \
-	group_by project_id \
+	group_by object_id \
 	header $project_vars \
 	content {} \
     ] \
@@ -384,7 +389,7 @@ set class "rowodd"
 
 db_foreach sql $sql {
 
-    if {"" eq $project_name} { set project_name "Absence" }
+    if {"" eq $object_name} { set object_name "undefined" }
 
 	im_report_display_footer \
 	    -output_format $output_format \
