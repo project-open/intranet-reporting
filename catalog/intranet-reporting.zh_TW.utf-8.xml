@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<message_catalog package_key="intranet-reporting" locale="zh_TW" charset="utf-8">
+
+  <msg key="Finance">財務</msg>
+  <msg key="Forum">論壇</msg>
+  <msg key="Indicators">指標</msg>
+  <msg key="Project_Main_List">專案主列表</msg>
+  <msg key="Sales">銷售</msg>
+  <msg key="Simple_Survey_Main_List">簡單調查主列表</msg>
+  <msg key="Simple_Survey_Results">簡單調查結果</msg>
+  <msg key="Timesheet">工時表</msg>
+  <msg key="Timesheet_Customers_and_Projects">客戶與專案工時表</msg>
+  <msg key="Timesheet_Productivity">生產率工時表</msg>
+  <msg key="Timesheet_Project_Hierarchy___Finance">專案層次與財務工時表</msg>
+  <msg key="Users___Contact_Information">用戶與合同資訊</msg>
+</message_catalog>
