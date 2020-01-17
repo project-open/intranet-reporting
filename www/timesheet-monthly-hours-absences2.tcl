@@ -200,12 +200,11 @@ UNION
 # ad_return_complaint 1 [im_ad_hoc_query -format html $inner_sql]
 
 
-
 set hours_per_day_case ""
 set hours_per_day_aggregate ""
 for {set d 1} {$d <= $report_year_month_days_in_month} {incr d} {
     append hours_per_day_case ", CASE WHEN extract(day from t.day) = $d THEN t.hours ELSE null END as day_$d\n"
-    append hours_per_day_aggregate ", round(sum(day_$d)::numeric,1) as hours_$d\n"
+    append hours_per_day_aggregate ", round(sum(day_$d)::numeric,2) as hours_$d\n"
 }
 
 set sql "
