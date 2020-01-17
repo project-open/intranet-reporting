@@ -783,7 +783,7 @@ ad_proc im_report_number_locale_select {
     to allow a user to select the number locale of a report
 } {
     if {"" == $locale} { set locale [lang::user::locale] }
-    set locales [list de_DE en_US]
+    set locales [db_list enabled_locales "select locale from ad_locales where (enabled_p = 't' OR locale = 'en_US') order by locale"]
 
     set result "<select name=\"$name\">\n"
     foreach loc $locales {
