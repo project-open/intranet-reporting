@@ -1210,7 +1210,6 @@ db_foreach sql $sql {
 	    -cell_class $class
 
 	im_report_update_counters -counters $counters
-	ns_log Notice "timesheet-customer-project: company_project_id=$company_project_id, val=[im_opt_val hours_project_subtotal]"
 	
 	set last_value_list [im_report_render_header \
 	    -output_format $output_format \
@@ -1307,7 +1306,6 @@ foreach user_absence $absence_list {
          -cell_class $class
 
     im_report_update_counters -counters $counters
-    ns_log Notice "timesheet-customer-project: company_project_id=$company_project_id, val=[im_opt_val hours_project_subtotal]"
 
     set last_value_list [im_report_render_header \
          -output_format $output_format \

@@ -42,7 +42,6 @@ if {"" != $report_code} {
     if {"" != $id} { set report_id $id }
 }
 
-ns_log Notice "/intranet-reporting/view: report_code='[im_opt_val report_code]', report_id='[im_opt_val report_id]'"
 
 # ---------------------------------------------------------------
 # Authentication
