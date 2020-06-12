@@ -148,7 +148,7 @@ set context [im_context_bar $page_title]
 set substitution_list [list user_id $current_user_id]
 set form_vars [ns_conn form]
 foreach form_var [ad_ns_set_keys $form_vars] {
-    set form_val [im_opt_val -limit_no nohtml $form_var]
+    set form_val [im_opt_val -limit_to nohtml $form_var]
     lappend substitution_list $form_var
     lappend substitution_list $form_val
 }
