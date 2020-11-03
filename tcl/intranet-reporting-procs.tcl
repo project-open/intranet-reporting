@@ -829,6 +829,30 @@ ad_proc im_report_write_http_headers {
 	set all_the_headers "HTTP/1.0 200 OK\nConnection: keep-alive\nContent-Type: $content_type\r\n"
     }
     
+
+    #
+    # Add the content security policy. Since this is the blank master, we
+    # are defensive and check, if the system has already support for it
+    # via the CSPEnabledP kernel parameter. Otherwise users would be
+    # blocked out.
+    #
+    if {[parameter::get -parameter CSPEnabledP -package_id [ad_acs_kernel_id] -default 0]
+	&& [info commands ::security::csp::render] ne ""
+    } {
+	set csp [::security::csp::render]
+	if {$csp ne ""} {
+
+	    set ua [ns_set iget [ns_conn headers] user-agent]
+	    if {[regexp {Trident/.*rv:([0-9]{1,}[\.0-9]{0,})} $ua]} {
+		set field X-Content-Security-Policy
+	    } else {
+		set field Content-Security-Policy
+	    }
+
+	    ns_set put [ns_conn outputheaders] $field $csp
+	}
+    }
+
     util_WriteWithExtraOutputHeaders $all_the_headers
 
     # fraber 160224: NaviServer instead of AOLserver...

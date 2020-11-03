@@ -343,7 +343,7 @@ switch $output_format {
 	</td>
 	</table>
 
-        <script>
+        <script type=\"text/javascript\" nonce=\"[im_csp_nonce]\">
         jQuery().ready(function(){
                 \$(function() {
                 \$( \"\#start_date\" ).datepicker({ dateFormat: \"yyyy-mm-dd\" });
@@ -465,7 +465,7 @@ switch $output_format {
     html { 
 	ns_write "</table>\n[im_footer]\n" 
 	ns_write "
-		<script type='text/javascript'>
+		<script type='text/javascript' nonce='[im_csp_nonce]'>
 			document.getElementById('total_users_ctr').innerHTML = '$total_users_ctr';
 			document.getElementById('output_users_ctr').innerHTML = '$output_users_ctr';
 		</script>

@@ -2,6 +2,14 @@
 	<%=[im_header]%>
         <%=[im_navbar]%>
 
+	<!-- Show calendar on start- and end-date -->
+	<script type="text/javascript" <if @::__csp_nonce@ not nil>nonce="@::__csp_nonce;literal@"</if>>
+	window.addEventListener('load', function() { 
+	     document.getElementById('start_date_calendar').addEventListener('click', function() { showCalendar('start_date', 'y-m-d'); });
+	     document.getElementById('end_date_calendar').addEventListener('click', function() { showCalendar('end_date', 'y-m-d'); });
+	});
+	</script>
+
         <form action='project-deviation-time-budget' id='intranet-reporting-project-deviation-time-budget'>
         <%=[export_vars -form {opened_projects}]%>
 
@@ -13,14 +21,14 @@
                   <td class=form-label><%=[lang::message::lookup "" intranet-core.Start_Date "Start Date"]%></td>
                   <td class=form-widget>
                     <input type="text"field name="start_date" id="start_date" value="@start_date@">
-                    <input type="button" style="height:20px; width:20px; background: url('/resources/acs-templating/calendar.gif');" onclick ="return showCalendar('start_date', 'y-m-d');" >
+                    <input type="button" id=start_date_calendar style="height:20px; width:20px; background: url('/resources/acs-templating/calendar.gif');">
                   </td>
                 </tr>
                 <tr>
                   <td class=form-label><%=[lang::message::lookup "" intranet-core.End_Date "End Date"]%></td>
                   <td class=form-widget>
                     <input type="text"field name="end_date" id="end_date" value="@end_date@">
-                    <input type="button" style="height:20px; width:20px; background: url('/resources/acs-templating/calendar.gif');" onclick ="return showCalendar('end_date', 'y-m-d');" >
+                    <input type="button" id=end_date_calendar style="height:20px; width:20px; background: url('/resources/acs-templating/calendar.gif');">
                   </td>
                 </tr>
                 <tr>

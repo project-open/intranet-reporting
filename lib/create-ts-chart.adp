@@ -1,5 +1,4 @@
-<script>
-
+<script type="text/javascript" <if @::__csp_nonce@ not nil>nonce="@::__csp_nonce;literal@"</if>>
 <if @no_records_found_msg@ eq "">
 
 Ext.require('Ext.chart.*');

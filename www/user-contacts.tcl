@@ -46,9 +46,9 @@ set offset [expr {$page * $limit}]
 # Page Title, Bread Crums and Help
 #
 
-set page_title [lang::message::lookup "" intranet-reporting_Users_and_Contacts "Users and Contacts"]
+set page_title [lang::message::lookup "" intranet-reporting.Users_and_Contacts "Users and Contacts"]
 set context_bar [im_context_bar $page_title]
-set help_text [lang::message::lookup "" intranet-reporting_Users_and_Contacts_help "
+set help_text [lang::message::lookup "" intranet-reporting.Users_and_Contacts_help "
 	<strong>Users and Contacts:</strong><br>
         This report shows all users in the system, together with
         their state and their contact details.
@@ -161,8 +161,8 @@ OFFSET	:offset
 
 # Global Header Line
 set header0 [list \
-		 "<input type=checkbox name=_dummy onclick=\\\"acs_ListCheckAll('user',this.checked)\\\" checked>" \
-		 [lang::message::lookup "" intranet-reporting.Company_short Comp]  \
+		 "<input id=list_check_all type=checkbox name=_dummy checked>" \
+		 [lang::message::lookup "" intranet-reporting.Company_short Comp] \
 		 [lang::message::lookup "" intranet-reporting.Customer_oneletter "C"] \
 		 [lang::message::lookup "" intranet-reporting.Employee_oneletter "E"] \
 		 [lang::message::lookup "" intranet-reporting.Freelancer_oneletter "F"] \
@@ -270,6 +270,13 @@ switch $output_format {
 	ns_write "
 	[im_header]
 	[im_navbar reporting]
+
+	    	<script type=\"text/javascript\" nonce=\"[im_csp_nonce] \">
+		window.addEventListener('load', function() { 
+		     document.getElementById('list_check_all').addEventListener('click', function() { acs_ListCheckAll('user',this.checked); });
+		});
+		</script>
+
 	<table cellspacing=0 cellpadding=0 border=0>
 	<tr valign=top>
 	  <td width='30%'>

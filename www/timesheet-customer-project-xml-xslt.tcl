@@ -1008,7 +1008,7 @@ append sidebar_html "
     </div> <!-- /slave -->
 
 
-<script type='text/javascript'>
+<script type='text/javascript' nonce='[im_csp_nonce]'>
 function handleClick(myRadio) \{
 
 	if (\"html\" == myRadio.value) \{
@@ -1351,7 +1351,7 @@ switch $output_format {
     html { 
 	ns_write "</table>[im_box_footer]</div></form>"
 	# Todo: Verify how to include div id "monitor_frame" to make following js obsolete 
-	ns_write "<script language='javascript' type='text/javascript'>document.getElementById('slave_content').style.visibility='visible';"
+	ns_write "<script language='javascript' type='text/javascript' nonce='[im_csp_nonce]'>document.getElementById('slave_content').style.visibility='visible';"
 	ns_write "document.getElementById('fullwidth-list').style.visibility='visible'; </script>"
 	ns_write "[im_footer]\n"
     }
@@ -1419,7 +1419,7 @@ switch $output_format {
     }
     chart {
 	# Todo: Verify how to include div id "monitor_frame" to make following js obsolete 
-	ns_write "<script language='javascript' type='text/javascript'>document.getElementById('slave_content').style.visibility='visible';"
+	ns_write "<script language='javascript' type='text/javascript' nonce='[im_csp_nonce]'>document.getElementById('slave_content').style.visibility='visible';"
 	ns_write "document.getElementById('fullwidth-list').style.visibility='visible'; </script>"
 	# These var values we need to wrap into ''
 	set str_vars_list [list]
@@ -1465,7 +1465,7 @@ switch $output_format {
         ns_write "[im_footer]\n"
 
         # Todo: Verify how to include div id "monitor_frame" to make following js obsolete
-        ns_write "<script language='javascript' type='text/javascript'>"
+        ns_write "<script language='javascript' type='text/javascript' nonce='[im_csp_nonce]'>"
         ns_write "document.getElementById('slave_content').style.visibility='visible';"
         ns_write "document.getElementById('fullwidth-list').style.visibility='visible';" 
         ns_write "</script>"
